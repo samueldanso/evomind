@@ -103,7 +103,7 @@ Acceptance:
 
 Files to create:
 - `scripts/embed.py` — `--incremental` (default), `--rebuild` (drop + re-embed with confirmation), batch 64 chunks/call, exponential backoff on rate limits, progress output `embedded N/M chunks (X%)`
-- `lib/provider.py` — `Provider` Protocol, `ChatMessage`, `Citation`, `ChatResponse` dataclasses, `AnthropicProvider`, `OpenAIProvider`. Key validation at startup. Provider selected via `EVO_LLM_PROVIDER` env var.
+- `lib/provider.py` — `Provider` Protocol, `ChatMessage`, `Citation`, `ChatResponse` dataclasses, `AnthropicProvider`, `OpenAIProvider`. Key validation at startup. Provider selected via `EVO_LLM_PROVIDER` env var. **`OpenAIProvider` must read `OPENAI_BASE_URL` (default: `https://api.openai.com/v1`) and `ANTHROPIC_BASE_URL` (default: `https://api.anthropic.com`) — pass as `base_url` kwarg to the SDK client. This is the one-line hook that lets Phase H users swap in OpenRouter or any OpenAI-compatible proxy via config alone.**
 - `tests/test_embed.py` — incremental mode, idempotency, rebuild flag, batch behaviour. Use `MockProvider` (no real API calls in CI).
 - `tests/test_provider.py` — mock provider for all higher-level tests; real provider gated behind `RUN_LIVE_LLM=1`
 
@@ -138,27 +138,31 @@ Acceptance:
 
 ### T6 — Chat API (estimated: medium)
 
-**What:** `POST /api/chat` in the Next.js portal.
+**What:** `POST /api/chat` in the Next.js portal, using Vercel AI SDK for streaming generation.
+
+**Stack:** Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) replaces direct Anthropic SDK calls. This ships **streaming in v0.2.0** — it comes free with `streamText` and removes the v0.2.1 deferral. The FastAPI Python retrieval service (`scripts/chat_server.py`) is unchanged — AI SDK is only the generation layer.
 
 Files to create:
-- `scripts/chat_server.py` — FastAPI app with `POST /chat` endpoint: validates query, calls `hybrid_retrieve`, calls `Provider.chat()`, returns `ChatResponse` shape. Bind to `localhost:8765` (configurable via `EVO_CHAT_PORT`). Startup validates API keys and loads sqlite-vec extension.
-- `portal/app/api/chat/route.ts` — thin proxy: forwards request body to `http://localhost:${EVO_CHAT_PORT}/chat`, surfaces errors cleanly (503 if server not running, with helpful message)
-- `portal/lib/chat-client.ts` — typed `POST /api/chat` helper for the UI
-- `portal/__tests__/api/chat.test.ts` — happy path, empty query rejection, provider failure handling, citation parsing
+- `scripts/chat_server.py` — FastAPI app with `POST /retrieve` endpoint: validates query, calls `hybrid_retrieve`, returns ranked chunks as JSON. Does **not** call the LLM — that is the portal's job via AI SDK. Bind to `localhost:8765` (configurable via `EVO_CHAT_PORT`). Startup validates that `OPENAI_API_KEY` is set and sqlite-vec loads.
+- `portal/app/api/chat/route.ts` — calls `scripts/chat_server.py` to get chunks, then calls `streamText` from `@ai-sdk/anthropic` with the retrieved context and the system prompt from `lib/prompts.py` (ported to TS as a pure function). Returns a streaming `Response` using `result.toDataStreamResponse()`.
+- `portal/lib/chat-client.ts` — typed wrapper using `useChat` from `@ai-sdk/react` for the UI; handles stream state and citation parsing
+- `portal/__tests__/api/chat.test.ts` — happy path, empty query rejection, retrieval server down (503), citation parsing from streamed response
 
 **Architecture note for Claude Code:** The portal is TypeScript (Next.js) and the retrieval/embedding logic is Python. Two options:
 1. Portal calls Python via `child_process.spawn('uv', ['run', 'python', '-c', ...])` — ~300–600ms cold Python startup *per request*, before retrieval or LLM generation even starts
 2. Lightweight Python HTTP server (`scripts/chat_server.py`) the portal proxies — ~10ms latency, decoupled, easy to test
 
-**Hermes decision: Option 2 for v0.2.0.** Ship `scripts/chat_server.py` as a FastAPI app (~40 lines). Run it alongside the portal via `bun dev` using `concurrently` in `package.json`. The "more complex" framing overstates the lift — a FastAPI server with one POST endpoint is straightforward. Daily use friction matters; 600ms cold startup on every message is not acceptable for a tool you want to reach for constantly.
+**Hermes decision: Option 2 for v0.2.0.** Ship `scripts/chat_server.py` as a FastAPI app (~40 lines, retrieval only). Run it alongside the portal via `bun dev` using `concurrently` in `package.json`. The "more complex" framing overstates the lift — a FastAPI server with one POST endpoint is straightforward. Daily use friction matters; 600ms cold startup on every message is not acceptable for a tool you want to reach for constantly.
 
 Files to modify:
 - `portal/lib/db.ts` — add prepared statements for chunk reads by artifact_id
-- `portal/package.json` — add `concurrently` dev dep; update `dev` script to `concurrently "next dev" "uv run python scripts/chat_server.py"`
+- `portal/package.json` — add `ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`, `concurrently` dev deps; update `dev` script to `concurrently "next dev" "uv run python scripts/chat_server.py"`
 - `pyproject.toml` — add `fastapi`, `uvicorn` alongside the existing new deps
 
 Acceptance:
-- `POST /api/chat` with `{"query": "what is EvoResearch?"}` returns a response with `text` (non-empty) and `citations` (array, may be empty if corpus doesn't have it)
+- `POST /api/chat` streams tokens — response is `text/event-stream`, not a single JSON blob
+- Streaming works end-to-end: browser receives tokens as they arrive from Anthropic
+- Citations are included in the final streamed message
 - Invalid requests (empty query, missing body) return 400
 - All `chat.test.ts` tests pass
 
@@ -166,23 +170,25 @@ Acceptance:
 
 ### T7 — Chat UI (estimated: medium)
 
-**What:** `/chat` route in the portal with sidebar layout.
+**What:** `/chat` route in the portal using Vercel AI Elements — purpose-built shadcn-style components for grounded RAG with citations.
+
+**Stack:** Install AI Elements components via `npx shadcn@latest add https://elements.ai-sdk.dev/api/registry/...`. Source code lands in the repo (same flow as existing shadcn/ui components — no runtime Vercel dependency). Use `Conversation`, `Message`, `Sources`, and `InlineCitation` components. These are built for exactly the citation-anchored RAG output we're shipping. `Reasoning`, `Tool`, and `Task` components are available for Phase F agents when that time comes — no extra setup needed.
 
 Files to create:
-- `portal/app/chat/page.tsx` — layout: left panel (cited artifacts), right panel (chat). Uses `ChatPanel` and `CitationBadge`.
-- `portal/components/chat-panel.tsx` — message history, input box, submit handler, loading + error states
-- `portal/components/chat-message.tsx` — renders `text` with `[N]` citations as superscript `CitationBadge` components
-- `portal/components/citation-badge.tsx` — `[N]` superscript that links to `/artifacts/[slug]`
+- `portal/app/chat/page.tsx` — layout: left panel (cited artifacts via `Sources`), right panel (chat via `Conversation` + `Message`). Wired to `useChat` from `portal/lib/chat-client.ts`.
+- AI Elements components installed via npx into `portal/components/ui/` (same location as shadcn/ui components — treat as source-owned, not a black box)
 
 Files to modify:
 - `portal/app/layout.tsx` — add `/chat` nav link alongside the existing layout
 
 Acceptance:
 - `/chat` renders without errors
-- Typing a question and submitting shows a loading state, then the answer
-- Citations appear as `[1]`, `[2]` superscripts inline in the answer
-- Clicking a citation navigates to the source artifact page
+- Typing a question and submitting shows a streaming loading state — tokens appear as they arrive, not all at once
+- Citations render as `InlineCitation` components inline in the answer
+- `Sources` panel on the left shows cited artifacts with excerpt text
+- Clicking a citation or source navigates to the source artifact page
 - No regressions in grid, search, or artifact viewer
+- No new runtime dependencies beyond `ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`
 
 ---
 
@@ -238,6 +244,7 @@ Hermes runs this autonomously after T8 passes. ("Evo" in earlier docs refers to 
 ## Pre-flight checklist (Claude Code reads before starting T1)
 
 - [ ] `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are in `.env.local` (portal) and OS env (brain)
+- [ ] `OPENAI_BASE_URL` and `ANTHROPIC_BASE_URL` are **not** required for v0.2.0 (both default to official endpoints) — but must be honoured if set
 - [ ] `uv run pytest` passes (37 tests green) — baseline before any changes
 - [ ] `bun test` in `portal/` passes (33 tests green) — baseline
 - [ ] Existing vault DB is backed up: `cp manifest.db manifest.db.bak` — **`scripts/migrate.py` will error if `manifest.db.bak` is missing or older than `manifest.db`** (`--require-backup` flag enforced by default; override with `--skip-backup-check` only in CI)
@@ -249,9 +256,11 @@ Hermes runs this autonomously after T8 passes. ("Evo" in earlier docs refers to 
 
 - Do not modify the existing `artifacts` table schema — additive only
 - Do not write to the vault DB from the portal (portal stays read-only)
-- Do not add new UI dependencies — use existing shadcn/ui primitives
+- Do not add new UI dependencies beyond `ai`, `@ai-sdk/anthropic`, `@ai-sdk/react` — use AI Elements + existing shadcn/ui primitives for everything else
+- Do not use Vercel AI Gateway — direct provider calls only (`api.anthropic.com`, `api.openai.com`). Gateway is deferred to Phase H.
 - Do not skip the `claims` + `claim_sources` stub tables — they must land in migration 002 even with no extraction logic
 - Do not commit with phase-tracking messages ("T1 complete", "Phase C done") — describe what changed
 - Do not deviate from the Provider abstraction — no raw `anthropic.Anthropic()` calls outside `lib/provider.py`
+- Do not hardcode `https://api.openai.com/v1` or `https://api.anthropic.com` — read `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` with those as defaults
 - Do not add telemetry, remote logging, or any call that leaves the machine except to LLM providers
 - Do not manually delete artifacts from the DB — the existing `archived` flow (Phase D) handles cleanup. `ON DELETE CASCADE` on chunks/embeddings handles it automatically when an artifact row is deleted; confirm this is wired correctly in `test_migrations.py`

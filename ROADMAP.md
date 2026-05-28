@@ -230,6 +230,7 @@ Next.js 16 + React 19 portal with card grid, full-text search via FTS5 BM25, tag
 - Tagged v1.0.0 — semver promise: no breaking changes within v1.x without deprecation warning
 - Reference deployment example (self-host on a $5 VPS)
 - At least 5 community ingest plugins available at launch
+- **User-configurable third provider option** — OpenRouter (`https://openrouter.ai/api/v1`) or Vercel AI Gateway as a drop-in via `OPENAI_BASE_URL` + `OPENAI_API_KEY`. No code change required (already wired in Phase C); just document it. This simplifies open-source onboarding for users who don't want to manage separate Anthropic + OpenAI keys.
 
 **Acceptance criteria for v1.0.0:**
 
