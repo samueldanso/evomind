@@ -2,6 +2,7 @@ import fs from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { ArtifactViewer } from "@/components/artifact-viewer";
 import { getDb } from "@/lib/db";
 import { assertInsideVault } from "@/lib/path-guard";
 import type { Artifact } from "@/lib/types";
@@ -12,20 +13,7 @@ function readHtmlContent(artifact: Artifact): string | null {
   try {
     const safePath = assertInsideVault(artifact.html_path);
     if (!fs.existsSync(safePath)) return null;
-    const raw = fs.readFileSync(safePath, "utf-8");
-    // Extract body content — index-based to avoid regex backtracking on large files
-    const lower = raw.toLowerCase();
-    const openIdx = lower.indexOf("<body");
-    const closeIdx = lower.lastIndexOf("</body>");
-    if (openIdx !== -1 && closeIdx !== -1) {
-      const bodyStart = raw.indexOf(">", openIdx) + 1;
-      return raw.slice(bodyStart, closeIdx);
-    }
-    return raw
-      .replace(/<html[^>]*>/gi, "")
-      .replace(/<\/html>/gi, "")
-      .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
-      .trim();
+    return fs.readFileSync(safePath, "utf-8");
   } catch {
     return null;
   }
@@ -78,11 +66,7 @@ export default async function ArtifactPage({ params }: { params: Promise<{ slug:
         </header>
 
         {htmlContent ? (
-          <div
-            className="prose prose-sm max-w-none rounded-lg border bg-card p-6 text-card-foreground"
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
-          />
+          <ArtifactViewer html={htmlContent} />
         ) : (
           <div className="rounded-lg border bg-card p-6">
             <p className="text-sm leading-relaxed text-muted-foreground">{artifact.summary}</p>
