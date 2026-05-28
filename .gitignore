@@ -24,7 +24,7 @@ node_modules/
 
 # Claude Code — local workspace only
 .claude/
-tasks/
+# tasks/ — now tracked (PM planning docs)
 
 # Env
 .env
