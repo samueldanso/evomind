@@ -24,10 +24,11 @@ function resolveDbPath(): string {
 const g = global as unknown as { _evoDB: Database.Database | undefined };
 
 export function getDb(): Database.Database {
-  // Don't cache a failed open — retry each request until DB exists
   if (!g._evoDB) {
     const dbPath = resolveDbPath();
-    g._evoDB = new Database(dbPath, { readonly: true });
+    // Don't cache a failed open — next request will retry
+    const db = new Database(dbPath, { readonly: true });
+    g._evoDB = db;
   }
   return g._evoDB;
 }
