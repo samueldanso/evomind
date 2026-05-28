@@ -8,12 +8,13 @@ function fetchArtifacts(): Artifact[] {
     return db
       .prepare("SELECT * FROM artifacts ORDER BY created_at DESC")
       .all() as Artifact[];
-  } catch {
+  } catch (err) {
+    console.error("[page] failed to load artifacts:", err);
     return [];
   }
 }
 
-export default function Home() {
+export default async function Home() {
   const artifacts = fetchArtifacts();
 
   return (

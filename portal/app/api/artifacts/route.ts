@@ -10,7 +10,8 @@ export function GET() {
       .prepare("SELECT * FROM artifacts ORDER BY created_at DESC")
       .all() as Artifact[];
     return Response.json(artifacts);
-  } catch {
-    return Response.json([]);
+  } catch (err) {
+    console.error("[GET /api/artifacts]", err);
+    return Response.json({ error: "Failed to load artifacts" }, { status: 500 });
   }
 }

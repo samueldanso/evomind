@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import os from "node:os";
 import path from "node:path";
 
+// Personal vault path — override with EVO_RESEARCH_STORE env var
 const DEFAULT_STORE = path.join(
   os.homedir(),
   "Library",
@@ -15,16 +16,16 @@ const DEFAULT_STORE = path.join(
 );
 
 function resolveDbPath(): string {
-  const env = process.env.EVO_RESEARCH_STORE;
-  const store = env ? env : DEFAULT_STORE;
+  const store = process.env.EVO_RESEARCH_STORE ?? DEFAULT_STORE;
   return path.join(store, "manifest.db");
 }
 
-let _db: Database.Database | null = null;
+// Attach to globalThis so Next.js dev-mode HMR doesn't leak connections
+const g = global as unknown as { _evoDB: Database.Database | undefined };
 
 export function getDb(): Database.Database {
-  if (!_db) {
-    _db = new Database(resolveDbPath(), { readonly: true });
+  if (!g._evoDB) {
+    g._evoDB = new Database(resolveDbPath(), { readonly: true });
   }
-  return _db;
+  return g._evoDB;
 }

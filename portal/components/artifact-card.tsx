@@ -1,5 +1,3 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -24,8 +22,8 @@ function parseTags(tags: string): string[] {
 export function ArtifactCard({ artifact }: { artifact: Artifact }) {
   const tags = parseTags(artifact.tags);
   const excerpt =
-    artifact.summary.length > 120
-      ? `${artifact.summary.slice(0, 120)}…`
+    artifact.summary.length > 150
+      ? `${artifact.summary.slice(0, 150)}…`
       : artifact.summary;
 
   return (
