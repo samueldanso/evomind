@@ -50,12 +50,15 @@ cd portal && bun dev
 
 ## Current Phase
 
-**Phase B — Checkpoint C complete** (Tasks 1–5 done, reviewed, CI gates on pytest + vitest + bun build)
+**Phase B — SHIPPED as v0.1.0** (all tasks done, reviewed, tagged)
 - T1 ✅ — db layer (`lib/db.ts`, `lib/types.ts`), better-sqlite3, shadcn foundation
 - T2 ✅ — `GET /api/artifacts`, `ArtifactCard`, `ArtifactGrid`, `page.tsx` wired
 - T3 ✅ — tag filter (client state, OR logic, badge toggles)
 - T4 ✅ — `GET /api/search?q=` FTS5 BM25, debounced search input
-- T5 ✅ — artifact viewer + iframe (`/artifacts/[slug]`), HTML route with path confinement + CSP
+- T5 ✅ — artifact viewer + iframe srcdoc (`/artifacts/[slug]`), HTML route with path confinement + CSP
 - Portal tests: 33 vitest tests covering all API routes
+- CI: pytest + vitest + bun build gates on every push
+
+**Phase C — next** (RAG layer via sqlite-vec — "ask your research" chat interface)
 
 Phase A is complete: `scripts/ingest.py` fully implemented, 37/37 tests passing, `manifest.db` schema live at vault path.
