@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+
+# DB — lives in vault (iCloud), not repo
+*.db
+*.db-shm
+*.db-wal
+
+# macOS
+.DS_Store
+
+# Env
+.env
+.env.local
+.env*.local
+
+# uv
+.python-version
