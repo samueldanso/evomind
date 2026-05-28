@@ -1,5 +1,5 @@
 import { ArtifactGrid } from "@/components/artifact-grid";
-import { getDb } from "@/lib/db";
+import { getDb, resetDb } from "@/lib/db";
 import type { Artifact } from "@/lib/types";
 
 function fetchArtifacts(): Artifact[] {
@@ -9,6 +9,8 @@ function fetchArtifacts(): Artifact[] {
       .prepare("SELECT * FROM artifacts ORDER BY created_at DESC")
       .all() as Artifact[];
   } catch (err) {
+    // Reset cached connection so next request retries (e.g. DB created after server start)
+    resetDb();
     console.error("[page] failed to load artifacts:", err);
     return [];
   }
