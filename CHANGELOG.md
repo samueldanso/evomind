@@ -7,20 +7,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Changed
-- `summary` and `html_path` typed as nullable in `Artifact` interface to match DB schema
-- FTS5 UPDATE trigger corrected to delete+insert pattern — bare `UPDATE SET` on FTS5 virtual tables doesn't update the B-tree index
-- `_fts_escape()` in Python now strips embedded double-quotes before wrapping tokens, matching TypeScript `ftsEscape()` behavior
-- `ftsEscape()` filter changed from `t.length > 2` to `t !== '""'` — single-character search tokens were being silently dropped
-
-### Fixed
-- Path traversal: `page.tsx` now runs `html_path` through the vault-boundary guard before reading — previously only the `/html` API route was protected
-- Search race condition: `AbortController` cancels superseded in-flight fetches in `ArtifactGrid`
-- Biome v2 config: `files.ignore` → `files.includes` with negation patterns; `css.parser.tailwindDirectives` enabled
-
-### Added
-- `lib/path-guard.ts` — shared `resolveVaultRoot()` + `assertInsideVault()` used by both the HTML API route and the artifact viewer page
-
 ---
 
 ## [0.1.0] - 2026-05-28
