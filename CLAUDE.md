@@ -11,7 +11,7 @@ See SPEC.md for the full specification.
   - `manifest.db` — SQLite with FTS5, all artifact metadata
   - `html/` — permanent HTML research pages
   - `summaries/` — companion .md notes
-- **Portal app:** `portal/` (Next.js 15, Phase B)
+- **Portal app:** `portal/` (Next.js 16, Phase B)
 - **Scripts:** `scripts/ingest.py` — CLI for saving artifacts + querying manifest
 
 ## Commands
@@ -36,7 +36,7 @@ cd portal && bun dev
 ## Stack
 
 - Python 3.12+, `uv`, SQLite FTS5, `pytest`
-- Portal: Next.js 15, Tailwind v4, shadcn/ui, Biome, `bun`
+- Portal: Next.js 16, Tailwind v4, shadcn/ui (card, input, badge), Biome, `bun`
 
 ## Rules
 
@@ -50,4 +50,11 @@ cd portal && bun dev
 
 ## Current Phase
 
-**Phase A** — Brain: persistent store + SQLite manifest + CLI tooling
+**Phase B — Checkpoint A complete** (Tasks 1 + 2 done, reviewed, CI gates on pytest + bun build)
+- T1 ✅ — db layer (`lib/db.ts`, `lib/types.ts`), better-sqlite3, shadcn foundation
+- T2 ✅ — `GET /api/artifacts`, `ArtifactCard`, `ArtifactGrid`, `page.tsx` wired
+- T3 next — tag filter (client state, OR logic)
+- T4 — FTS5 search
+- T5 — artifact viewer + iframe
+
+Phase A is complete: `scripts/ingest.py` fully implemented, 37/37 tests passing, `manifest.db` schema live at vault path.
