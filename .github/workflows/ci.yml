@@ -24,3 +24,21 @@ jobs:
 
       - name: Run tests
         run: uv run pytest -v
+
+  portal-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: portal
+        run: bun install
+
+      - name: Build portal
+        working-directory: portal
+        run: bun run build
