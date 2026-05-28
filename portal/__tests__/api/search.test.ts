@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type Database from "better-sqlite3";
 import { NextRequest } from "next/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertArtifact, makeTestDb } from "../helpers/db";
 
 const { mockGetDb } = vi.hoisted(() => ({

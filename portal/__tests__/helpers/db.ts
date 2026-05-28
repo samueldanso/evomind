@@ -72,7 +72,5 @@ export function insertArtifact(
   `);
   const info = stmt.run(row);
 
-  return db
-    .prepare("SELECT * FROM artifacts WHERE id = ?")
-    .get(info.lastInsertRowid) as Artifact;
+  return db.prepare("SELECT * FROM artifacts WHERE id = ?").get(info.lastInsertRowid) as Artifact;
 }
