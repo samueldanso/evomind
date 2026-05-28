@@ -2,15 +2,21 @@
 
 > The master technical spec for EvoResearch. For product vision and rationale, read [VISION.md](./VISION.md). For phase plan and release versions, read [ROADMAP.md](./ROADMAP.md). For the current phase under active development, read the matching doc in [`specs/`](./specs/).
 
+## Architectural framing
+
+**EvoResearch is an agentic system with a chat control surface — not a chatbot.** The brain (Python) runs ingest, embedding, reconciliation, and agent orchestration. The portal (TypeScript) is a thin surface over the brain. Chat is one of several control surfaces; search, browse, and agent invocation are equally first-class. Background work — claim extraction, contradiction detection, supersession — runs without user invocation as new material arrives.
+
+Implication for implementation: do not over-invest in the chat UI as if it were the headline feature. Build chat to a polished but minimal bar; reserve UX investment for the surfaces that show the _system working on your behalf_ — contradiction queues, agent run history, the corpus growing and reorganizing itself.
+
 ## Status
 
-| Component | Version | Status |
-|---|---|---|
-| Brain (Python) | v0.1.0 | Shipped — Phase A complete |
-| Portal (Next.js) | v0.1.0 | Shipped — Phase B complete |
-| Intelligence layer (RAG + chat) | — | Spec only — Phase C, see [specs/phase-c-rag.md](./specs/phase-c-rag.md) |
-| Reconciliation | — | Roadmap only — Phase E |
-| Agentic research | — | Roadmap only — Phase F |
+| Component                       | Version | Status                                                                  |
+| ------------------------------- | ------- | ----------------------------------------------------------------------- |
+| Brain (Python)                  | v0.1.0  | Shipped — Phase A complete                                              |
+| Portal (Next.js)                | v0.1.0  | Shipped — Phase B complete                                              |
+| Intelligence layer (RAG + chat) | —       | Spec only — Phase C, see [specs/phase-c-rag.md](./specs/phase-c-rag.md) |
+| Reconciliation                  | —       | Roadmap only — Phase E                                                  |
+| Agentic research                | —       | Roadmap only — Phase F                                                  |
 
 ## High-level architecture
 
@@ -57,6 +63,7 @@
 ### 1. Storage layer — Vault + SQLite
 
 **Default path** (macOS, Samuel):
+
 ```
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/HomeOS/Knowledge/Research/
 ```
@@ -302,17 +309,20 @@ See [Architecture / Portal](#3-portal-layer--nextjs) for the full route list.
 
 ### Environment variables
 
-| Var | Required | Default | Phase |
-|---|---|---|---|
-| `EVO_RESEARCH_STORE` | no | macOS iCloud path | A |
-| `ANTHROPIC_API_KEY` | yes (if provider=anthropic) | — | C |
-| `OPENAI_API_KEY` | yes (if provider=openai) | — | C |
-| `EVO_LLM_PROVIDER` | no | `anthropic` | C |
-| `EVO_EMBED_MODEL` | no | `text-embedding-3-small` | C |
-| `EVO_CHUNK_SIZE` | no | `800` (chars) | C |
-| `EVO_CHUNK_OVERLAP` | no | `100` (chars) | C |
-| `EVO_MAX_AGENT_COST_USD` | no | `1.00` per run | F |
-| `EVO_PORTAL_TOKEN` | no | none (localhost-only) | G |
+| Var                      | Required                    | Default                          | Phase |
+| ------------------------ | --------------------------- | -------------------------------- | ----- |
+| `EVO_RESEARCH_STORE`     | no                          | macOS iCloud path                | A     |
+| `ANTHROPIC_API_KEY`      | yes (if provider=anthropic) | —                                | C     |
+| `OPENAI_API_KEY`         | yes (if provider=openai)    | —                                | C     |
+| `EVO_LLM_PROVIDER`       | no                          | `anthropic`                      | C     |
+| `EVO_EMBED_MODEL`        | no                          | `text-embedding-3-small`         | C     |
+| `EVO_CHUNK_SIZE`         | no                          | `800` (chars)                    | C     |
+| `EVO_CHUNK_OVERLAP`      | no                          | `100` (chars)                    | C     |
+| `OPENAI_BASE_URL`        | no                          | `https://api.openai.com/v1`      | C     |
+| `ANTHROPIC_BASE_URL`     | no                          | `https://api.anthropic.com`      | C     |
+| `EVO_CHAT_PORT`          | no                          | `8765`                           | C     |
+| `EVO_MAX_AGENT_COST_USD` | no                          | `1.00` per run                   | F     |
+| `EVO_PORTAL_TOKEN`       | no                          | none (localhost-only)            | G     |
 
 All env vars validated at startup with clear error messages — never silent fallbacks.
 
@@ -343,7 +353,8 @@ Existing Phase A/B conventions remain in force:
 - `better-sqlite3` with prepared statements
 - Read-only DB connection in the portal (writes go through Brain)
 - Server components by default; client components only when interactive
-- shadcn/ui base; no other UI libraries
+- shadcn/ui base + Vercel AI Elements (installed via `npx shadcn`, source lands in repo); no other UI libraries
+- Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`) for LLM streaming in the portal; no direct Anthropic SDK calls from TypeScript
 - Tailwind v4
 
 **General:**
@@ -358,23 +369,29 @@ Existing Phase A/B conventions remain in force:
 ## Testing strategy
 
 ### Phase A ✅
+
 37 pytest tests, 100% coverage of `ingest.py`.
 
 ### Phase B ✅
+
 33 vitest tests covering all API routes and grid behaviour.
 
 ### Phase C target
+
 - 20+ pytest tests for chunking, embedding, retrieval ranking
 - 15+ vitest tests for chat route and chat UI
-- Hand-built eval set: 20 questions with known-good answers, ranked retrieval must hit top-3 for ≥ 80%
+- Smoke-test eval set: 10 questions with known-good artifact slugs, retrieval must return correct artifact in top-5 for all 10. Hybrid-vs-FTS comparison deferred to v0.2.1 (7-artifact corpus too small to measure meaningfully)
 
 ### Phase E target
+
 - Hand-built contradiction set: 10 artifact pairs with known conflicts, detector must catch ≥ 8
 
 ### Phase F target
+
 - Mock LLM in test mode; agents must complete deterministic test scenarios
 
 ### CI
+
 - pytest + vitest + `bun run build` gate on every push
 - Coverage reports uploaded
 - From Phase G, a Docker build job runs in CI
