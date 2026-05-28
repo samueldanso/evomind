@@ -1,14 +1,8 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Artifact } from "@/lib/types";
 import { parseTags } from "@/lib/utils";
-import Link from "next/link";
 
 function formatDate(iso: string): string {
   return iso.slice(0, 10);
@@ -16,10 +10,8 @@ function formatDate(iso: string): string {
 
 export function ArtifactCard({ artifact }: { artifact: Artifact }) {
   const tags = parseTags(artifact.tags);
-  const excerpt =
-    artifact.summary.length > 150
-      ? `${artifact.summary.slice(0, 150)}…`
-      : artifact.summary;
+  const summary = artifact.summary ?? "";
+  const excerpt = summary.length > 150 ? `${summary.slice(0, 150)}…` : summary;
 
   return (
     <Link href={`/artifacts/${artifact.slug}`} className="block h-full">

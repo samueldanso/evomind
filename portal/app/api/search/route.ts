@@ -1,6 +1,6 @@
+import type { NextRequest } from "next/server";
 import { getDb } from "@/lib/db";
 import type { Artifact } from "@/lib/types";
-import type { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ function ftsEscape(query: string): string {
     .trim()
     .split(/\s+/)
     .map((t) => `"${t.replace(/"/g, "")}"`)
-    .filter((t) => t.length > 2) // drop tokens that were pure quotes → ""
+    .filter((t) => t !== '""') // drop tokens that were pure quotes
     .join(" ");
 }
 
@@ -37,7 +37,7 @@ export function GET(request: NextRequest) {
          FROM artifacts a
          JOIN artifacts_fts f ON a.id = f.rowid
          WHERE artifacts_fts MATCH ?
-         ORDER BY rank`,
+         ORDER BY rank`
       )
       .all(escaped) as Artifact[];
 

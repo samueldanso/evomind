@@ -23,9 +23,11 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
   // null = search inactive (show all); array = search results
   const [searchResults, setSearchResults] = useState<Artifact[] | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
 
     const q = searchQuery.trim();
     if (!q) {
@@ -34,10 +36,12 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
     }
 
     debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
       try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(q)}`,
-        );
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
         if (!res.ok) {
           console.error(`[search] API error ${res.status} for query: ${q}`);
           setSearchResults([]);
@@ -46,6 +50,7 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
         const data = (await res.json()) as Artifact[];
         setSearchResults(data);
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("[search] fetch failed:", err);
         setSearchResults([]);
       }
@@ -53,6 +58,7 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
     };
   }, [searchQuery]);
 
@@ -75,9 +81,7 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
 
   const displayed =
     !isSearchActive && selectedTags.size > 0
-      ? baseList.filter((a) =>
-          parseTags(a.tags).some((tag) => selectedTags.has(tag)),
-        )
+      ? baseList.filter((a) => parseTags(a.tags).some((tag) => selectedTags.has(tag)))
       : baseList;
 
   if (artifacts.length === 0) {
@@ -118,10 +122,7 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
             </button>
           ))}
           {selectedTags.size > 0 && (
-            <button
-              type="button"
-              onClick={() => setSelectedTags(new Set())}
-            >
+            <button type="button" onClick={() => setSelectedTags(new Set())}>
               <Badge variant="ghost" className="cursor-pointer">
                 Clear
               </Badge>
