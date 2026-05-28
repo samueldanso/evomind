@@ -53,10 +53,10 @@ CREATE TRIGGER IF NOT EXISTS artifacts_ai AFTER INSERT ON artifacts BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS artifacts_au AFTER UPDATE ON artifacts BEGIN
-  UPDATE artifacts_fts SET
-    slug=new.slug, title=new.title, summary=new.summary,
-    tags=new.tags, topics=new.topics
-  WHERE rowid=new.id;
+  INSERT INTO artifacts_fts(artifacts_fts, rowid, slug, title, summary, tags, topics)
+  VALUES ('delete', old.id, old.slug, old.title, old.summary, old.tags, old.topics);
+  INSERT INTO artifacts_fts(rowid, slug, title, summary, tags, topics)
+  VALUES (new.id, new.slug, new.title, new.summary, new.tags, new.topics);
 END;
 
 CREATE TRIGGER IF NOT EXISTS artifacts_ad AFTER DELETE ON artifacts BEGIN
@@ -157,10 +157,11 @@ def save_artifact(
 
 
 def _fts_escape(query: str) -> str:
-    # Wrap each whitespace-separated token in double quotes so FTS5 treats
-    # hyphens, wildcards, and other special chars as literals (phrase tokens).
-    tokens = query.split()
-    return " ".join(f'"{t}"' for t in tokens)
+    # Wrap each token in double quotes so FTS5 treats hyphens, wildcards, and
+    # other special chars as literals. Strip embedded " first — FTS5 phrase
+    # literals have no escape sequence for " and would produce a syntax error.
+    tokens = [t.replace('"', '') for t in query.split()]
+    return " ".join(f'"{t}"' for t in tokens if t)
 
 
 def search_artifacts(db: sqlite3.Connection, query: str) -> list[dict]:

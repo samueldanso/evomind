@@ -237,19 +237,19 @@ def test_fts_delete_trigger(db, store, sample_html):
 
 
 def test_fts_update_trigger(db, store, sample_html):
+    # Use a direct UPDATE to actually fire the artifacts_au trigger.
+    # save_artifact uses ON CONFLICT DO UPDATE which fires the AI trigger, not AU.
     artifact = _make_artifact(store, str(sample_html), title="Original Title Here")
     ingest.save_artifact(db, store, artifact)
 
-    updated = _make_artifact(
-        store, str(sample_html), title="Revised Title Content", updated_at="2026-06-01T00:00:00Z"
+    db.execute(
+        "UPDATE artifacts SET title=?, updated_at=? WHERE slug=?",
+        ("Revised Title Content", "2026-06-01T00:00:00Z", "test-slug"),
     )
-    ingest.save_artifact(db, store, updated)
+    db.commit()
 
     assert ingest.search_artifacts(db, "Revised") != []
-    # Original-only token no longer matches
-    results = ingest.search_artifacts(db, "Original")
-    # "Original" is gone from the updated row
-    assert all(r["title"] != "Original Title Here" for r in results)
+    assert ingest.search_artifacts(db, "Original") == []
 
 
 # ---------------------------------------------------------------------------
