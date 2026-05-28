@@ -39,6 +39,10 @@ jobs:
         working-directory: portal
         run: bun install
 
+      - name: Run portal tests
+        working-directory: portal
+        run: bun run test
+
       - name: Build portal
         working-directory: portal
         run: bun run build

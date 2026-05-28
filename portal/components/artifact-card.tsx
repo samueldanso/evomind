@@ -7,17 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Artifact } from "@/lib/types";
+import { parseTags } from "@/lib/utils";
 import Link from "next/link";
 
 function formatDate(iso: string): string {
   return iso.slice(0, 10);
-}
-
-function parseTags(tags: string): string[] {
-  return tags
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
 }
 
 export function ArtifactCard({ artifact }: { artifact: Artifact }) {

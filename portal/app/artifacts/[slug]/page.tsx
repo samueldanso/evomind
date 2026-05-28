@@ -1,15 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { getDb } from "@/lib/db";
 import type { Artifact } from "@/lib/types";
+import { parseTags } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-function parseTags(tags: string): string[] {
-  return tags
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
 
 export default async function ArtifactPage({
   params,
@@ -24,7 +18,8 @@ export default async function ArtifactPage({
     artifact = db
       .prepare("SELECT * FROM artifacts WHERE slug = ?")
       .get(slug) as Artifact | undefined;
-  } catch {
+  } catch (err) {
+    console.error("[ArtifactPage] DB error for slug", slug, err);
     notFound();
   }
 
@@ -61,8 +56,8 @@ export default async function ArtifactPage({
 
         <iframe
           src={`/api/artifacts/${slug}/html`}
-          className="w-full rounded-lg border"
-          style={{ height: "80vh" }}
+          sandbox="allow-same-origin allow-popups"
+          className="h-[80vh] w-full rounded-lg border"
           title={artifact.title}
         />
       </div>

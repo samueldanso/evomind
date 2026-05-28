@@ -5,13 +5,7 @@ import { ArtifactCard } from "@/components/artifact-card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import type { Artifact } from "@/lib/types";
-
-function parseTags(tags: string): string[] {
-  return tags
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
+import { parseTags } from "@/lib/utils";
 
 function uniqueTags(artifacts: Artifact[]): string[] {
   const seen = new Set<string>();
