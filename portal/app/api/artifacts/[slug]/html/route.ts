@@ -1,40 +1,19 @@
-import { getDb } from "@/lib/db";
-import type { Artifact } from "@/lib/types";
 import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import type { NextRequest } from "next/server";
+import { getDb } from "@/lib/db";
+import { assertInsideVault } from "@/lib/path-guard";
+import type { Artifact } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-function getVaultRoot(): string {
-  return (
-    process.env.EVO_RESEARCH_STORE ??
-    path.join(
-      os.homedir(),
-      "Library",
-      "Mobile Documents",
-      "iCloud~md~obsidian",
-      "Documents",
-      "Samuel's Vault",
-      "HomeOS",
-      "Knowledge",
-      "Research",
-    )
-  );
-}
-
-export async function GET(
-  _req: NextRequest,
-  ctx: { params: Promise<{ slug: string }> },
-) {
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
 
   try {
     const db = getDb();
-    const artifact = db
-      .prepare("SELECT * FROM artifacts WHERE slug = ?")
-      .get(slug) as Artifact | undefined;
+    const artifact = db.prepare("SELECT * FROM artifacts WHERE slug = ?").get(slug) as
+      | Artifact
+      | undefined;
 
     if (!artifact) {
       return new Response("Not found", { status: 404 });
@@ -48,11 +27,11 @@ export async function GET(
       });
     }
 
-    // Confine file access to the vault directory to prevent path traversal
-    const resolvedPath = path.resolve(artifact.html_path);
-    const vaultRoot = path.resolve(getVaultRoot());
-    if (!resolvedPath.startsWith(vaultRoot + path.sep)) {
-      console.error("[html route] html_path outside vault root:", resolvedPath);
+    let resolvedPath: string;
+    try {
+      resolvedPath = assertInsideVault(artifact.html_path);
+    } catch {
+      console.error("[html route] html_path outside vault root:", artifact.html_path);
       return new Response("Forbidden", { status: 403 });
     }
 

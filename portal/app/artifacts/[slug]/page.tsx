@@ -1,20 +1,26 @@
-import { Badge } from "@/components/ui/badge";
-import { getDb } from "@/lib/db";
-import type { Artifact } from "@/lib/types";
-import { parseTags } from "@/lib/utils";
 import fs from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { getDb } from "@/lib/db";
+import { assertInsideVault } from "@/lib/path-guard";
+import type { Artifact } from "@/lib/types";
+import { parseTags } from "@/lib/utils";
 
 function readHtmlContent(artifact: Artifact): string | null {
   if (!artifact.html_path) return null;
   try {
-    if (!fs.existsSync(artifact.html_path)) return null;
-    const raw = fs.readFileSync(artifact.html_path, "utf-8");
-    // Strip outer <html>/<head>/<body> wrapper if present, keep inner content
-    const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    if (bodyMatch) return bodyMatch[1];
-    // No body tag — strip html/head wrappers if present and return remainder
+    const safePath = assertInsideVault(artifact.html_path);
+    if (!fs.existsSync(safePath)) return null;
+    const raw = fs.readFileSync(safePath, "utf-8");
+    // Extract body content — index-based to avoid regex backtracking on large files
+    const lower = raw.toLowerCase();
+    const openIdx = lower.indexOf("<body");
+    const closeIdx = lower.lastIndexOf("</body>");
+    if (openIdx !== -1 && closeIdx !== -1) {
+      const bodyStart = raw.indexOf(">", openIdx) + 1;
+      return raw.slice(bodyStart, closeIdx);
+    }
     return raw
       .replace(/<html[^>]*>/gi, "")
       .replace(/<\/html>/gi, "")
@@ -25,19 +31,15 @@ function readHtmlContent(artifact: Artifact): string | null {
   }
 }
 
-export default async function ArtifactPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ArtifactPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   let artifact: Artifact | undefined;
   try {
     const db = getDb();
-    artifact = db
-      .prepare("SELECT * FROM artifacts WHERE slug = ?")
-      .get(slug) as Artifact | undefined;
+    artifact = db.prepare("SELECT * FROM artifacts WHERE slug = ?").get(slug) as
+      | Artifact
+      | undefined;
   } catch (err) {
     console.error("[ArtifactPage] DB error for slug", slug, err);
     notFound();
@@ -83,9 +85,7 @@ export default async function ArtifactPage({
           />
         ) : (
           <div className="rounded-lg border bg-card p-6">
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {artifact.summary}
-            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{artifact.summary}</p>
           </div>
         )}
       </div>
