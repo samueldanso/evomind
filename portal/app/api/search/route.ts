@@ -6,11 +6,13 @@ export const dynamic = "force-dynamic";
 
 function ftsEscape(query: string): string {
   // Wrap each token in double quotes so FTS5 treats hyphens and special chars
-  // as literals — mirrors the same escaping in scripts/ingest.py
+  // as literals. Strip embedded double-quotes first — FTS5 phrase literals
+  // have no escape sequence for " and will throw a syntax error otherwise.
   return query
     .trim()
     .split(/\s+/)
-    .map((t) => `"${t}"`)
+    .map((t) => `"${t.replace(/"/g, "")}"`)
+    .filter((t) => t.length > 2) // drop tokens that were pure quotes → ""
     .join(" ");
 }
 
@@ -20,7 +22,9 @@ export function GET(request: NextRequest) {
   try {
     const db = getDb();
 
-    if (!q) {
+    const escaped = q ? ftsEscape(q) : "";
+
+    if (!escaped) {
       const artifacts = db
         .prepare("SELECT * FROM artifacts ORDER BY created_at DESC")
         .all() as Artifact[];
@@ -35,7 +39,7 @@ export function GET(request: NextRequest) {
          WHERE artifacts_fts MATCH ?
          ORDER BY rank`,
       )
-      .all(ftsEscape(q)) as Artifact[];
+      .all(escaped) as Artifact[];
 
     return Response.json(artifacts);
   } catch (err) {

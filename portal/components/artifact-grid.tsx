@@ -45,12 +45,14 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
           `/api/search?q=${encodeURIComponent(q)}`,
         );
         if (!res.ok) {
+          console.error(`[search] API error ${res.status} for query: ${q}`);
           setSearchResults([]);
           return;
         }
         const data = (await res.json()) as Artifact[];
         setSearchResults(data);
-      } catch {
+      } catch (err) {
+        console.error("[search] fetch failed:", err);
         setSearchResults([]);
       }
     }, 300);
