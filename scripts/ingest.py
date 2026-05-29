@@ -11,6 +11,10 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from lib.chunker import chunk_text, extract_text
+from lib.db import open_db
+
 _DEFAULT_STORE = (
     Path.home()
     / "Library"
@@ -62,6 +66,19 @@ END;
 CREATE TRIGGER IF NOT EXISTS artifacts_ad AFTER DELETE ON artifacts BEGIN
   DELETE FROM artifacts_fts WHERE rowid=old.id;
 END;
+
+CREATE TABLE IF NOT EXISTS chunks (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  artifact_id INTEGER NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,
+  ordinal     INTEGER NOT NULL,
+  text        TEXT NOT NULL,
+  char_start  INTEGER NOT NULL,
+  char_end    INTEGER NOT NULL,
+  created_at  TEXT NOT NULL,
+  UNIQUE(artifact_id, ordinal)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chunks_artifact ON chunks(artifact_id);
 """
 
 
@@ -156,6 +173,30 @@ def save_artifact(
     db.commit()
 
 
+def chunk_and_store(conn: sqlite3.Connection, artifact_id: int, html_path: Path) -> int:
+    """Extract text from HTML, chunk it, and store chunks in the DB."""
+    html = html_path.read_text(encoding="utf-8")
+    text = extract_text(html)
+    chunks = chunk_text(text)
+
+    if not chunks:
+        print(f"warning: no chunks produced for artifact {artifact_id}", file=sys.stderr)
+        return 0
+
+    conn.execute("DELETE FROM chunks WHERE artifact_id = ?", (artifact_id,))
+    now = _now_iso()
+    conn.executemany(
+        "INSERT INTO chunks (artifact_id, ordinal, text, char_start, char_end, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        [
+            (artifact_id, c.ordinal, c.text, c.char_start, c.char_end, now)
+            for c in chunks
+        ],
+    )
+    conn.commit()
+    return len(chunks)
+
+
 def _fts_escape(query: str) -> str:
     # Wrap each token in double quotes so FTS5 treats hyphens, wildcards, and
     # other special chars as literals. Strip embedded " first — FTS5 phrase
@@ -215,11 +256,17 @@ def cmd_ingest(args: argparse.Namespace) -> None:
     artifact.md_path = str(md_path)
 
     save_artifact(db, store, artifact)
+
+    row = db.execute("SELECT id FROM artifacts WHERE slug = ?", (args.slug,)).fetchone()
+    artifact_id = row["id"]
+    n_chunks = chunk_and_store(db, artifact_id, dest_html)
+
     db.close()
 
     print(f"saved: {args.slug}")
     print(f"  html → {dest_html}")
     print(f"  md   → {md_path}")
+    print(f"  chunks → {n_chunks}")
 
 
 def cmd_search(args: argparse.Namespace) -> None:
