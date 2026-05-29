@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sqlite3
 import struct
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 
@@ -102,12 +101,8 @@ def hybrid_search(
     query_embedding: list[float],
     limit: int = 5,
 ) -> list[RetrievalResult]:
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        fts_future = executor.submit(fts_search, db, query, limit * 2)
-        vec_future = executor.submit(vec_search, db, query_embedding, limit * 2)
-
-        fts_results = fts_future.result()
-        vec_results = vec_future.result()
+    fts_results = fts_search(db, query, limit * 2)
+    vec_results = vec_search(db, query_embedding, limit * 2)
 
     merged: dict[int, RetrievalResult] = {}
 
