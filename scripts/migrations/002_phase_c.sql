@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_chunks_artifact ON chunks(artifact_id);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS embeddings USING vec0(
   chunk_id  INTEGER PRIMARY KEY,
-  embedding FLOAT[1536]
+  embedding FLOAT[1024]
 );
 
 -- Stub for Phase E claim extraction — no rows written in Phase C.
