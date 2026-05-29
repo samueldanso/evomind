@@ -7,21 +7,15 @@ Usage:
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-
 import argparse
 import sys
 import time
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from lib.db import default_db_path, load_sqlite_vec, open_db
-from lib.provider import OpenAIProvider
+from lib.provider import BedrockProvider
 
 BATCH_SIZE = 64
 MAX_RETRIES = 3
@@ -47,7 +41,7 @@ def get_all_chunks(conn) -> list[tuple[int, str]]:
 def embed_chunks(
     conn,
     chunks: list[tuple[int, str]],
-    provider: OpenAIProvider,
+    provider,
 ) -> int:
     """Embed chunks in batches, write to embeddings table. Returns count embedded."""
     total = len(chunks)
@@ -76,18 +70,16 @@ def embed_chunks(
     return embedded
 
 
-def _embed_with_retry(provider: OpenAIProvider, texts: list[str]) -> list[list[float]]:
-    """Call provider.embed with exponential backoff on rate limit errors."""
-    import openai
-
+def _embed_with_retry(provider, texts: list[str]) -> list[list[float]]:
+    """Call provider.embed with exponential backoff on transient errors."""
     for attempt in range(MAX_RETRIES):
         try:
-            return provider.embed(texts)
-        except openai.RateLimitError:
+            return provider.embed(texts, input_type="search_document")
+        except Exception as exc:
             if attempt == MAX_RETRIES - 1:
                 raise
             wait = 2**attempt
-            print(f"Rate limited, retrying in {wait}s...", file=sys.stderr)
+            print(f"Embed error ({exc}), retrying in {wait}s...", file=sys.stderr)
             time.sleep(wait)
     raise RuntimeError("Unreachable")
 
@@ -99,7 +91,7 @@ def _serialize_vector(vector: list[float]) -> bytes:
     return struct.pack(f"{len(vector)}f", *vector)
 
 
-def run_incremental(conn, provider: OpenAIProvider) -> int:
+def run_incremental(conn, provider) -> int:
     chunks = get_unembedded_chunks(conn)
     if not chunks:
         print("All chunks already embedded. Nothing to do.")
@@ -108,7 +100,7 @@ def run_incremental(conn, provider: OpenAIProvider) -> int:
     return embed_chunks(conn, chunks, provider)
 
 
-def run_rebuild(conn, provider: OpenAIProvider) -> int:
+def run_rebuild(conn, provider) -> int:
     chunks = get_all_chunks(conn)
     total = len(chunks)
     confirm = input(f"Re-embedding all {total} chunks. Confirm? [y/N] ")
@@ -149,7 +141,7 @@ def main(argv: list[str] | None = None) -> None:
     load_sqlite_vec(conn)
 
     try:
-        provider = OpenAIProvider()
+        provider = BedrockProvider()
     except ValueError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)

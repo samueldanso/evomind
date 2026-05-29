@@ -2,22 +2,17 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).resolve().parent / ".env")
-
 import os
 import sqlite3
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from lib.db import default_db_path, load_sqlite_vec, open_db
-from lib.provider import AnthropicProvider, ChatMessage, OpenAIProvider
+from lib.provider import BedrockProvider, ChatMessage
 from lib.retrieval import hybrid_search
 
 
@@ -36,28 +31,16 @@ async def lifespan(app: FastAPI):
         raise RuntimeError(f"Failed to open database: {exc}") from exc
 
     try:
-        embed_provider = OpenAIProvider()
+        provider = BedrockProvider()
     except ValueError as exc:
-        app.state.startup_error = f"Embedding provider init failed: {exc}"
+        app.state.startup_error = f"Provider init failed: {exc}"
         app.state.db = None
-        app.state.embed_provider = None
-        app.state.chat_provider = None
-        yield
-        return
-
-    try:
-        chat_provider = AnthropicProvider()
-    except ValueError as exc:
-        app.state.startup_error = f"Chat provider init failed: {exc}"
-        app.state.db = None
-        app.state.embed_provider = None
-        app.state.chat_provider = None
+        app.state.provider = None
         yield
         return
 
     app.state.db = conn
-    app.state.embed_provider = embed_provider
-    app.state.chat_provider = chat_provider
+    app.state.provider = provider
     app.state.startup_error = None
     app.state.db_path = str(db_path)
     yield
@@ -102,11 +85,10 @@ async def chat(request: Request, body: ChatRequest):
         )
 
     db: sqlite3.Connection = request.app.state.db
-    embed_provider: OpenAIProvider = request.app.state.embed_provider
-    chat_provider: AnthropicProvider = request.app.state.chat_provider
+    provider: BedrockProvider = request.app.state.provider
 
     try:
-        query_embedding = embed_provider.embed([body.query])[0]
+        query_embedding = provider.embed([body.query], input_type="search_query")[0]
     except Exception as exc:
         return JSONResponse(
             status_code=500,
@@ -115,10 +97,8 @@ async def chat(request: Request, body: ChatRequest):
 
     results = hybrid_search(db, body.query, query_embedding, limit=body.limit)
 
-    context = "\n\n---\n\n".join(r.text for r in results)
-
     try:
-        response = chat_provider.chat(
+        response = provider.chat(
             [ChatMessage(role="user", content=body.query)],
             context_chunks=[r.text for r in results],
         )

@@ -10,20 +10,15 @@ No LLM generation — retrieval only.
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-
 import argparse
 import sqlite3
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from lib.db import default_db_path, load_sqlite_vec
-from lib.provider import OpenAIProvider
+from lib.provider import BedrockProvider
 from lib.retrieval import RetrievalResult, hybrid_search
 
 EVAL_QUESTIONS = [
@@ -69,7 +64,7 @@ def run_eval(
     passed = 0
 
     for question in qs:
-        embedding = provider.embed([question])[0]
+        embedding = provider.embed([question], input_type="search_query")[0]
         results = hybrid_search(db, question, embedding, limit=limit)
         results_per_question.append((question, results))
         if len(results) >= 1:
@@ -122,16 +117,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: DB not found at {db_path}", file=sys.stderr)
         return 1
 
-    api_key_missing = False
-    import os
-
-    if not os.environ.get("OPENAI_API_KEY"):
-        print(
-            "ERROR: OPENAI_API_KEY environment variable is required for embeddings.",
-            file=sys.stderr,
-        )
-        api_key_missing = True
-    if api_key_missing:
+    try:
+        provider = BedrockProvider()
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
     conn = sqlite3.connect(str(db_path), check_same_thread=False)
@@ -140,7 +129,6 @@ def main(argv: list[str] | None = None) -> int:
     conn.row_factory = sqlite3.Row
     load_sqlite_vec(conn)
 
-    provider = OpenAIProvider()
     corpus = corpus_stats(conn)
     results_per_question, passed, total = run_eval(conn, provider, limit=5)
     report = format_report(corpus, results_per_question, passed, total)
