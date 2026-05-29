@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>autoresearch — Karpathy autonomous ML experiment loop</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.7; color: #1a1a1a; }
+  h1, h2, h3 { line-height: 1.3; }
+  code { background: #f4f4f4; padding: 0.15em 0.35em; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+  blockquote { border-left: 3px solid #ccc; margin: 0; padding-left: 1rem; color: #555; }
+</style>
+</head>
+<body>
+<pre style="white-space: pre-wrap; font-family: inherit;"># autoresearch — Karpathy's Autonomous AI Research Framework
+
+**Source:** https://github.com/karpathy/autoresearch
+**Ingested:** 2026-05-28
+**Tags:** #agent-infra #agentops #autonomous-agents #ml-training #reference-architecture
+**Relevance:** High — reference architecture for EvoResearch agent loop patterns
+
+---
+
+## What it is
+
+Autonomous AI research loop for ML experimentation. Give an agent (Claude/Codex) a real LLM training codebase, let it run experiments overnight — modify → train 5 min → measure → keep or discard → repeat. ~12 experiments/hour, ~100 overnight. No human intervention once started.
+
+**Stats:** 83.8k ⭐ · 12.2k forks · MIT · March 2026
+
+---
+
+## Three-File Architecture
+
+| File | Who edits | Role |
+|------|-----------|------|
+| `prepare.py` | Nobody | Fixed constants, tokenizer, dataloader, eval harness |
+| `train.py` | The agent | GPT arch, Muon optimizer, training loop — only file agent touches |
+| `program.md` | Human | The "research org" — agent instructions, loop rules, constraints |
+
+**program.md is a markdown skill file.** Human programs the research org in markdown, not Python. Exact same pattern as agent-skills/SKILL.md applied to ML research.
+
+---
+
+## The Autonomous Loop
+
+```
+FOREVER:
+  modify train.py → git commit
+  → uv run train.py → check val_bpb
+  → if improved: keep commit ("advance" branch)
+  → if worse/crash: git reset to previous state
+  → log to results.tsv (untracked)
+  → NEVER STOP until human interrupts
+```
+
+**Metric:** `val_bpb` (validation bits per byte) — lower is better, vocab-size-independent.
+
+---
+
+## Key Design Constraints (the infra thinking)
+
+- **Single file scope** — agent only touches `train.py`. Bounded blast radius, reviewable diffs.
+- **Fixed 5-min time budget** — wall clock, excluding compilation. Makes experiments directly comparable regardless of model size.
+- **Single metric** — removes ambiguity. Agent knows exactly what "better" means.
+- **Git as audit + rollback** — every experiment is a commit. Bad experiment = `git reset`. Full history.
+- **NEVER STOP directive** — explicit autonomy. Agent does not pause to ask. Loop runs until interrupted.
+- **results.tsv untracked** — experiment log stays local, not in version history.
+
+---
+
+## Agent Infra Patterns (what matters for EvoResearch)
+
+1. **Bounded blast radius** — constrain what the agent can touch. Single file = single vector of failure. Applied to EvoResearch: agent reads widely but writes only to structured store.
+
+2. **Fixed budget per unit of work** — 5-min training budget = comparable experiments. Applied to EvoResearch: fixed scope per research session, consistent artifact format.
+
+3. **program.md as human-agent interface** — human writes the research strategy, agent executes it. Decouples "what to research" (human) from "how to run experiments" (agent). Applied to EvoResearch: `SPEC.md` / task instructions play this role.
+
+4. **Keep/discard loop with git** — agent makes decisions autonomously, git preserves everything. Applied to EvoResearch Phase C: relevance scoring → keep high-signal artifacts, discard noise.
+
+5. **Single metric clarity** — `val_bpb` removes subjectivity. Applied to EvoResearch: relevance score + tag taxonomy as the equivalent signal.
+
+6. **AI co-authorship in git history** — `@claude` is a listed contributor. Commits co-authored with Claude Opus 4.6. This is the norm for AI platform teams building with agents.
+
+---
+
+## NaN Detection Bug (notable engineering detail)
+
+```python
+# BROKEN — IEEE 754: NaN > 100 is always False
+if train_loss_f > 100: fail_fast()
+
+# FIXED — catches both >100 and NaN
+if not (train_loss_f <= 100): fail_fast()
+```
+
+Co-authored and fixed with Claude Opus 4.6 in production. Good pattern for any numeric fast-fail check in agent loops.
+
+---
+
+## Hardware Reality
+
+Requires NVIDIA GPU (tested on H100). macOS/MLX forks exist but this is ML training infra — not Samuel's current career focus. **Do not run. Study as reference architecture.**
+
+---
+
+## Connection to EvoResearch
+
+EvoResearch is building toward the same autonomous research loop pattern, applied to knowledge management rather than ML training:
+
+| autoresearch | EvoResearch equivalent |
+|---|---|
+| `train.py` | Knowledge corpus (SQLite FTS5 store) |
+| `program.md` | Research task instructions / SPEC.md |
+| `val_bpb` metric | Relevance score + tag taxonomy |
+| keep/discard loop | Phase C: RAG + scoring layer |
+| `results.tsv` | `manifest.db` |
+| git as audit trail | Obsidian vault as persistent store |
+| NEVER STOP directive | Scheduled ingest cron (EvoResearch Phase B+) |
+
+---
+
+## Links
+
+- Repo: https://github.com/karpathy/autoresearch
+- Karpathy tweet (launch): https://x.com/karpathy/status/2029701092347630069
+- Beginner's guide tweet: https://x.com/hooeem/status/2030720614752039185
+- macOS fork: https://github.com/miolini/autoresearch-macos
+- MLX fork: https://github.com/trevin-creator/autoresearch-mlx
+</pre>
+</body>
+</html>
