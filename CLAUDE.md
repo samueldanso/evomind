@@ -26,13 +26,11 @@ EvoResearch is a learning and research partner that builds and protects your und
 
 ## Current state
 
-**Shipped:** v0.1.0 — Phases A + B complete (ingest pipeline + local portal).
+**Shipped:** v0.2.0 — Phases A + B + C complete (ingest pipeline + local portal + intelligence layer).
 
-**Active:** **Phase C — Intelligence Layer** (RAG + chat + claim stub). Target release v0.2.0. Detailed spec at [specs/phase-c-rag.md](./specs/phase-c-rag.md).
+**Active:** **Phase D — Multi-source ingest** (web fetch, PDF, RSS). Target release v0.3.0.
 
-**Phase C progress:** T1 ✅ (schema migration) · T2 ✅ (chunker) · T3 ✅ (chunk-at-ingest) · T4 ✅ (Provider abstraction + embed pipeline) · T5 ✅ (hybrid retrieval) · T6–T9 pending.
-
-**Next:** Phase D (multi-source ingest), then E (reconciliation), F (agents), G (portable), H (open source v1.0).
+**Next:** Phase E (reconciliation), F (agents), G (portable), H (open source v1.0).
 
 ## Commands
 
