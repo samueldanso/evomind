@@ -30,6 +30,8 @@ EvoResearch is a learning and research partner that builds and protects your und
 
 **Active:** **Phase C — Intelligence Layer** (RAG + chat + claim stub). Target release v0.2.0. Detailed spec at [specs/phase-c-rag.md](./specs/phase-c-rag.md).
 
+**Phase C progress:** T1 ✅ (schema migration) · T2 ✅ (chunker) · T3 ✅ (chunk-at-ingest) · T4 ✅ (Provider abstraction + embed pipeline) · T5–T9 pending.
+
 **Next:** Phase D (multi-source ingest), then E (reconciliation), F (agents), G (portable), H (open source v1.0).
 
 ## Commands
