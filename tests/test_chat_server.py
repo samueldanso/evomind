@@ -15,7 +15,7 @@ import migrate
 from lib.provider import ChatResponse
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 1024
 
 
 def _serialize_vector(vector: list[float]) -> bytes:
@@ -173,7 +173,7 @@ def chat_db_no_embeddings(tmp_path: Path) -> sqlite3.Connection:
     return conn
 
 
-def _mock_embed(texts: list[str]) -> list[list[float]]:
+def _mock_embed(texts: list[str], input_type: str = "search_query") -> list[list[float]]:
     return [[0.1] * EMBEDDING_DIM for _ in texts]
 
 
@@ -196,14 +196,11 @@ def _create_test_app(db: sqlite3.Connection):
         app.state.db_path = ":memory:"
         app.state.startup_error = None
 
-        embed_provider = MagicMock()
-        embed_provider.embed = _mock_embed
+        provider = MagicMock()
+        provider.embed = _mock_embed
+        provider.chat = _mock_chat
 
-        chat_provider = MagicMock()
-        chat_provider.chat = _mock_chat
-
-        app.state.embed_provider = embed_provider
-        app.state.chat_provider = chat_provider
+        app.state.provider = provider
         yield
 
     test_app = FastAPI(lifespan=test_lifespan)

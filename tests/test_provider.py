@@ -3,19 +3,19 @@
 import os
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.provider import (
-    AnthropicProvider,
+    BedrockProvider,
     ChatMessage,
     ChatResponse,
-    OpenAIProvider,
     get_provider,
 )
 
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 1024
 
 
 class MockProvider:
@@ -24,7 +24,7 @@ class MockProvider:
     def __init__(self) -> None:
         self.embed_calls: list[list[str]] = []
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed(self, texts: list[str], input_type: str = "search_document") -> list[list[float]]:
         self.embed_calls.append(texts)
         return [[0.0] * EMBEDDING_DIM for _ in texts]
 
@@ -32,59 +32,39 @@ class MockProvider:
         return ChatResponse(content="Mock response based on context.")
 
 
-# --- Key validation ---
+# --- BedrockProvider ---
 
 
-def test_anthropic_provider_raises_without_key(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    with pytest.raises(ValueError, match="ANTHROPIC_API_KEY"):
-        AnthropicProvider()
+def test_bedrock_provider_default_region(monkeypatch):
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    with patch("boto3.client") as mock_client:
+        provider = BedrockProvider()
+    assert provider.region == "us-east-1"
+    mock_client.assert_called_once_with("bedrock-runtime", region_name="us-east-1")
 
 
-def test_openai_provider_raises_without_key(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    with pytest.raises(ValueError, match="OPENAI_API_KEY"):
-        OpenAIProvider()
+def test_bedrock_provider_custom_region(monkeypatch):
+    monkeypatch.setenv("AWS_REGION", "eu-west-1")
+    with patch("boto3.client") as mock_client:
+        provider = BedrockProvider()
+    assert provider.region == "eu-west-1"
+    mock_client.assert_called_once_with("bedrock-runtime", region_name="eu-west-1")
 
 
 # --- Factory ---
 
 
-def test_get_provider_returns_anthropic(monkeypatch):
-    monkeypatch.setenv("EVO_LLM_PROVIDER", "anthropic")
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-fake")
-    provider = get_provider()
-    assert isinstance(provider, AnthropicProvider)
-
-
-def test_get_provider_returns_openai(monkeypatch):
-    monkeypatch.setenv("EVO_LLM_PROVIDER", "openai")
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-fake")
-    provider = get_provider()
-    assert isinstance(provider, OpenAIProvider)
+def test_get_provider_default_is_bedrock(monkeypatch):
+    monkeypatch.delenv("EVO_LLM_PROVIDER", raising=False)
+    with patch("boto3.client"):
+        provider = get_provider()
+    assert isinstance(provider, BedrockProvider)
 
 
 def test_get_provider_raises_unknown(monkeypatch):
     monkeypatch.setenv("EVO_LLM_PROVIDER", "unknown")
     with pytest.raises(ValueError, match="Unknown provider"):
         get_provider()
-
-
-# --- Base URL override ---
-
-
-def test_openai_base_url_override(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-fake")
-    monkeypatch.setenv("OPENAI_BASE_URL", "http://localhost:11434/v1")
-    provider = OpenAIProvider()
-    assert str(provider.client.base_url).rstrip("/") == "http://localhost:11434/v1"
-
-
-def test_anthropic_base_url_override(monkeypatch):
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-fake")
-    monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://localhost:8080")
-    provider = AnthropicProvider()
-    assert "localhost:8080" in str(provider.client.base_url)
 
 
 # --- MockProvider ---
@@ -96,6 +76,13 @@ def test_mock_provider_embed_returns_correct_dims():
     assert len(result) == 2
     assert len(result[0]) == EMBEDDING_DIM
     assert all(v == 0.0 for v in result[0])
+
+
+def test_mock_provider_embed_accepts_input_type():
+    mock = MockProvider()
+    result = mock.embed(["test"], input_type="search_query")
+    assert len(result) == 1
+    assert len(result[0]) == EMBEDDING_DIM
 
 
 def test_mock_provider_chat_returns_response():
@@ -110,16 +97,16 @@ def test_mock_provider_chat_returns_response():
 
 
 @pytest.mark.skipif(not os.getenv("RUN_LIVE_LLM"), reason="set RUN_LIVE_LLM=1")
-def test_openai_embed_live():
-    provider = OpenAIProvider()
-    result = provider.embed(["Hello world"])
+def test_bedrock_embed_live():
+    provider = BedrockProvider()
+    result = provider.embed(["Hello world"], input_type="search_document")
     assert len(result) == 1
     assert len(result[0]) == EMBEDDING_DIM
 
 
 @pytest.mark.skipif(not os.getenv("RUN_LIVE_LLM"), reason="set RUN_LIVE_LLM=1")
-def test_anthropic_chat_live():
-    provider = AnthropicProvider()
+def test_bedrock_chat_live():
+    provider = BedrockProvider()
     msgs = [ChatMessage(role="user", content="What is 2+2?")]
     resp = provider.chat(msgs, ["Mathematics: 2+2=4"])
     assert resp.content != ""

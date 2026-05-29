@@ -14,7 +14,7 @@ import migrate
 from lib.retrieval import RetrievalResult, fts_search, hybrid_search, vec_search
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 1024
 
 
 def _serialize_vector(vector: list[float]) -> bytes:
@@ -22,7 +22,7 @@ def _serialize_vector(vector: list[float]) -> bytes:
 
 
 def _make_vector(first_val: float) -> list[float]:
-    """Create a 1536-dim vector with first_val at index 0, rest zeros."""
+    """Create a 1024-dim vector with first_val at index 0, rest zeros."""
     vec = [0.0] * EMBEDDING_DIM
     vec[0] = first_val
     return vec

@@ -16,7 +16,7 @@ from lib.retrieval import RetrievalResult
 from scripts.eval import PASS_THRESHOLD, corpus_stats, format_report, run_eval
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 1024
 
 
 class MockProvider:
@@ -26,7 +26,7 @@ class MockProvider:
         self._return_embeddings = return_embeddings
         self.embed_calls: list[list[str]] = []
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed(self, texts: list[str], input_type: str = "search_document") -> list[list[float]]:
         self.embed_calls.append(texts)
         return [[0.1] * EMBEDDING_DIM for _ in texts]
 
@@ -220,7 +220,7 @@ def test_eval_partial_pass(eval_db):
     class PartialProvider:
         """Returns zero-vector embeddings so only FTS matches contribute."""
 
-        def embed(self, texts: list[str]) -> list[list[float]]:
+        def embed(self, texts: list[str], input_type: str = "search_query") -> list[list[float]]:
             return [[0.0] * EMBEDDING_DIM for _ in texts]
 
         def chat(self, messages, context_chunks):
