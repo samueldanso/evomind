@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["__tests__/**/*.test.ts"],
+    include: ["__tests__/**/*.test.ts", "lib/**/*.test.ts"],
     coverage: {
       provider: "v8",
       include: ["app/api/**/*.ts"],
