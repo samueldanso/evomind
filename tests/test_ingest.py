@@ -492,3 +492,86 @@ def _build_ingest_args(html_path: Path, **overrides) -> object:
 
 def _build_search_args(query: str) -> object:
     return type("Args", (), {"search": query})()
+
+
+# ---------------------------------------------------------------------------
+# T3 — chunk_and_store integration
+# ---------------------------------------------------------------------------
+
+
+def _make_artifact_dc(store: Path, html_path: str, **overrides) -> "ingest.Artifact":
+    """Build a real Artifact dataclass instance for chunk_and_store tests."""
+    now = "2026-01-01T00:00:00Z"
+    defaults = dict(
+        slug="test-slug",
+        title="Test Title",
+        summary="A test summary.",
+        tags="ai,python",
+        topics="llm,infra",
+        html_path=html_path,
+        md_path=None,
+        created_at=now,
+        updated_at=now,
+    )
+    defaults.update(overrides)
+    return ingest.Artifact(**defaults)
+
+
+def test_chunks_created_after_ingest(store: Path, db: sqlite3.Connection) -> None:
+    """chunk_and_store writes > 0 chunk rows for a real HTML artifact."""
+    html_path = store / "html" / "article.html"
+    html_path.write_text(
+        "<html><body><p>" + ("This is a sentence. " * 60) + "</p></body></html>",
+        encoding="utf-8",
+    )
+    artifact = _make_artifact_dc(store, str(html_path))
+    ingest.save_artifact(db, store, artifact)
+    row = db.execute("SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)).fetchone()
+    artifact_id = row[0]
+
+    n = ingest.chunk_and_store(db, artifact_id, html_path)
+
+    assert n > 0, "Expected at least one chunk after ingest"
+    count = db.execute(
+        "SELECT COUNT(*) FROM chunks WHERE artifact_id = ?", (artifact_id,)
+    ).fetchone()[0]
+    assert count == n
+
+
+def test_reingest_updates_chunks_not_duplicate(
+    store: Path, db: sqlite3.Connection
+) -> None:
+    """Re-ingesting the same slug replaces chunks, does not double them."""
+    html_path = store / "html" / "dup.html"
+    html_path.write_text(
+        "<html><body><p>" + ("Sentence number one. " * 60) + "</p></body></html>",
+        encoding="utf-8",
+    )
+    artifact = _make_artifact_dc(store, str(html_path))
+    ingest.save_artifact(db, store, artifact)
+    artifact_id = db.execute("SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)).fetchone()[0]
+
+    n_first = ingest.chunk_and_store(db, artifact_id, html_path)
+    # Ingest again — same artifact_id, same HTML
+    n_second = ingest.chunk_and_store(db, artifact_id, html_path)
+
+    count = db.execute(
+        "SELECT COUNT(*) FROM chunks WHERE artifact_id = ?", (artifact_id,)
+    ).fetchone()[0]
+    assert count == n_second, "Chunk count should match second ingest, not doubled"
+    assert n_first == n_second
+
+
+def test_chunk_and_store_empty_html(
+    store: Path, db: sqlite3.Connection, tmp_path: Path
+) -> None:
+    """chunk_and_store returns 0 and does not crash when HTML has no text."""
+    html_path = tmp_path / "empty.html"
+    html_path.write_text("<html><head></head><body></body></html>", encoding="utf-8")
+    artifact = _make_artifact_dc(store, str(html_path), slug="empty-slug")
+    ingest.save_artifact(db, store, artifact)
+    artifact_id = db.execute("SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)).fetchone()[0]
+
+    n = ingest.chunk_and_store(db, artifact_id, html_path)
+
+    assert n == 0
