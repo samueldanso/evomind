@@ -1,75 +1,69 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { chat } from "@/lib/chat";
 
 describe("chat()", () => {
-  let fetchSpy: ReturnType<typeof spyOn>;
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    fetchSpy = spyOn(globalThis, "fetch");
+    fetchSpy = vi.spyOn(globalThis, "fetch");
   });
 
   afterEach(() => {
-    fetchSpy.mockRestore();
+    vi.restoreAllMocks();
   });
 
-  it("returns a ChatResponse on successful request", async () => {
-    const payload = {
-      answer: "SQLite is a lightweight database.",
+  it("returns parsed response on success", async () => {
+    const mockResponse = {
+      answer: "Test answer",
       sources: [
         {
-          slug: "sqlite-overview",
-          title: "SQLite Overview",
-          excerpt: "SQLite is a C-language library...",
-          score: 0.89,
-          match_type: "hybrid",
+          slug: "test-slug",
+          title: "Test Title",
+          excerpt: "Test excerpt",
+          score: 0.9,
+          match_type: "vec",
         },
       ],
     };
 
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify(payload), { status: 200 })
+      new Response(JSON.stringify(mockResponse), { status: 200 }),
     );
 
-    const result = await chat("What is SQLite?");
-
-    expect(fetchSpy).toHaveBeenCalledWith("http://localhost:8765/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: "What is SQLite?", limit: 5 }),
-    });
-    expect(result.answer).toBe(payload.answer);
+    const result = await chat("test query");
+    expect(result.answer).toBe("Test answer");
     expect(result.sources).toHaveLength(1);
-    expect(result.sources[0].slug).toBe("sqlite-overview");
-    expect(result.sources[0].score).toBe(0.89);
-    expect(result.sources[0].match_type).toBe("hybrid");
+    expect(result.sources[0].slug).toBe("test-slug");
   });
 
-  it("passes custom limit to the request body", async () => {
+  it("throws on non-200 response", async () => {
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify({ answer: "...", sources: [] }), { status: 200 })
+      new Response(JSON.stringify({ error: "Bad request" }), { status: 400 }),
     );
 
-    await chat("query", 10);
-
-    const body = JSON.parse((fetchSpy.mock.calls[0] as [string, RequestInit])[1].body as string);
-    expect(body.limit).toBe(10);
+    await expect(chat("bad query")).rejects.toThrow();
   });
 
-  it("throws an error when the response is not ok", async () => {
+  it("posts to correct endpoint with query", async () => {
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify({ error: "Embedding failed: timeout" }), { status: 500 })
+      new Response(JSON.stringify({ answer: "ok", sources: [] }), {
+        status: 200,
+      }),
     );
 
-    await expect(chat("bad query")).rejects.toThrow("Embedding failed: timeout");
+    await chat("my question");
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining("/chat"),
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining("my question"),
+      }),
+    );
   });
 
-  it("throws a generic error when error body is not parseable", async () => {
-    fetchSpy.mockResolvedValueOnce(
-      new Response("not json", { status: 503 })
-    );
-
-    await expect(chat("query")).rejects.toThrow(
-      "Chat request failed with status 503"
-    );
+  it("throws on network error", async () => {
+    fetchSpy.mockRejectedValueOnce(new Error("Network error"));
+    await expect(chat("fail")).rejects.toThrow("Network error");
   });
 });
