@@ -50,7 +50,7 @@ def corpus_stats(db: sqlite3.Connection) -> tuple[int, int, int]:
 
 def run_eval(
     db: sqlite3.Connection,
-    provider,
+    provider: BedrockProvider,
     questions: list[str] | None = None,
     limit: int = 5,
 ) -> tuple[list[tuple[str, list[RetrievalResult]]], int, int]:

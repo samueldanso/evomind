@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 
 @dataclass
@@ -77,8 +77,8 @@ class BedrockProvider:
             accept="application/json",
         )
 
-        response_body = json.loads(response["body"].read())
-        return response_body["embeddings"]["float"]
+        response_body: dict[str, Any] = json.loads(response["body"].read())
+        return cast(list[list[float]], response_body["embeddings"]["float"])
 
     def chat(self, messages: list[ChatMessage], context_chunks: list[str]) -> ChatResponse:
         context_block = "\n\n---\n\n".join(context_chunks)

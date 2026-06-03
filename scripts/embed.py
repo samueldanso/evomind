@@ -8,6 +8,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import sqlite3
 import sys
 import time
 from pathlib import Path
@@ -21,7 +22,7 @@ BATCH_SIZE = 64
 MAX_RETRIES = 3
 
 
-def get_unembedded_chunks(conn) -> list[tuple[int, str]]:
+def get_unembedded_chunks(conn: sqlite3.Connection) -> list[tuple[int, str]]:
     """Return (chunk_id, text) for chunks without embeddings."""
     rows = conn.execute("""
         SELECT c.id, c.text
@@ -32,16 +33,16 @@ def get_unembedded_chunks(conn) -> list[tuple[int, str]]:
     return [(row[0], row[1]) for row in rows]
 
 
-def get_all_chunks(conn) -> list[tuple[int, str]]:
+def get_all_chunks(conn: sqlite3.Connection) -> list[tuple[int, str]]:
     """Return all (chunk_id, text) pairs."""
     rows = conn.execute("SELECT id, text FROM chunks").fetchall()
     return [(row[0], row[1]) for row in rows]
 
 
 def embed_chunks(
-    conn,
+    conn: sqlite3.Connection,
     chunks: list[tuple[int, str]],
-    provider,
+    provider: BedrockProvider,
 ) -> int:
     """Embed chunks in batches, write to embeddings table. Returns count embedded."""
     total = len(chunks)
@@ -70,7 +71,7 @@ def embed_chunks(
     return embedded
 
 
-def _embed_with_retry(provider, texts: list[str]) -> list[list[float]]:
+def _embed_with_retry(provider: BedrockProvider, texts: list[str]) -> list[list[float]]:
     """Call provider.embed with exponential backoff on transient errors."""
     for attempt in range(MAX_RETRIES):
         try:
@@ -91,7 +92,7 @@ def _serialize_vector(vector: list[float]) -> bytes:
     return struct.pack(f"{len(vector)}f", *vector)
 
 
-def run_incremental(conn, provider) -> int:
+def run_incremental(conn: sqlite3.Connection, provider: BedrockProvider) -> int:
     chunks = get_unembedded_chunks(conn)
     if not chunks:
         print("All chunks already embedded. Nothing to do.")
@@ -100,7 +101,7 @@ def run_incremental(conn, provider) -> int:
     return embed_chunks(conn, chunks, provider)
 
 
-def run_rebuild(conn, provider) -> int:
+def run_rebuild(conn: sqlite3.Connection, provider: BedrockProvider) -> int:
     chunks = get_all_chunks(conn)
     total = len(chunks)
     confirm = input(f"Re-embedding all {total} chunks. Confirm? [y/N] ")

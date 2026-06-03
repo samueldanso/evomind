@@ -199,7 +199,7 @@ def _fts_escape(query: str) -> str:
     return " ".join(f'"{t}"' for t in tokens if t)
 
 
-def search_artifacts(db: sqlite3.Connection, query: str) -> list[dict]:
+def search_artifacts(db: sqlite3.Connection, query: str) -> list[dict[str, object]]:
     rows = db.execute(
         """
         SELECT a.*
@@ -213,7 +213,7 @@ def search_artifacts(db: sqlite3.Connection, query: str) -> list[dict]:
     return [dict(row) for row in rows]
 
 
-def list_artifacts(db: sqlite3.Connection) -> list[dict]:
+def list_artifacts(db: sqlite3.Connection) -> list[dict[str, object]]:
     rows = db.execute("SELECT * FROM artifacts ORDER BY created_at DESC").fetchall()
     return [dict(row) for row in rows]
 
