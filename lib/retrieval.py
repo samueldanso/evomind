@@ -17,9 +17,7 @@ class RetrievalResult:
     match_type: str
 
 
-def fts_search(
-    db: sqlite3.Connection, query: str, limit: int = 10
-) -> list[RetrievalResult]:
+def fts_search(db: sqlite3.Connection, query: str, limit: int = 10) -> list[RetrievalResult]:
     try:
         rows = db.execute(
             """

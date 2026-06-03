@@ -11,7 +11,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
-from lib.retrieval import RetrievalResult, fts_search, hybrid_search, vec_search
+
+from lib.retrieval import fts_search, hybrid_search, vec_search
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
 EMBEDDING_DIM = 1024
@@ -225,13 +226,9 @@ def test_hybrid_returns_top_limit(retrieval_db):
     retrieval_db.commit()
 
     # Manually populate FTS for new chunks
-    rows = retrieval_db.execute(
-        "SELECT rowid, text FROM chunks WHERE ordinal >= 10"
-    ).fetchall()
+    rows = retrieval_db.execute("SELECT rowid, text FROM chunks WHERE ordinal >= 10").fetchall()
     for row in rows:
-        retrieval_db.execute(
-            "INSERT INTO chunks_fts(rowid, text) VALUES (?, ?)", (row[0], row[1])
-        )
+        retrieval_db.execute("INSERT INTO chunks_fts(rowid, text) VALUES (?, ?)", (row[0], row[1]))
     retrieval_db.commit()
 
     query_vec = _make_vector(0.9)

@@ -26,9 +26,7 @@ describe("chat()", () => {
       ],
     };
 
-    fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify(mockResponse), { status: 200 }),
-    );
+    fetchSpy.mockResolvedValueOnce(new Response(JSON.stringify(mockResponse), { status: 200 }));
 
     const result = await chat("test query");
     expect(result.answer).toBe("Test answer");
@@ -38,7 +36,7 @@ describe("chat()", () => {
 
   it("throws on non-200 response", async () => {
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify({ error: "Bad request" }), { status: 400 }),
+      new Response(JSON.stringify({ error: "Bad request" }), { status: 400 })
     );
 
     await expect(chat("bad query")).rejects.toThrow();
@@ -48,7 +46,7 @@ describe("chat()", () => {
     fetchSpy.mockResolvedValueOnce(
       new Response(JSON.stringify({ answer: "ok", sources: [] }), {
         status: 200,
-      }),
+      })
     );
 
     await chat("my question");
@@ -58,7 +56,7 @@ describe("chat()", () => {
       expect.objectContaining({
         method: "POST",
         body: expect.stringContaining("my question"),
-      }),
+      })
     );
   });
 

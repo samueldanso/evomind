@@ -11,7 +11,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import ingest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -95,9 +94,7 @@ def test_init_db_creates_tables(store):
     conn = ingest.init_db(store / "manifest.db")
     tables = {
         row[0]
-        for row in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type IN ('table', 'shadow')"
-        )
+        for row in conn.execute("SELECT name FROM sqlite_master WHERE type IN ('table', 'shadow')")
     }
     assert "artifacts" in tables
     conn.close()
@@ -106,12 +103,7 @@ def test_init_db_creates_tables(store):
 def test_init_db_creates_fts_table(store):
     conn = ingest.init_db(store / "manifest.db")
     # FTS virtual table appears in sqlite_master
-    names = {
-        row[0]
-        for row in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
-        )
-    }
+    names = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     assert "artifacts_fts" in names
     conn.close()
 
@@ -119,10 +111,7 @@ def test_init_db_creates_fts_table(store):
 def test_init_db_creates_triggers(store):
     conn = ingest.init_db(store / "manifest.db")
     triggers = {
-        row[0]
-        for row in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='trigger'"
-        )
+        row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='trigger'")
     }
     assert {"artifacts_ai", "artifacts_au", "artifacts_ad"} <= triggers
     conn.close()
@@ -268,8 +257,8 @@ def test_list_returns_all(db, store, sample_html):
             str(sample_html),
             slug=slug,
             title=f"Title {i}",
-            created_at=f"2026-0{i+1}-01T00:00:00Z",
-            updated_at=f"2026-0{i+1}-01T00:00:00Z",
+            created_at=f"2026-0{i + 1}-01T00:00:00Z",
+            updated_at=f"2026-0{i + 1}-01T00:00:00Z",
         )
         ingest.save_artifact(db, store, a)
 
@@ -436,9 +425,7 @@ def test_main_search(monkeypatch, tmp_path, capsys):
 def test_main_html_missing_required_args(monkeypatch, tmp_path, sample_html):
     store = tmp_path / "vault"
     monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
-    monkeypatch.setattr(
-        sys, "argv", ["ingest.py", "--html", str(sample_html), "--title", "T"]
-    )
+    monkeypatch.setattr(sys, "argv", ["ingest.py", "--html", str(sample_html), "--title", "T"])
     with pytest.raises(SystemExit):
         ingest.main()
 
@@ -459,12 +446,18 @@ def test_main_ingest(monkeypatch, tmp_path, sample_html, capsys):
         "argv",
         [
             "ingest.py",
-            "--html", str(sample_html),
-            "--title", "My Title",
-            "--slug", "my-slug",
-            "--tags", "a,b",
-            "--topics", "x,y",
-            "--summary", "A summary.",
+            "--html",
+            str(sample_html),
+            "--title",
+            "My Title",
+            "--slug",
+            "my-slug",
+            "--tags",
+            "a,b",
+            "--topics",
+            "x,y",
+            "--summary",
+            "A summary.",
         ],
     )
     ingest.main()
@@ -538,9 +531,7 @@ def test_chunks_created_after_ingest(store: Path, db: sqlite3.Connection) -> Non
     assert count == n
 
 
-def test_reingest_updates_chunks_not_duplicate(
-    store: Path, db: sqlite3.Connection
-) -> None:
+def test_reingest_updates_chunks_not_duplicate(store: Path, db: sqlite3.Connection) -> None:
     """Re-ingesting the same slug replaces chunks, does not double them."""
     html_path = store / "html" / "dup.html"
     html_path.write_text(
@@ -549,7 +540,9 @@ def test_reingest_updates_chunks_not_duplicate(
     )
     artifact = _make_artifact_dc(store, str(html_path))
     ingest.save_artifact(db, store, artifact)
-    artifact_id = db.execute("SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)).fetchone()[0]
+    artifact_id = db.execute(
+        "SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)
+    ).fetchone()[0]
 
     n_first = ingest.chunk_and_store(db, artifact_id, html_path)
     # Ingest again — same artifact_id, same HTML
@@ -562,15 +555,15 @@ def test_reingest_updates_chunks_not_duplicate(
     assert n_first == n_second
 
 
-def test_chunk_and_store_empty_html(
-    store: Path, db: sqlite3.Connection, tmp_path: Path
-) -> None:
+def test_chunk_and_store_empty_html(store: Path, db: sqlite3.Connection, tmp_path: Path) -> None:
     """chunk_and_store returns 0 and does not crash when HTML has no text."""
     html_path = tmp_path / "empty.html"
     html_path.write_text("<html><head></head><body></body></html>", encoding="utf-8")
     artifact = _make_artifact_dc(store, str(html_path), slug="empty-slug")
     ingest.save_artifact(db, store, artifact)
-    artifact_id = db.execute("SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)).fetchone()[0]
+    artifact_id = db.execute(
+        "SELECT id FROM artifacts WHERE slug = ?", (artifact.slug,)
+    ).fetchone()[0]
 
     n = ingest.chunk_and_store(db, artifact_id, html_path)
 

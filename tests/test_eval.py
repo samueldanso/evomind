@@ -11,9 +11,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
+
 from lib.provider import ChatMessage, ChatResponse
 from lib.retrieval import RetrievalResult
-from scripts.eval import PASS_THRESHOLD, corpus_stats, format_report, run_eval
+from scripts.eval import corpus_stats, format_report, run_eval
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
 EMBEDDING_DIM = 1024
@@ -210,7 +211,7 @@ def test_eval_fails_when_no_embeddings(empty_eval_db):
 
     assert total == 10
     assert passed == 0
-    for question, results in results_per_question:
+    for _question, results in results_per_question:
         assert len(results) == 0
 
 
@@ -243,9 +244,7 @@ def test_eval_partial_pass(eval_db):
     ]
 
     provider = PartialProvider()
-    results_per_question, passed, total = run_eval(
-        eval_db, provider, questions=questions, limit=5
-    )
+    results_per_question, passed, total = run_eval(eval_db, provider, questions=questions, limit=5)
 
     assert total == 10
     assert passed >= 8

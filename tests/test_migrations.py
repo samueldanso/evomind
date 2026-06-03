@@ -9,7 +9,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import migrate
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -67,9 +66,7 @@ class TestApplyMigration002:
 
         table_names = {
             row[0]
-            for row in conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            ).fetchall()
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         }
         for expected in ("chunks", "claims", "claim_sources", "migrations"):
             assert expected in table_names, f"Table '{expected}' missing after migration 002"
@@ -80,9 +77,7 @@ class TestApplyMigration002:
         migrate.apply_migrations(conn, MIGRATIONS_DIR, skip_backup_check=True)
 
         # sqlite-vec creates shadow tables; check the virtual table name is registered
-        row = conn.execute(
-            "SELECT name FROM sqlite_master WHERE name = 'embeddings'"
-        ).fetchone()
+        row = conn.execute("SELECT name FROM sqlite_master WHERE name = 'embeddings'").fetchone()
         assert row is not None, "Virtual table 'embeddings' missing after migration 002"
 
     def test_migrations_table_records_version(self, tmp_path: Path) -> None:
@@ -114,10 +109,13 @@ class TestCascadeDelete:
         migrate.apply_migrations(conn, MIGRATIONS_DIR, skip_backup_check=True)
         conn.execute("PRAGMA foreign_keys = ON")
 
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO chunks (artifact_id, ordinal, text, char_start, char_end, created_at)
             VALUES (?, 0, 'Hello world', 0, 11, '2026-01-01T00:00:00Z')
-        """, (artifact_id,))
+        """,
+            (artifact_id,),
+        )
         conn.commit()
 
         count = conn.execute(

@@ -56,7 +56,7 @@ def embed_chunks(
 
         vectors = _embed_with_retry(provider, texts)
 
-        for chunk_id, vector in zip(ids, vectors):
+        for chunk_id, vector in zip(ids, vectors, strict=True):
             conn.execute(
                 "INSERT INTO embeddings (chunk_id, embedding) VALUES (?, ?)",
                 (chunk_id, _serialize_vector(vector)),

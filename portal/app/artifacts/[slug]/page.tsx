@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { ArtifactViewer } from "@/components/artifact-viewer";
+import { Badge } from "@/components/ui/badge";
 import { getDb } from "@/lib/db";
 import { assertInsideVault } from "@/lib/path-guard";
 import type { Artifact } from "@/lib/types";

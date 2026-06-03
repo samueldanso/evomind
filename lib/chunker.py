@@ -1,10 +1,12 @@
 """HTML text extraction and fixed-size chunking with sentence-boundary respect."""
+
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
 
 try:
     import trafilatura
+
     _TRAFILATURA = True
 except ImportError:
     _TRAFILATURA = False
@@ -78,12 +80,14 @@ def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> list[Chu
             end = _next_sentence_boundary(text, target)
 
         chunk_text_str = text[start:end]
-        chunks.append(Chunk(
-            text=chunk_text_str,
-            char_start=start,
-            char_end=end,
-            ordinal=ordinal,
-        ))
+        chunks.append(
+            Chunk(
+                text=chunk_text_str,
+                char_start=start,
+                char_end=end,
+                ordinal=ordinal,
+            )
+        )
         ordinal += 1
 
         if end >= len(text):

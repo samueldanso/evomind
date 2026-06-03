@@ -1,12 +1,12 @@
 "use client";
 
+import { Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { chat, type ChatResponse, type ChatSource } from "@/lib/chat";
-import { Search, Loader2 } from "lucide-react";
+import { type ChatResponse, type ChatSource, chat } from "@/lib/chat";
 
 export default function ChatPage() {
   const [query, setQuery] = useState("");
@@ -52,11 +52,7 @@ export default function ChatPage() {
             className="flex-1"
           />
           <Button type="submit" disabled={loading || !query.trim()}>
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Search className="size-4" />
-            )}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
           </Button>
         </form>
 
@@ -92,8 +88,11 @@ export default function ChatPage() {
                   Sources ({result.sources.length})
                 </h2>
                 <div className="space-y-3">
-                  {result.sources.map((source, i) => (
-                    <SourceCard key={`${source.slug}-${i}`} source={source} />
+                  {result.sources.map((source) => (
+                    <SourceCard
+                      key={`${source.slug}-${source.excerpt.slice(0, 20)}`}
+                      source={source}
+                    />
                   ))}
                 </div>
               </section>

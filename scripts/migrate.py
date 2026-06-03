@@ -41,8 +41,7 @@ def check_backup(db_path: Path) -> None:
         sys.exit(1)
     if bak.stat().st_mtime < db_path.stat().st_mtime:
         print(
-            f"ERROR: {bak} is older than {db_path}. "
-            "Re-run: cp manifest.db manifest.db.bak",
+            f"ERROR: {bak} is older than {db_path}. Re-run: cp manifest.db manifest.db.bak",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -93,9 +92,7 @@ def apply_migrations(
         if version is None:
             continue
 
-        row = conn.execute(
-            "SELECT 1 FROM migrations WHERE version = ?", (version,)
-        ).fetchone()
+        row = conn.execute("SELECT 1 FROM migrations WHERE version = ?", (version,)).fetchone()
         if row:
             print(f"Migration {version:03d} already applied, skipping.")
             continue

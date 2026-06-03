@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sqlite3
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,12 +69,8 @@ async def health(request: Request):
     db: sqlite3.Connection = request.app.state.db
     chunk_count = db.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
     embedding_count = 0
-    try:
-        embedding_count = db.execute(
-            "SELECT COUNT(*) FROM embeddings"
-        ).fetchone()[0]
-    except Exception:
-        pass
+    with contextlib.suppress(Exception):
+        embedding_count = db.execute("SELECT COUNT(*) FROM embeddings").fetchone()[0]
 
     return {
         "status": "ok",
@@ -133,6 +129,4 @@ async def chat(request: Request, body: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        app, host="127.0.0.1", port=int(os.getenv("EVO_CHAT_PORT", "8765"))
-    )
+    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("EVO_CHAT_PORT", "8765")))

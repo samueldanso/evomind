@@ -61,12 +61,14 @@ class BedrockProvider:
         self.region = resolved_region
 
     def embed(self, texts: list[str], input_type: str = "search_document") -> list[list[float]]:
-        body = json.dumps({
-            "texts": texts,
-            "input_type": input_type,
-            "output_dimension": 1024,
-            "embedding_types": ["float"],
-        })
+        body = json.dumps(
+            {
+                "texts": texts,
+                "input_type": input_type,
+                "output_dimension": 1024,
+                "embedding_types": ["float"],
+            }
+        )
 
         response = self.client.invoke_model(
             modelId=self.embed_model,
@@ -80,16 +82,16 @@ class BedrockProvider:
 
     def chat(self, messages: list[ChatMessage], context_chunks: list[str]) -> ChatResponse:
         context_block = "\n\n---\n\n".join(context_chunks)
-        user_content = (
-            f"<context>\n\n{context_block}\n\n</context>\n\n{messages[-1].content}"
-        )
+        user_content = f"<context>\n\n{context_block}\n\n</context>\n\n{messages[-1].content}"
 
-        body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 1024,
-            "system": "You are a research assistant. Answer using only the provided context chunks. Cite sources inline.",
-            "messages": [{"role": "user", "content": user_content}],
-        })
+        body = json.dumps(
+            {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 1024,
+                "system": "You are a research assistant. Answer using only the provided context chunks. Cite sources inline.",
+                "messages": [{"role": "user", "content": user_content}],
+            }
+        )
 
         response = self.client.invoke_model(
             modelId=self.chat_model,

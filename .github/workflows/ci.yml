@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,19 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy scripts/
+
       - name: Run tests
         run: uv run pytest -v
 
-  portal-build:
+  portal:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,10 +48,18 @@ jobs:
         working-directory: portal
         run: bun install
 
-      - name: Run portal tests
+      - name: Lint & format check
+        working-directory: portal
+        run: bun run check
+
+      - name: Type check
+        working-directory: portal
+        run: bun run typecheck
+
+      - name: Run tests
         working-directory: portal
         run: bun run test
 
-      - name: Build portal
+      - name: Build
         working-directory: portal
         run: bun run build

@@ -4,7 +4,6 @@ import sqlite3
 import struct
 import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -12,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
+
 from lib.provider import ChatResponse
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"

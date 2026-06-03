@@ -8,12 +8,11 @@ import shutil
 import sqlite3
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.chunker import chunk_text, extract_text
-from lib.db import open_db
 
 _DEFAULT_STORE = (
     Path.home()
@@ -116,11 +115,11 @@ def init_db(db_path: Path) -> sqlite3.Connection:
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _date_str() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(UTC).strftime("%Y-%m-%d")
 
 
 def write_companion_md(store: Path, artifact: Artifact) -> Path:
@@ -150,9 +149,7 @@ html_path: {artifact.html_path}
     return md_path
 
 
-def save_artifact(
-    db: sqlite3.Connection, store: Path, artifact: Artifact
-) -> None:
+def save_artifact(db: sqlite3.Connection, store: Path, artifact: Artifact) -> None:
     db.execute(
         """
         INSERT INTO artifacts
@@ -188,10 +185,7 @@ def chunk_and_store(conn: sqlite3.Connection, artifact_id: int, html_path: Path)
     conn.executemany(
         "INSERT INTO chunks (artifact_id, ordinal, text, char_start, char_end, created_at) "
         "VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            (artifact_id, c.ordinal, c.text, c.char_start, c.char_end, now)
-            for c in chunks
-        ],
+        [(artifact_id, c.ordinal, c.text, c.char_start, c.char_end, now) for c in chunks],
     )
     conn.commit()
     return len(chunks)
@@ -201,7 +195,7 @@ def _fts_escape(query: str) -> str:
     # Wrap each token in double quotes so FTS5 treats hyphens, wildcards, and
     # other special chars as literals. Strip embedded " first — FTS5 phrase
     # literals have no escape sequence for " and would produce a syntax error.
-    tokens = [t.replace('"', '') for t in query.split()]
+    tokens = [t.replace('"', "") for t in query.split()]
     return " ".join(f'"{t}"' for t in tokens if t)
 
 
@@ -220,9 +214,7 @@ def search_artifacts(db: sqlite3.Connection, query: str) -> list[dict]:
 
 
 def list_artifacts(db: sqlite3.Connection) -> list[dict]:
-    rows = db.execute(
-        "SELECT * FROM artifacts ORDER BY created_at DESC"
-    ).fetchall()
+    rows = db.execute("SELECT * FROM artifacts ORDER BY created_at DESC").fetchall()
     return [dict(row) for row in rows]
 
 
@@ -286,9 +278,7 @@ def cmd_list(_args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="EvoResearch artifact ingest and query CLI"
-    )
+    parser = argparse.ArgumentParser(description="EvoResearch artifact ingest and query CLI")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--html", metavar="PATH", help="Source HTML file to ingest")
     group.add_argument("--search", metavar="QUERY", help="Full-text search query")

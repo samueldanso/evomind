@@ -1,9 +1,8 @@
 """Tests for lib/chunker.py — HTML extraction and fixed-size chunking."""
+
 from pathlib import Path
 
-import pytest
-
-from lib.chunker import Chunk, chunk_text, extract_text
+from lib.chunker import chunk_text, extract_text
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_artifact.html"
 
@@ -90,8 +89,7 @@ def test_chunk_text_overlap():
         next_start = chunks[i + 1].char_start
         # next chunk starts before current chunk ends (overlap)
         assert next_start < cur_end, (
-            f"No overlap between chunk {i} and {i+1}: "
-            f"cur_end={cur_end} next_start={next_start}"
+            f"No overlap between chunk {i} and {i + 1}: cur_end={cur_end} next_start={next_start}"
         )
 
 
