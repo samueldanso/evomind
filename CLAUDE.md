@@ -108,6 +108,7 @@ cd portal && bun test && bun run build
 - `agents/` goes inside `core/agents/` when Phase D creates it — not top-level
 - `server.py` → `server/` with `routes/`, `middleware/`, `config.py`, `utils/` when `/agent` route lands in Phase D — that's the threshold
 - No phantom files — only create files in the phase that needs them
+- Phase D UI: agent invocation is the home page (`/`). Artifact grid moves to `/kb`. Chat at `/chat`. Run history at `/runs`.
 
 ## Working agreement
 
