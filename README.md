@@ -1,29 +1,70 @@
 # EvoResearch
 
-A persistent, corpus-aware research knowledge system. Every research artifact is saved permanently to an iCloud vault with full-text search, and browsable via a local web portal.
+> Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
 
-## Stack
+EvoResearch is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
 
-- **Brain:** Python 3.12 + SQLite FTS5 — ingest CLI, search, manifest
-- **Portal:** Next.js 16, Tailwind v4, shadcn/ui — browse, search, read
+## Architecture
 
-## Usage
+EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it that turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
+
+```
+                       ┌─────────────────────────────┐
+                       │  LLM (Bedrock)           ✅ │
+                       │  Claude Sonnet 4.6          │
+                       │  lib/provider.py            │
+                       └──────────────┬──────────────┘
+                                      │
+  ┌───────────────────┐   ┌───────────▼───────────┐   ┌───────────────────┐
+  │ PROMPT         🟡 │◄─►│     Inner Loop     🟡 │◄─►│ TOOLS & SKILLS    │
+  │ lib/prompts.py    │   │  ┌─────────────────┐  │   │ lib/tools.py   🟡 │
+  │ research-wiki     │   │  │ Context         │  │   │  retrieve      ✅ │
+  │ teach-me          │   │  │ Observe         │  │   │  generate      ✅ │
+  └───────────────────┘   │  │ Reason          │  │   │  ingest        ✅ │
+                          │  │ Act             │  │   │  web_search    🔵 │
+  ┌───────────────────┐   │  └─────────────────┘  │   └───────────────────┘
+  │ ORCHESTRATION  🟡 │   │  lib/runtime.py       │
+  │ Agent dispatcher  │   └───────────┬───────────┘   ┌───────────────────┐
+  │ Research→Teaching │               │               │ SECURITY & AUDIT  │
+  │ auto-chain        │               │               │ Tool allowlist 🟡 │
+  └───────────────────┘               │               │ agent_runs log 🟡 │
+                                      ▼               │ cost tracking  🟡 │
+                       ┌─────────────────────────────┐└───────────────────┘
+                       │ MEMORY                      │
+                       │  artifacts             ✅   │
+                       │  chunks                ✅   │
+                       │  embeddings            ✅   │
+                       │  claims (stub)         ✅   │
+                       │  agent_runs            🟡   │
+                       │  mastery checklists    🟡   │
+                       └─────────────────────────────┘
+```
+
+**Status:** ✅ shipped in v0.2.0 (intelligence substrate) · 🟡 lands in v0.3.0 (Phase D — agent runtime) · 🔵 later phases
+
+Phase D wraps the existing v0.2.0 retrieval pipeline and Provider abstraction under Tool interfaces. No retrieval rebuild, no provider rewrite.
+
+## Quick start
 
 ```bash
-# Save a research artifact
+# Ingest a research artifact
 uv run scripts/ingest.py \
   --title "..." --slug "my-topic" \
   --tags "ai,agents" --topics "llm,tooling" \
   --summary "..." --html /path/to/file.html
 
-# Search the corpus
-uv run scripts/ingest.py --search "claude agents"
+# Embed chunks for retrieval
+uv run scripts/embed.py --incremental
 
-# List all artifacts
-uv run scripts/ingest.py --list
+# Start the chat server
+uvicorn chat_server:app --port 8765
 
 # Run the portal
 cd portal && bun dev
+
+# Run tests
+uv run pytest
+cd portal && bun test && bun run build
 ```
 
 ## Vault
@@ -31,16 +72,22 @@ cd portal && bun dev
 Artifacts are stored at:
 ```
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/HomeOS/Knowledge/Research/
-├── manifest.db    # SQLite + FTS5 index
+├── manifest.db    # SQLite + FTS5 + sqlite-vec
 ├── html/          # Permanent HTML pages
 └── summaries/     # Companion .md notes
 ```
 
 Override with `EVO_RESEARCH_STORE=/path/to/store`.
 
-## Dev
+## Stack
 
-```bash
-uv run pytest          # Python tests (run before every commit)
-cd portal && bun run build   # Portal build
-```
+- **Brain:** Python 3.12+, uv, FastAPI, SQLite (FTS5 + sqlite-vec), boto3 (Bedrock)
+- **Portal:** Next.js 16, React 19, Tailwind v4, shadcn/ui, Biome, bun
+- **LLM:** Bedrock — Claude Sonnet 4.6 (chat) + Cohere Embed v4 (embeddings, 1024 dims)
+
+## Read more
+
+- [VISION.md](./VISION.md) — product vision, harness component map, agent descriptions
+- [ROADMAP.md](./ROADMAP.md) — phase sequence with acceptance criteria
+- [CAPABILITIES.md](./CAPABILITIES.md) — platform capability map with phase-by-phase justification
+- [CHANGELOG.md](./CHANGELOG.md) — what's actually shipped
