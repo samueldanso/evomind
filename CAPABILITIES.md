@@ -132,7 +132,7 @@ Capabilities are ordered by architectural priority — agent runtime at the top,
 |---|---|---|---|
 | Env-overridable vault path | A | ✅ v0.1.0 | First step away from hardcoded macOS iCloud path |
 | Validated env at startup (boto3 client creation fails loud) | C | ✅ v0.2.0 | Never silent fallback on missing credentials |
-| First-run setup wizard | H | planned | Strangers can't be expected to read SPEC.md before installing |
+| First-run setup wizard | H | planned | Strangers can't be expected to read docs before installing |
 | Configurable store backend (local, S3) | H | planned | Self-hosters on Linux need non-iCloud paths |
 | Docker compose deployment | H | planned | The 5-minute-install bar |
 | Plugin SDK (community ingest sources) | H | planned | Community contribution surface |

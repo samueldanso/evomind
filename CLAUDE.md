@@ -7,9 +7,8 @@ Read these in order before touching the codebase:
 1. [VISION.md](./VISION.md) — agents do the work, you direct them, the KB is what they build, chat is how you query what they built. The **Engineering positioning** section names the AI Platform Engineering thesis explicitly.
 2. [ROADMAP.md](./ROADMAP.md) — phases A through J with versions and acceptance criteria. Each phase Goal leads with the platform capability it delivers.
 3. [CAPABILITIES.md](./CAPABILITIES.md) — every platform capability the system embodies, shipped or planned, tied to the phase that delivered it and the user pressure that justified it.
-4. [SPEC.md](./SPEC.md) — master system specification
-5. [specs/](./specs/) — phase-specific specifications, read the one matching the current phase
-6. [CHANGELOG.md](./CHANGELOG.md) — what's actually shipped
+4. [specs/](./specs/) — phase-specific specifications, read the one matching the current phase
+5. [CHANGELOG.md](./CHANGELOG.md) — what's actually shipped
 
 ## What this is
 
