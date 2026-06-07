@@ -23,9 +23,10 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.coverage.run]
-source = ["scripts"]
+source = ["core", "scripts"]
 
 [tool.coverage.report]
 show_missing = true

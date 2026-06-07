@@ -1,4 +1,4 @@
-"""Tests for lib/retrieval.py — hybrid FTS5 + vector search."""
+"""Tests for core/memory/retrieval.py — hybrid FTS5 + vector search."""
 
 import sqlite3
 import struct
@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
 
-from lib.retrieval import fts_search, hybrid_search, vec_search
+from core.memory.retrieval import fts_search, hybrid_search, vec_search
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
 EMBEDDING_DIM = 1024

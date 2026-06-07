@@ -137,7 +137,7 @@ Embedding model: `cohere.embed-v4:0` (Cohere Embed v4 via Bedrock) at 1024 dimen
 
 ## Provider abstraction
 
-`lib/provider.py`:
+`core/llm/bedrock.py`:
 
 ```python
 from typing import Protocol, Iterable
@@ -175,7 +175,7 @@ Provider selection at startup via `EVO_LLM_PROVIDER` (default `bedrock`). AWS cr
 
 ## Retrieval
 
-`lib/retrieve.py`:
+`core/memory/retrieval.py`:
 
 ```python
 def hybrid_retrieve(
@@ -231,7 +231,7 @@ Server-side flow:
 5. Parse model output to extract citation references (model is instructed to cite as `[1]`, `[2]`, etc.)
 6. Return response
 
-System prompt template (in `lib/prompts.py`):
+System prompt template (in `core/prompts/`):
 
 ```
 You are EvoResearch, a research assistant grounded in Samuel's research corpus.
@@ -263,13 +263,16 @@ scripts/
   embed.py                          (new)
   migrations/
     002_phase_c.sql                 (new)
-lib/
-  __init__.py                       (new — if not present)
-  db.py                             (new — shared DB helpers extracted from ingest.py)
-  provider.py                       (new — Provider protocol + impls)
-  retrieve.py                       (new — hybrid retrieval)
-  prompts.py                        (new — prompt templates)
-  chunker.py                        (new — HTML extraction + chunking)
+core/
+  __init__.py
+  llm/
+    __init__.py
+    bedrock.py                      (Provider protocol + BedrockProvider)
+  memory/
+    __init__.py
+    db.py                           (shared DB helpers extracted from ingest.py)
+    retrieval.py                    (hybrid retrieval)
+    chunker.py                      (HTML extraction + chunking)
 tests/
   test_chunker.py                   (new)
   test_embed.py                     (new)
@@ -387,11 +390,11 @@ When Phase C ships, the entry under `[0.2.0] - YYYY-MM-DD` should read:
 
 ### Added — Phase C: Intelligence Layer
 
-- Chunking pipeline — `lib/chunker.py` extracts plain text from HTML and chunks it with deterministic char-offset anchoring
+- Chunking pipeline — `core/memory/chunker.py` extracts plain text from HTML and chunks it with deterministic char-offset anchoring
 - `chunks` and `embeddings` tables — `sqlite-vec` virtual table for vector similarity alongside FTS5
 - `scripts/embed.py` — incremental and rebuild modes, batched embedding with retry
-- `lib/provider.py` — pluggable LLM provider (BedrockProvider: Claude Sonnet 4.6 + Cohere Embed v4 via boto3)
-- `lib/retrieval.py` — hybrid retrieval combining vector and FTS5 via score-based merge
+- `core/llm/bedrock.py` — pluggable LLM provider (BedrockProvider: Claude Sonnet 4.6 + Cohere Embed v4 via boto3)
+- `core/memory/retrieval.py` — hybrid retrieval combining vector and FTS5 via score-based merge
 - `POST /chat` — grounded chat over the corpus with cited responses (FastAPI at repo root)
 - `/chat` route in the portal — chat UI with source list and match_type badges
 - `claims` and `claim_sources` schema stubs — populated in Phase F

@@ -17,9 +17,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lib.db import default_db_path, load_sqlite_vec
-from lib.provider import BedrockProvider
-from lib.retrieval import RetrievalResult, hybrid_search
+from core.llm.bedrock import BedrockProvider
+from core.memory.db import default_db_path, load_sqlite_vec
+from core.memory.retrieval import RetrievalResult, hybrid_search
 
 EVAL_QUESTIONS = [
     "What is the transformer architecture?",

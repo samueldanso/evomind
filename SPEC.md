@@ -93,7 +93,7 @@ Single-binary tool driven by `uv`. No external service. Stdlib + `sqlite-vec` (P
 - `reconcile.py` — Phase E. Runs claim extraction + contradiction detection.
 - `agent.py` — Phase F. Spawns sub-agents.
 
-**All scripts share:** `lib/db.py` (DB connection, schema, migrations), `lib/provider.py` (LLM abstraction, Phase C+), `lib/store.py` (vault paths and file IO).
+**All scripts share:** `core/memory/db.py` (DB connection, schema, migrations), `core/llm/bedrock.py` (LLM abstraction, Phase C+), `core/memory/` (vault paths and file IO).
 
 ### 3. Portal layer — Next.js
 
@@ -124,7 +124,7 @@ Local web app, reads from the vault. Next.js 16 + React 19 + Tailwind v4 + shadc
 Introduced in Phase C. Every LLM call goes through the `Provider` interface:
 
 ```python
-# lib/provider.py
+# core/llm/bedrock.py
 class Provider(Protocol):
     def embed(self, texts: list[str]) -> list[list[float]]: ...
     def chat(self, messages: list[Message], tools: list[Tool] | None = None) -> ChatResponse: ...

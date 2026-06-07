@@ -135,13 +135,13 @@ EvoResearch's component map:
 
 | Harness component | EvoResearch implementation |
 |---|---|
-| **LLM** | Bedrock — Claude Sonnet 4.6 + Cohere Embed v4 via `lib/provider.py` |
+| **LLM** | Bedrock — Claude Sonnet 4.6 + Cohere Embed v4 via `core/llm/bedrock.py` |
 | **Context** | Skill prompt + retrieved chunks + task input + tool results, assembled per turn |
-| **Observe → Reason → Act** | Agent execution loop in `lib/runtime.py` (Phase D) |
+| **Observe → Reason → Act** | Agent execution loop in `core/runtime/` (Phase D) |
 | **Memory** | KB: `artifacts`, `chunks`, `embeddings`, `claims` (stub), mastery checklists, `agent_runs` log |
-| **Tools & Skills** | `lib/tools.py` (retrieve, generate, ingest) + `lib/prompts.py` (research-wiki, teach-me skills) |
+| **Tools & Skills** | `core/tools/` (retrieve, generate, ingest) + `core/prompts/` (research-wiki, teach-me skills) |
 | **Prompt** | System prompts per skill + per-task input contracts (`ResearchTask`, `TeachTask`) |
-| **Orchestration** | Agent dispatcher + Research → Teaching auto-chain (`lib/runtime.py`) |
+| **Orchestration** | Agent dispatcher + Research → Teaching auto-chain (`core/runtime/`) |
 | **Security & Governance** | Tool allowlist per agent + `agent_runs` audit log + cost tracking |
 
 The "Platform layers" diagram above is EvoResearch's specific instantiation of this framework. The harness components are the universal pattern; the layers diagram is the concrete code organization.

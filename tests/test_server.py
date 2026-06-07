@@ -1,4 +1,4 @@
-"""Tests for chat_server.py — FastAPI chat + health endpoints."""
+"""Tests for server.py — FastAPI chat + health endpoints."""
 
 import sqlite3
 import struct
@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
 
-from lib.provider import ChatResponse
+from core.llm.bedrock import ChatResponse
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"
 EMBEDDING_DIM = 1024
@@ -188,7 +188,7 @@ def _create_test_app(db: sqlite3.Connection):
 
     from fastapi import FastAPI
 
-    from chat_server import chat, health
+    from server import chat, health
 
     @asynccontextmanager
     async def test_lifespan(app: FastAPI):

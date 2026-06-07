@@ -29,7 +29,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy scripts/
+        run: uv run mypy scripts/ core/ server.py
 
       - name: Run tests
         run: uv run pytest -v

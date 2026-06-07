@@ -57,7 +57,7 @@ The substrate the agent layer runs on. Shipped four days ago. Everything in this
 - Eval harness — 10-question retrieval quality gate, currently 10/10 on dogfood corpus
 - `POST /api/chat` endpoint with grounded citations and hallucination guardrail
 - `/chat` portal route — chat surface over the KB
-- FastAPI `chat_server.py` on port 8765 (repo root)
+- FastAPI `server.py` on port 8765 (repo root)
 - 84 Python tests passing (2 skipped behind `RUN_LIVE_LLM=1`), CI green
 
 **Reframing in v0.3.0 (no rewrite):**

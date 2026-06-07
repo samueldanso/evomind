@@ -12,9 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from lib.db import default_db_path, load_sqlite_vec, open_db
-from lib.provider import BedrockProvider, ChatMessage
-from lib.retrieval import hybrid_search
+from core.llm.bedrock import BedrockProvider, ChatMessage
+from core.memory.db import default_db_path, load_sqlite_vec, open_db
+from core.memory.retrieval import hybrid_search
 
 
 class ChatRequest(BaseModel):

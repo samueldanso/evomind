@@ -1,4 +1,4 @@
-"""Tests for lib/provider.py — Provider abstraction, factory, and MockProvider."""
+"""Tests for core/llm/bedrock.py — Provider abstraction, factory, and MockProvider."""
 
 import os
 import sys
@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.provider import (
+from core.llm.bedrock import (
     BedrockProvider,
     ChatMessage,
     ChatResponse,

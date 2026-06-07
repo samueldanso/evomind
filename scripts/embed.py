@@ -15,8 +15,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lib.db import default_db_path, load_sqlite_vec, open_db
-from lib.provider import BedrockProvider
+from core.llm.bedrock import BedrockProvider
+from core.memory.db import default_db_path, load_sqlite_vec, open_db
 
 BATCH_SIZE = 64
 MAX_RETRIES = 3

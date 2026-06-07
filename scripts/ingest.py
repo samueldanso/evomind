@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.chunker import chunk_text, extract_text
+from core.memory.chunker import chunk_text, extract_text
 
 _DEFAULT_STORE = (
     Path.home()

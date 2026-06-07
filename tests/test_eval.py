@@ -12,8 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import migrate
 
-from lib.provider import ChatMessage, ChatResponse
-from lib.retrieval import RetrievalResult
+from core.llm.bedrock import ChatMessage, ChatResponse
+from core.memory.retrieval import RetrievalResult
 from scripts.eval import corpus_stats, format_report, run_eval
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "scripts" / "migrations"

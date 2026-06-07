@@ -12,18 +12,18 @@ EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The
                        ┌─────────────────────────────┐
                        │  LLM (Bedrock)           ✅ │
                        │  Claude Sonnet 4.6          │
-                       │  lib/provider.py            │
+                       │  core/llm/bedrock.py        │
                        └──────────────┬──────────────┘
                                       │
   ┌───────────────────┐   ┌───────────▼───────────┐   ┌───────────────────┐
   │ PROMPT         🟡 │◄─►│     Inner Loop     🟡 │◄─►│ TOOLS & SKILLS    │
-  │ lib/prompts.py    │   │  ┌─────────────────┐  │   │ lib/tools.py   🟡 │
+  │ core/prompts/  🟡 │   │  ┌─────────────────┐  │   │ core/tools/    🟡 │
   │ research-wiki     │   │  │ Context         │  │   │  retrieve      ✅ │
   │ teach-me          │   │  │ Observe         │  │   │  generate      ✅ │
   └───────────────────┘   │  │ Reason          │  │   │  ingest        ✅ │
                           │  │ Act             │  │   │  web_search    🔵 │
   ┌───────────────────┐   │  └─────────────────┘  │   └───────────────────┘
-  │ ORCHESTRATION  🟡 │   │  lib/runtime.py       │
+  │ ORCHESTRATION  🟡 │   │  core/runtime/     🟡 │
   │ Agent dispatcher  │   └───────────┬───────────┘   ┌───────────────────┐
   │ Research→Teaching │               │               │ SECURITY & AUDIT  │
   │ auto-chain        │               │               │ Tool allowlist 🟡 │
@@ -57,7 +57,7 @@ uv run scripts/ingest.py \
 uv run scripts/embed.py --incremental
 
 # Start the chat server
-uvicorn chat_server:app --port 8765
+uvicorn server:app --port 8765
 
 # Run the portal
 cd portal && bun dev
@@ -84,6 +84,30 @@ Override with `EVO_RESEARCH_STORE=/path/to/store`.
 - **Brain:** Python 3.12+, uv, FastAPI, SQLite (FTS5 + sqlite-vec), boto3 (Bedrock)
 - **Portal:** Next.js 16, React 19, Tailwind v4, shadcn/ui, Biome, bun
 - **LLM:** Bedrock — Claude Sonnet 4.6 (chat) + Cohere Embed v4 (embeddings, 1024 dims)
+
+## Project structure
+
+```
+core/                     # harness — platform primitives
+├── llm/                  #   LLM provider layer
+│   ├── __init__.py       #   re-exports
+│   └── bedrock.py        #   BedrockProvider (Claude + Cohere Embed)
+├── memory/               #   KB read/write + retrieval
+│   ├── __init__.py       #   re-exports
+│   ├── db.py             #   shared DB helpers
+│   ├── retrieval.py      #   hybrid FTS5 + vec search
+│   └── chunker.py        #   sentence-boundary splitter
+├── runtime/              #   🟡 Phase D — agent execution loop
+├── tools/                #   🟡 Phase D — tool interface
+├── prompts/              #   🟡 Phase D — skill instruction sets
+└── governance/           #   🟡 Phase D — audit + allowlist
+
+agents/                   # 🟡 Phase D — product layer (what agents DO)
+server.py                 # FastAPI — /chat + /agent (Phase D)
+scripts/                  # CLI tools (ingest, embed, eval, migrate)
+tests/                    # pytest suite (84 passing)
+portal/                   # Next.js frontend
+```
 
 ## Read more
 

@@ -1,8 +1,8 @@
-"""Tests for lib/chunker.py — HTML extraction and fixed-size chunking."""
+"""Tests for core/memory/chunker.py — HTML extraction and fixed-size chunking."""
 
 from pathlib import Path
 
-from lib.chunker import chunk_text, extract_text
+from core.memory.chunker import chunk_text, extract_text
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_artifact.html"
 

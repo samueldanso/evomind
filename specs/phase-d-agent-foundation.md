@@ -50,7 +50,7 @@ User: "go deep on KV Cache" (mode: concept)
         ↓
 POST /api/agent { task_type: "research", topic: "KV Cache", mode: "concept" }
         ↓
-Agent Dispatcher (lib/runtime.py)
+Agent Dispatcher (core/runtime/)
   → validates task contract
   → instantiates Research Agent with tool allowlist: [retrieve, generate, ingest]
   → starts execution loop
@@ -84,7 +84,7 @@ Portal: artifact card for notes + artifact card for checklist
 
 ## Core components
 
-### lib/runtime.py — Agent execution loop (NEW)
+### core/runtime/ — Agent execution loop (NEW)
 
 The dispatch function. Responsibilities:
 - Receive a typed task contract
@@ -125,7 +125,7 @@ def dispatch(task: ResearchTask | TeachTask) -> AgentRun:
 
 The loop is synchronous in Phase D. Async is earned in Phase G when agents run without explicit user invocation.
 
-### lib/contracts.py — Typed task contracts (NEW)
+### core/runtime/contracts.py — Typed task contracts (NEW)
 
 ```python
 from dataclasses import dataclass
@@ -148,7 +148,7 @@ class TeachTask:
 
 Contracts are validated at dispatch time. Invalid contract raises before any LLM call is made.
 
-### lib/tools.py — Tool interface and Phase D implementations (NEW)
+### core/tools/ — Tool interface and Phase D implementations (NEW)
 
 ```python
 from typing import Protocol
@@ -180,7 +180,7 @@ class Tool(Protocol):
 - Output: `{ artifact_id: int, slug: str, success: bool }`
 - Implementation: calls existing ingest logic, writes to `artifacts` table
 
-### lib/prompts.py — Skill-embedded prompt templates (NEW)
+### core/prompts/ — Skill-embedded prompt templates (NEW)
 
 Prompt templates for both agents. The research-wiki and teach-me skill instructions are embedded here as system prompts — not inline in agent code.
 
@@ -192,7 +192,7 @@ Phase D ships:
 
 Skills update here. The runtime does not change when skills change.
 
-### lib/provider.py — Already shipped in v0.2.0
+### core/llm/bedrock.py — Already shipped in v0.2.0
 
 No changes in Phase D. The existing Provider abstraction is wrapped by the `generate` tool.
 
@@ -390,11 +390,27 @@ Recent agent runs with type badge, status badge, cost, and output links.
 ## Files to create
 
 ```
-lib/
-  runtime.py        — execution loop, tool dispatch, run logging, DB persistence
-  contracts.py      — ResearchTask, TeachTask
-  tools.py          — Tool protocol, tool router, Phase D tool implementations (wrap existing)
-  prompts.py        — skill-embedded prompt templates
+core/
+  runtime/
+    loop.py         — execution loop, tool dispatch, run logging, DB persistence
+    contracts.py    — ResearchTask, TeachTask
+    dispatcher.py   — task dispatch + Research→Teaching chain
+  tools/
+    base.py         — Tool protocol
+    retrieve.py     — wraps core/memory/retrieval.py
+    generate.py     — wraps core/llm/
+    ingest.py       — wraps scripts/ingest.py logic
+    web_search.py   — stub → real Phase G
+  prompts/
+    templates.py    — skill-embedded prompt templates
+    research_wiki.md — Research Agent skill
+    teach_me.md     — Teaching Agent skill
+  governance/
+    audit.py        — agent_runs logging + cost tracking
+    allowlist.py    — per-agent tool permissions
+agents/
+  research.py       — Research Agent
+  teaching.py       — Teaching Agent
 scripts/
   migrations/
     003_phase_d.sql
@@ -431,9 +447,9 @@ portal/
 ## Files to modify
 
 ```
-lib/provider.py           — no changes; tools/generate wraps it
+core/llm/bedrock.py           — no changes; tools/generate wraps it
 scripts/ingest.py         — extract shared DB helpers if needed for tools/ingest wrapper
-chat_server.py            — no changes (file at repo root, not scripts/)
+server.py            — no changes (file at repo root, not scripts/)
 CHANGELOG.md              — Phase D entry under [Unreleased]
 CLAUDE.md                 — already updated (Phase D active)
 portal/app/layout.tsx     — add /agent as primary nav link, move /chat to secondary
@@ -443,8 +459,8 @@ portal/app/chat/page.tsx  — update header copy: "Query what agents built"
 
 ## Files NOT to touch
 
-- `lib/provider.py` — already shipped in v0.2.0, do not rewrite
-- `lib/retrieval.py` (or wherever hybrid retrieval lives) — already shipped in v0.2.0, wrapped by `tools.retrieve`
+- `core/llm/bedrock.py` — already shipped in v0.2.0, do not rewrite
+- `core/memory/retrieval.py` (or wherever hybrid retrieval lives) — already shipped in v0.2.0, wrapped by `tools.retrieve`
 - `scripts/embed.py` — already shipped, no changes
 - Migrations 001 + 002 — already applied, do not modify
 - Phase C eval harness — runs against Phase D as regression gate, no rewrite
@@ -543,7 +559,7 @@ Coverage: new modules at 100%, runtime at ≥ 95%
 1. **Agent loop** — custom Python execution loop (recommended) or thin wrapper over smolagents / pydantic-ai / LangGraph? Custom keeps the runtime on the critical learning path and avoids a framework dependency in core. Wrap option saves implementation time but introduces lock-in.
 2. **Teaching session turn handling** — portal polling (recommended for Phase D) or WebSocket? WebSocket is cleaner but adds complexity; earn it in Phase D.1 patch or Phase E.
 3. **Auto-chain default** — should Research → Teaching auto-chain be on by default or opt-in? Recommend on by default — it is the core loop. Users who want research-only can toggle off.
-4. **Tool wrapper location** — does `tools.retrieve` live as a function in `lib/tools.py` or as a class method? Recommendation: function with closures over the existing retrieval implementation. Cleaner imports, easier testing.
+4. **Tool wrapper location** — does `tools.retrieve` live as a function in `core/tools/` or as a class method? Recommendation: function with closures over the existing retrieval implementation. Cleaner imports, easier testing.
 5. **Migration hygiene** — should Hermes extract the inline `artifacts` schema from `ingest.py` into a new `001_initial.sql` migration as part of Phase D, or leave the current arrangement alone? Currently migration 002 depends on the `artifacts` table which is created inline by `ingest.py`'s `_SCHEMA`, not by any migration file. Recommend: leave alone for v0.3.0, address in Phase H portability work when fresh-install testing happens.
 
 ---

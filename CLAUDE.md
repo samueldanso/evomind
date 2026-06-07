@@ -25,7 +25,14 @@ EvoResearch is an **agent-first learning platform**. You direct agents to go dee
   - `manifest.db` — SQLite with FTS5 + sqlite-vec
   - `html/` — permanent HTML research pages
   - `summaries/` — companion .md notes
-- **Brain:** Python 3.12+, `uv`, FastAPI
+- **Core:** `core/` — platform harness primitives
+  - `core/llm/` — Provider protocol + BedrockProvider
+  - `core/memory/` — db helpers, retrieval, chunker
+  - `core/runtime/` — agent execution loop (Phase D)
+  - `core/tools/` — tool interface (Phase D)
+  - `core/prompts/` — skill instruction sets (Phase D)
+  - `core/governance/` — audit + allowlist (Phase D)
+- **Server:** `server.py` — FastAPI (`/chat`, `/agent` in Phase D)
 - **Portal:** `portal/` (Next.js 16)
 - **Scripts:** `scripts/` — `ingest.py`, `embed.py`, agent scripts (Phase D)
 - **Migrations:** `scripts/migrations/` — versioned forward-only SQL
@@ -63,7 +70,7 @@ cd portal && bun dev
 # Phase C (shipped, v0.2.0) — embeddings + chat
 uv run scripts/embed.py --rebuild
 uv run scripts/embed.py --incremental
-uvicorn chat_server:app --port 8765  # FastAPI chat server (file at repo root)
+uvicorn server:app --port 8765  # FastAPI server (file at repo root)
 
 # Phase D (coming in v0.3.0) — agent runtime
 uv run scripts/agent.py --task research --topic "..." --mode concept
@@ -79,7 +86,7 @@ cd portal && bun test && bun run build
 - **Languages:** Python 3.12+, TypeScript
 - **Brain:** Python + uv + FastAPI + SQLite (FTS5 + sqlite-vec) + pytest
 - **Portal:** Next.js 16, React 19, Tailwind v4, shadcn/ui, Biome, bun, better-sqlite3
-- **LLM (Phase C shipped):** Bedrock-only — Claude Sonnet 4.6 for chat, Cohere Embed v4 for embeddings (1024 dims). Provider abstraction in `lib/provider.py`, swappable via `EVO_LLM_PROVIDER` (currently only `bedrock` implemented).
+- **LLM (Phase C shipped):** Bedrock-only — Claude Sonnet 4.6 for chat, Cohere Embed v4 for embeddings (1024 dims). Provider abstraction in `core/llm/bedrock.py`, swappable via `EVO_LLM_PROVIDER` (currently only `bedrock` implemented).
 - **Auth:** `~/.zshrc` exports `AWS_PROFILE=my-bedrock-profile` and `AWS_REGION=us-east-1` globally
 
 ## Rules
