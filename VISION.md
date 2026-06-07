@@ -1,132 +1,263 @@
 # EvoResearch — Product Vision
 
-> Your learning partner. Builds and protects your understanding of any domain you choose to go deep on.
+> Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
 
 ## One-liner
 
-EvoResearch is a learning and research partner that turns scattered sources into compounding personal expertise. It ingests notes, lectures, articles, research, and codebases; structures them into understanding; keeps that understanding honest as you grow it; and serves it back through chat, browse, and agent loops.
+EvoResearch is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
 
-## The job
+---
 
-When you go deep on something — a domain you're learning (AI infra, web3, distributed systems), a topic you're studying (algebra, organic chem, macroecon), a codebase you're inheriting, a field you're tracking — the actual job is **building durable understanding**.
+## The north star
 
-That job has stages:
+**Agents do the work. You direct them. The KB is what they build. Chat is how you query what they built.**
 
-- Pulling sources from many places: notes, lectures, papers, blogs, AI-generated research
-- Making sense of them together — which is hard because sources overlap, contradict, and age differently
-- Holding what you learn so it compounds rather than evaporating
-- Using that understanding later to answer questions, make decisions, write things, build things
+This is not a chatbot you ask questions to. This is a platform you direct agents through. The distinction is architectural, not cosmetic. It determines what gets built first, what the primary interface is, and what the product is actually defending.
 
-What people use today is a patchwork: Notion or Obsidian for storage, ChatGPT for explanation, Perplexity for fact-checking, browser tabs for sources, and their own memory to hold it together. The memory layer is the failure point. Everything else is fine alone, but the *understanding* never accumulates anywhere — it stays in your head and decays.
+---
 
-## What we are
-
-EvoResearch is the missing memory layer. Not a notes app. Not a chatbot. Not a search engine. **A learning partner that builds and holds your understanding of a domain, and grows it as you grow.**
-
-Reconciliation, contradiction detection, fact-checking — these are how the system keeps your understanding honest as it grows. They are quality mechanisms in service of the value, not the value itself.
-
-The value is depth of understanding over time. The mechanisms are what protect that depth.
-
-## The loop
+## The core loop
 
 ```
-sources → understanding → kept honest → served back
-   ▲                                          │
-   └──────────────────────────────────────────┘
-              you keep adding, it keeps growing
+You: "go deep on KV Cache"
+        ↓
+Research Agent spins up
+  → web_search: finds primary sources, papers, engineering blogs
+  → retrieve: pulls existing KB context on related concepts
+  → generate: synthesizes findings into structured notes
+  → ingest: writes notes as a structured artifact into KB
+        ↓
+Teaching Agent spins up (from the notes just written)
+  → retrieve: pulls the notes the research agent just wrote
+  → generate: teaches you layer by layer
+  → quizzes you, verifies mastery before advancing
+  → maps connections to concepts you already know
+  → ingest: writes mastery checklist back into KB
+        ↓
+KB grows
+  → notes on KV Cache now in KB
+  → your mastery state recorded
+  → connections to PagedAttention, batching, context windows mapped
+        ↓
+Next session on PagedAttention:
+  → Research Agent pulls existing KV Cache notes as context
+  → Teaching Agent knows you already understand KV Cache
+  → Both sessions are richer because of what came before
+        ↓
+Later — you chat to retrieve
+  → "explain KV Cache again"
+  → "how does it connect to PagedAttention?"
+  → "what did I struggle with last time?"
+  → retrieval pulls from accumulated notes + mastery state
+  → grounded answers with citations back to the notes agents wrote
 ```
 
-- **Sources** — any input you feed it: HTML pages, lecture PDFs, blog URLs, Markdown notes, codebases (later)
-- **Understanding** — structured knowledge, not stored documents. The system extracts what's being said, links it across sources, and builds a representation of what you collectively know about the topic
-- **Kept honest** — when sources contradict, the system flags it. When new sources update old ones, the older content is superseded. Fact-check agents (Phase F) can verify against primary sources. These are quality mechanisms, not the product
-- **Served back** — through chat with citations, through browse and search, and through spawned research agents that extend what you know
+The loop is the product. Every component exists to serve it.
 
-The defensible thing isn't any single step. It's that the system gets smarter about your domains the longer you use it, because every source you feed it compounds into something larger than the sum of the sources.
+---
+
+## What each part is
+
+**Agents** — the workers. They receive a task, call tools to do the work, write their output back to the KB. You direct them. They execute.
+
+**Tools** — what agents call to do work. `web_search` finds sources. `retrieve` pulls KB context. `generate` synthesizes and teaches. `ingest` writes output back. Tools are bounded per agent — each agent has an explicit allowlist of what it can call.
+
+**The KB** — what agents build over time. Not a file store. Structured notes, mastery checklists, concept connections, claim-level knowledge. It gets richer with every session.
+
+**Chat** — how you query what agents built. Not the primary interface. The retrieval surface. You chat against a KB that agents already populated. Without the agents running first, chat has nothing meaningful to draw from.
+
+**The skills** — the instruction sets agents follow. `research-wiki` tells the Research Agent how to structure its notes. `teach-me` tells the Teaching Agent how to teach incrementally and verify mastery. The agent is the runtime. The skill is the behavior.
+
+---
+
+## Engineering positioning
+
+EvoResearch is built as an **agent platform product, not a RAG app.**
+
+The distinction:
+
+| RAG app | Agent platform |
+|---|---|
+| User sends a query | User directs an agent |
+| System retrieves and generates | Agent calls tools in a loop |
+| Response returned | Output ingested back to KB |
+| Nothing persists beyond the chat | KB compounds with every run |
+| Chat is the product | Chat is the retrieval surface |
+| Retrieval is the architecture | Retrieval is a tool agents call |
+
+A RAG app calls a retriever and an LLM in sequence. An agent platform dispatches a task to an agent, the agent calls tools in a loop, the output is persisted to memory, and the next task starts richer than the last. The compounding is a structural property of the runtime — not a feature added later.
+
+**The portfolio thesis:** this is what AI Platform Engineering looks like when it ships as a product people actually use. Not an app with a fancy stack. Not infrastructure with no surface. A real agent platform whose primary interface is agent invocation, whose primary output is a compounding knowledge base, and whose secondary interface is retrieval over what the agents built.
+
+---
+
+## The platform layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Control Surface                      │
+│        Agent Invocation UI · Chat Retrieval · CLI        │
+│        Agent invocation is primary. Chat is secondary.   │
+├─────────────────────────────────────────────────────────┤
+│                  Orchestration Layer                     │
+│     Agent dispatcher · Task contracts · Tool router      │
+│     Cost guardrails · Replay log · Async runtime         │
+├─────────────────────────────────────────────────────────┤
+│                     Agent Layer                          │
+│   Research Agent · Teaching Agent · Fact-checker         │
+│   Deepener · Reconciler                                  │
+│   Each agent: scoped task + bounded tool allowlist       │
+├─────────────────────────────────────────────────────────┤
+│                     Tool Layer                           │
+│   web_search() · retrieve() · generate() · ingest()      │
+│   Each tool: typed input/output contract                 │
+├─────────────────────────────────────────────────────────┤
+│                    Memory Layer                          │
+│   Structured notes · Mastery checklists                  │
+│   Concept connections · Claim-level knowledge            │
+│   Agent run log · Source provenance                      │
+├─────────────────────────────────────────────────────────┤
+│                    Storage Layer                         │
+│   SQLite (FTS5 + sqlite-vec) · Migration versioned       │
+│   Path-confined FS · Atomic upsert · Cascade clean       │
+└─────────────────────────────────────────────────────────┘
+```
+
+The intelligence substrate (retrieval, embeddings, provider abstraction, eval harness) shipped in v0.2.0. The agent runtime lands in v0.3.0 — the first phase with executable agent behavior. Chat shipped in v0.2.0 and is reframed in v0.3.0 as the retrieval surface over what agents built. This ordering reflects the center of gravity: the agent runtime is the core. Retrieval, chat, and storage are the substrate it stands on.
+
+---
+
+## Architecture reference: Agent = LLM + Harness
+
+EvoResearch's architecture follows the industry-emerging *Agent = LLM + Harness* framework (NVIDIA GTC 2026). An agent is the LLM plus everything around it that makes the LLM useful in a loop: context assembly, the observe-reason-act cycle, memory that persists across runs, tools the agent can call, skills the agent follows, an orchestration layer that dispatches and chains agents, and security/governance that bounds behavior and audits it.
+
+EvoResearch's component map:
+
+| Harness component | EvoResearch implementation |
+|---|---|
+| **LLM** | Bedrock — Claude Sonnet 4.6 + Cohere Embed v4 via `lib/provider.py` |
+| **Context** | Skill prompt + retrieved chunks + task input + tool results, assembled per turn |
+| **Observe → Reason → Act** | Agent execution loop in `lib/runtime.py` (Phase D) |
+| **Memory** | KB: `artifacts`, `chunks`, `embeddings`, `claims` (stub), mastery checklists, `agent_runs` log |
+| **Tools & Skills** | `lib/tools.py` (retrieve, generate, ingest) + `lib/prompts.py` (research-wiki, teach-me skills) |
+| **Prompt** | System prompts per skill + per-task input contracts (`ResearchTask`, `TeachTask`) |
+| **Orchestration** | Agent dispatcher + Research → Teaching auto-chain (`lib/runtime.py`) |
+| **Security & Governance** | Tool allowlist per agent + `agent_runs` audit log + cost tracking |
+
+The "Platform layers" diagram above is EvoResearch's specific instantiation of this framework. The harness components are the universal pattern; the layers diagram is the concrete code organization.
+
+---
+
+## The agents
+
+**Research Agent** — researches a topic deeply. Calls `web_search`, `retrieve`, `generate`, `ingest`. Follows `research-wiki` skill. Ships in v0.3.0 (Phase D).
+
+**Teaching Agent** — teaches you from what the Research Agent wrote. Calls `retrieve`, `generate`, `ingest`. Follows `teach-me` skill. Ships in v0.3.0 (Phase D).
+
+**Fact-Checker** — verifies a claim against primary sources. Ships in v0.6.0 (Phase G).
+
+**Deepener** — finds adjacent concepts and spawns Research + Teaching runs autonomously. Ships in v0.6.0 (Phase G).
+
+**Reconciler** — resolves contradictions between notes by gathering more evidence. Ships in v0.6.0 (Phase G).
+
+---
+
+## The skills
+
+Skills are instruction sets agents follow — not the agents themselves.
+
+`research-wiki` — tells the Research Agent how to structure its notes. What sections to produce. How to write for future retrieval, not just for reading.
+
+`teach-me` — tells the Teaching Agent how to teach. Layer by layer. Problem before solution. Quiz before advancing. Connections step at the end of every session.
+
+Skills live as markdown files embedded in the agent's system prompt at runtime. Updating a skill updates every future run of that agent without touching the runtime.
+
+---
+
+## How memory compounds
+
+Every agent run writes back to the KB:
+
+- Notes accumulate on every topic you've directed agents to research
+- Mastery state is recorded — what you know, what you struggled with, what you've connected
+- Concept connections build — KV Cache links to PagedAttention links to batching
+- The Research Agent uses existing notes as context when researching adjacent topics
+- The Teaching Agent uses mastery state to skip what you know and focus on what you don't
+- Chat retrieval draws from everything agents built — richer KB means richer answers
+
+This compounding is not a feature. It is the structural consequence of every agent writing back to the same memory layer.
+
+---
+
+## What the job is
+
+When you go deep on something the job is building durable understanding. Not collecting sources. Not reading articles. Building understanding that compounds and is there when you need it.
+
+What people use today is a patchwork: browser tabs, ChatGPT for explanation, Notion for notes, their own memory to hold it together. The memory layer is the failure point. Understanding never accumulates. It evaporates.
+
+EvoResearch is the missing memory layer. Agents build it. You direct them. It compounds.
+
+---
+
+## What we are not building
+
+- A chatbot — chat is a retrieval surface, not the product
+- A RAG app with agents planned for later — agents are first, retrieval is a tool they use
+- A note-taking app — notes are agent output, not user input
+- A standalone fact-checker — fact-checking is an agent capability
+- Real-time multi-user collaboration — single-user first
+- Mobile native apps
+- Hosted enterprise SaaS at launch — open-source v1 first
+- A generic agent marketplace — agents here are research and learning specific
+
+**Note on the v0.2.0 → v0.3.0 framing shift:** v0.2.0 shipped with chat as the visible surface and retrieval as the architectural foundation. v0.3.0 reframes the same code as substrate for the agent layer — retrieval becomes a tool agents call, chat becomes the surface for querying what agents built. No code is thrown away. The compounding agent-first product was always the destination; v0.2.0 built the substrate, v0.3.0 makes the agents the primary interface. Anyone reading the CHANGELOG sees the trail: substrate first, agents second, retrieval and chat repositioned as agent capabilities not the product itself.
+
+---
 
 ## Positioning
 
-Hermes is the general productivity and coding agent. EvoResearch is its research and learning counterpart. Same builder, same ergonomic bar, different domain.
+If Hermes is "Cursor for everything you do", EvoResearch is "Cursor for everything you learn."
 
-If Hermes is "Cursor for everything you do", EvoResearch is "Cursor for everything you learn".
+Hermes acts on your tasks. EvoResearch builds your understanding.
 
-## Target users (priority order)
+---
 
-1. **Builders learning new domains** — AI infra, web3, distributed systems, ML research. They consume content aggressively and need it to compound. *This is Samuel.*
-2. **CS / STEM students** — reconciling lecture notes, textbooks, blog articles, and ChatGPT explanations. Contradictions are the norm.
-3. **Independent researchers tracking evolving fields** — where last month's blog post may now be wrong.
-4. **(Later) Small teams sharing understanding** — research groups, study groups, founder + technical advisor pairs.
+## Target users
 
-Explicitly **not** the target: enterprises, sales teams, customer support knowledge bases. That's Onyx territory.
+1. **Builders going deep on new domains** — AI infra, web3, distributed systems. *This is Samuel.*
+2. **CS / STEM students** — reconciling lectures, textbooks, blogs, AI explanations.
+3. **Independent researchers** — tracking evolving fields where last month's source may be wrong.
+4. **(Later) Small teams** — research groups, study groups.
+
+---
 
 ## Why we win
 
 | Competitor | What they do | Why we win |
 |---|---|---|
-| NotebookLM | Cloud RAG over user files | Closed; no evolution; understanding doesn't compound across sessions |
-| Onyx | Enterprise AI search over 50+ sources | Enterprise-shaped, not the individual learner |
-| OpenAgent | General-purpose self-hosted agent | No research specialisation; no claim-level reasoning |
-| R2R / Haystack / LangGraph | RAG frameworks | Infrastructure, not a product |
-| Obsidian plugins (Smart Connections, Copilot) | RAG over vault | Notes-only; no external ingest; no reconciliation |
-| Perplexity | Live web search + cited answer | Per-query; doesn't compound your understanding |
-| ChatGPT with files | Upload-and-ask | Ephemeral; no memory of past sessions or sources |
+| NotebookLM | RAG over uploaded files | You upload, it retrieves. No agents, no compounding, no teaching. |
+| Perplexity | Web search + cited answer | Per-query. Nothing accumulates. No teaching. |
+| ChatGPT with files | Upload and ask | Ephemeral. No memory across sessions. No agent loop. |
+| Obsidian + plugins | RAG over your notes | You write the notes. No research agent. No teaching. |
+| Onyx | Enterprise AI search | Enterprise-shaped. Not the individual learner. |
+| R2R / LangGraph | RAG/agent frameworks | Infrastructure. Not a product. |
 
-The defensible combination: **multi-source ingest + structured understanding that compounds + quality mechanisms that keep it honest + clean local-first product with a path to open source.**
+What nobody does: **spin up agents that research, write notes, and teach you — with a KB that compounds across every session.**
 
-No one is selling depth-of-understanding-over-time as a product. They're selling search, chat, or storage. We're selling the layer that turns those into expertise.
+---
 
-## What we are not building
+## Strategy
 
-To prevent scope creep, the following are explicitly out of scope:
+1. Build for Samuel first. Use daily. If it doesn't become a daily driver, the public version isn't worth shipping.
+2. Ship to GitHub as v1.0 only when it works for the original user every day.
+3. Hosted version is optional and last. Only if open source demonstrates demand.
 
-- A general-purpose AI chat assistant (we are not building a Claude / ChatGPT clone)
-- A standalone fact-checker (fact-checking serves learning here; it is not the product)
-- Real-time multi-user collaboration (single-user first; teams much later)
-- Mobile native apps
-- Hosted enterprise SaaS at launch (open-source v1 ships first; hosted is optional Phase I)
-- Voice / audio ingest (text and HTML / PDF / MD first)
-- A generic agent marketplace (agents in EvoResearch are research-specific)
+---
 
-## Product-market-fit signals
+## Decision principle
 
-**Personal (Samuel as user one)**
+When a feature decision is unclear:
 
-- Samuel uses EvoResearch daily for at least 30 days without skipping
-- Samuel can answer questions about a domain he's been ingesting that he could not have answered without the system
-- EvoResearch surfaces at least one correction or update per week that Samuel didn't catch himself
+> Does this make the agent loop richer, or does it just add features?
 
-**Public (post open source)**
-
-- 1,000+ GitHub stars within 6 months of v1.0 release
-- 50+ active self-hosters who installed and ingested more than 10 sources
-- Organic install requests in builder communities (X, Discord, HN, builder Slack channels)
-- 5+ community-contributed ingest plugins
-
-**Retention** (the strongest signal that the value is real)
-
-- Users return to query their KB weeks after building it — memory is the value
-- Users add new sources over time — the understanding grows, not stagnates
-- At least one user reports publicly that EvoResearch helped them go deeper on something they were learning
-
-## Strategy: personal-first, then open source, then optional hosted
-
-1. **Build for Samuel first.** Use it daily. If it does not become a daily-driver tool, the public version is not worth shipping.
-2. **Ship to GitHub as v1.0 only when it works for the original user every day.** No vanity OSS release.
-3. **Open-source release is a quality bar, not a milestone.** Match what Hermes, Cursor, Codex deliver in production quality.
-4. **Hosted version is optional and last.** Only if open source demonstrates demand.
-
-This mirrors how the job-ops system reference example shipped (built for self, used to land a FAANG offer, then open-sourced to 20k+ stars). Personal use validates the product before the world sees it.
-
-## Decision principle for trade-offs
-
-When a feature decision is unclear, the tie-breaker is:
-
-> Does this deepen the user's understanding of their domain over time, or does it just add features?
-
-Deepening understanding wins. Features don't.
-
-- A nicer search UI does not deepen understanding. Contradiction detection does.
-- A new file format does not deepen understanding. Compounding across sources does.
-- A team-sharing feature does not deepen understanding. Letting agents extend your learning does.
-- A pretty chat UI does not deepen understanding. Cited retrieval that lets you trust the answer does.
-
-This is the lens for every roadmap call.
+Richer agent loop wins. Features don't.
