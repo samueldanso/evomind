@@ -5,7 +5,7 @@
  * virtual table) so route handlers run against a real SQL engine without
  * touching the vault on disk.
  */
-import Database from "better-sqlite3";
+import { Database } from "bun:sqlite";
 import type { Artifact } from "@/lib/types";
 
 export type TestArtifact = Omit<Artifact, "id">;
@@ -40,7 +40,7 @@ const SCHEMA = `
 `;
 
 /** Build a fresh in-memory DB ready for route handler injection. */
-export function makeTestDb(): Database.Database {
+export function makeTestDb(): Database {
   const db = new Database(":memory:");
   db.exec(SCHEMA);
   return db;
@@ -51,26 +51,27 @@ export function makeTestDb(): Database.Database {
  * Omit html_path / md_path to simulate an artifact with no HTML file.
  */
 export function insertArtifact(
-  db: Database.Database,
+  db: Database,
   partial: Partial<TestArtifact> & { slug: string; title: string }
 ): Artifact {
   const row = {
-    slug: partial.slug,
-    title: partial.title,
-    summary: partial.summary ?? "A summary.",
-    tags: partial.tags ?? "tag1,tag2",
-    topics: partial.topics ?? "topic1",
-    html_path: partial.html_path ?? null,
-    md_path: partial.md_path ?? null,
-    created_at: partial.created_at ?? new Date().toISOString(),
-    updated_at: partial.updated_at ?? new Date().toISOString(),
+    $slug: partial.slug,
+    $title: partial.title,
+    $summary: partial.summary ?? "A summary.",
+    $tags: partial.tags ?? "tag1,tag2",
+    $topics: partial.topics ?? "topic1",
+    $html_path: partial.html_path ?? null,
+    $md_path: partial.md_path ?? null,
+    $created_at: partial.created_at ?? new Date().toISOString(),
+    $updated_at: partial.updated_at ?? new Date().toISOString(),
   };
 
   const stmt = db.prepare(`
     INSERT INTO artifacts (slug, title, summary, tags, topics, html_path, md_path, created_at, updated_at)
-    VALUES (@slug, @title, @summary, @tags, @topics, @html_path, @md_path, @created_at, @updated_at)
+    VALUES ($slug, $title, $summary, $tags, $topics, $html_path, $md_path, $created_at, $updated_at)
   `);
-  const info = stmt.run(row);
+  stmt.run(row);
 
-  return db.prepare("SELECT * FROM artifacts WHERE id = ?").get(info.lastInsertRowid) as Artifact;
+  const lastId = db.prepare("SELECT last_insert_rowid() as id").get() as { id: number };
+  return db.prepare("SELECT * FROM artifacts WHERE id = ?").get(lastId.id) as Artifact;
 }

@@ -1,11 +1,9 @@
-import type Database from "better-sqlite3";
+import type { Database } from "bun:sqlite";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertArtifact, makeTestDb } from "../helpers/db";
 
-const { mockGetDb } = vi.hoisted(() => ({
-  mockGetDb: vi.fn<() => Database.Database>(),
-}));
+const mockGetDb = vi.fn<() => Database>();
 
 vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
 
@@ -26,7 +24,7 @@ function makeRequestNoQ(): NextRequest {
 }
 
 describe("GET /api/search", () => {
-  let db: Database.Database;
+  let db: Database;
 
   beforeEach(() => {
     db = makeTestDb();
@@ -146,8 +144,6 @@ describe("GET /api/search", () => {
   // ── Special character handling (ftsEscape) ─────────────────────────────────
 
   it("does not throw on a query containing double quotes", async () => {
-    // A bare `"` passed to FTS5 MATCH would throw a syntax error without
-    // ftsEscape(). This verifies the handler never lets raw quotes reach SQL.
     const response = await GET(makeRequest('"quoted query"'));
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -155,9 +151,6 @@ describe("GET /api/search", () => {
   });
 
   it("does not throw on a query that is only double quotes", async () => {
-    // All tokens become empty strings after stripping quotes — ftsEscape
-    // filters them out and produces an empty escaped string, which falls
-    // through to the all-artifacts path.
     const response = await GET(makeRequest('"""'));
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -170,7 +163,6 @@ describe("GET /api/search", () => {
   });
 
   it("does not throw on a query containing hyphens", async () => {
-    // Hyphens are problematic in FTS5 unless tokens are quoted.
     const response = await GET(makeRequest("step-by-step"));
     expect(response.status).toBe(200);
     expect(Array.isArray(await response.json())).toBe(true);

@@ -1,19 +1,13 @@
 import path from "node:path";
-import type Database from "better-sqlite3";
+import type { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertArtifact, makeTestDb } from "../helpers/db";
 
-const { mockGetDb } = vi.hoisted(() => ({
-  mockGetDb: vi.fn<() => Database.Database>(),
-}));
+const mockGetDb = vi.fn<() => Database>();
+const mockExistsSync = vi.fn<(p: unknown) => boolean>();
+const mockReadFileSync = vi.fn<(p: unknown, enc: unknown) => string>();
 
 vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
-
-// Mock node:fs so tests never touch the real filesystem.
-const { mockExistsSync, mockReadFileSync } = vi.hoisted(() => ({
-  mockExistsSync: vi.fn<(p: unknown) => boolean>(),
-  mockReadFileSync: vi.fn<(p: unknown, enc: unknown) => string>(),
-}));
 
 vi.mock("node:fs", () => ({
   default: {
@@ -39,7 +33,7 @@ function makeCtx(slug: string) {
 }
 
 describe("GET /api/artifacts/[slug]/html", () => {
-  let db: Database.Database;
+  let db: Database;
 
   beforeEach(() => {
     db = makeTestDb();

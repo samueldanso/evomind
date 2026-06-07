@@ -1,10 +1,8 @@
-import type Database from "better-sqlite3";
+import type { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertArtifact, makeTestDb } from "../helpers/db";
 
-const { mockGetDb } = vi.hoisted(() => ({
-  mockGetDb: vi.fn<() => Database.Database>(),
-}));
+const mockGetDb = vi.fn<() => Database>();
 
 vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
 
@@ -16,7 +14,7 @@ function makeCtx(slug: string) {
 }
 
 describe("GET /api/artifacts/[slug]", () => {
-  let db: Database.Database;
+  let db: Database;
 
   beforeEach(() => {
     db = makeTestDb();

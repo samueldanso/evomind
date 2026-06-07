@@ -1,20 +1,15 @@
-import type Database from "better-sqlite3";
+import type { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertArtifact, makeTestDb } from "../helpers/db";
 
-// vi.hoisted() runs before vi.mock() factories, so mockGetDb is defined by the
-// time the factory callback executes (vi.mock is hoisted to top-of-file by
-// Vitest's transform — plain `const` declarations are not).
-const { mockGetDb } = vi.hoisted(() => ({
-  mockGetDb: vi.fn<() => Database.Database>(),
-}));
+const mockGetDb = vi.fn<() => Database>();
 
 vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
 
 import { GET } from "@/app/api/artifacts/route";
 
 describe("GET /api/artifacts", () => {
-  let db: Database.Database;
+  let db: Database;
 
   beforeEach(() => {
     db = makeTestDb();
