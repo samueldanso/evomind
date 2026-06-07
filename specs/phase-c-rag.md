@@ -1,5 +1,14 @@
 # Phase C — Intelligence Layer (RAG + Chat)
 
+> **STATUS: ✅ SHIPPED as v0.2.0** (May 31, 2026).
+>
+> This document is the spec for what shipped in v0.2.0 — the intelligence substrate (provider abstraction, hybrid retrieval, embedding pipeline, eval harness, chat surface). It is kept for historical reference and as documentation of what the Phase D agent layer runs on top of.
+>
+> In v0.3.0, this substrate is reframed: the retrieval pipeline becomes the `retrieve` tool agents call, the Provider abstraction becomes the `generate` tool, and the chat surface becomes the secondary interface for querying what agents built. No code from this phase is thrown away — it all becomes substrate the agent layer uses.
+>
+> For the Phase D agent runtime spec, see [phase-d-agent-foundation.md](./phase-d-agent-foundation.md).
+
+
 > Target release: **v0.2.0**. This is the immediate next phase. Hermes plans, Claude Code executes.
 
 ## Objective
@@ -44,13 +53,14 @@ Chat UI ──► POST /api/chat ──► retriever (new, hybrid: vec + fts5)
 
 Python:
 - `sqlite-vec` — vector extension for SQLite
-- `anthropic` — Claude SDK
-- `openai` — optional, for embedding model `text-embedding-3-small`
+- `boto3` — AWS SDK for Bedrock (Claude Sonnet 4.6 + Cohere Embed v4)
 
 TypeScript:
 - No new portal deps required (chat is fetch + state)
 
 All new deps must be added to `pyproject.toml` with justification commit.
+
+> **What actually shipped:** `anthropic` and `openai` were originally listed but replaced by `boto3` before release (commits `59989c0`, `87a8fe2`). Only `sqlite-vec`, `boto3`, `trafilatura`, `beautifulsoup4`, `fastapi`, and `uvicorn` are in the shipped `pyproject.toml`.
 
 ## Schema additions
 
@@ -72,7 +82,7 @@ CREATE INDEX idx_chunks_artifact ON chunks(artifact_id);
 -- sqlite-vec virtual table
 CREATE VIRTUAL TABLE embeddings USING vec0(
   chunk_id INTEGER PRIMARY KEY,
-  embedding FLOAT[1536]
+  embedding FLOAT[1024]
 );
 
 -- Stub for Phase E (no extraction logic in C, but schema lands now)
@@ -121,7 +131,9 @@ Hermes decides before implementation: is semantic chunking (e.g. via headings) w
 - Prints progress: `embedded 64/200 chunks (32%)`
 - On failure, partial state is fine — incremental run picks up where it left off
 
-Embedding model: `text-embedding-3-small` (OpenAI) at 1536 dimensions. Configurable via `EVO_EMBED_MODEL`. If the model changes, a full `--rebuild` is required.
+Embedding model: `cohere.embed-v4:0` (Cohere Embed v4 via Bedrock) at 1024 dimensions. If the model changes, a full `--rebuild` is required.
+
+> **What actually shipped:** OpenAI `text-embedding-3-small` was the original plan; shipped with Cohere Embed v4 via Bedrock instead. `EVO_EMBED_MODEL` env var was dropped — model is hardcoded in `BedrockProvider`.
 
 ## Provider abstraction
 
@@ -154,11 +166,12 @@ class Provider(Protocol):
     def chat(self, messages: list[ChatMessage], context_chunks: list[dict]) -> ChatResponse: ...
 ```
 
-Implementations in C:
-- `AnthropicProvider` — Claude API, used for chat
-- `OpenAIProvider` — OpenAI API, used for embeddings (and chat if `EVO_LLM_PROVIDER=openai`)
+Implementations in C (shipped):
+- `BedrockProvider` — boto3 client; Claude Sonnet 4.6 for chat, Cohere Embed v4 (1024 dims) for embeddings
 
-Provider selection at startup via `EVO_LLM_PROVIDER`. API keys validated at startup, never at call time.
+Provider selection at startup via `EVO_LLM_PROVIDER` (default `bedrock`). AWS credentials validated at client creation time (boto3 raises if profile/region invalid).
+
+> **What actually shipped:** The original plan had `AnthropicProvider` + `OpenAIProvider`. These were implemented and then replaced by `BedrockProvider` before release (commits `87a8fe2`, `59989c0`). Only `bedrock` is a valid provider value.
 
 ## Retrieval
 
@@ -171,12 +184,12 @@ def hybrid_retrieve(
     provider: Provider,
     k: int = 8,
 ) -> list[ChunkResult]:
-    """Hybrid retrieval: vector + FTS5, merged with Reciprocal Rank Fusion."""
+    """Hybrid retrieval: vector + FTS5, merged with score-based dedup."""
 ```
 
 - Vector arm — embed query, top-K from `embeddings` via `sqlite-vec` cosine
 - FTS arm — `_fts_escape(query)` against `artifacts_fts`, top-K by BM25
-- Merge — Reciprocal Rank Fusion (RRF) with `k=60` constant, return top-K merged
+- Merge — sequential score-based dedup (take higher score per chunk_id, mark `match_type` as `hybrid`), return top-K sorted by score
 - Each result includes: `chunk_id`, `artifact_id`, `text`, `score`, `source` (`'vec' | 'fts' | 'both'`)
 
 ## Chat API
@@ -300,10 +313,9 @@ portal/app/layout.tsx               — add /chat nav link
 `.env.local` (portal) and OS env (brain) gain:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
-OPENAI_API_KEY=sk-...           # for embeddings
-EVO_LLM_PROVIDER=anthropic       # 'anthropic' | 'openai'
-EVO_EMBED_MODEL=text-embedding-3-small
+AWS_PROFILE=my-bedrock-profile   # or valid AWS credentials
+AWS_REGION=us-east-1             # Bedrock region
+EVO_LLM_PROVIDER=bedrock         # 'bedrock' (only implemented provider)
 EVO_CHUNK_SIZE=800
 EVO_CHUNK_OVERLAP=100
 ```
@@ -316,7 +328,7 @@ All new env vars validated at startup with clear errors. Default values document
 
 - `test_chunker.py` — HTML → text → chunks, boundary conditions, char offsets correct
 - `test_embed.py` — incremental embedding, idempotency, batch behaviour, rebuild flag
-- `test_retrieve.py` — vec-only retrieval, fts-only retrieval, hybrid RRF merge, top-K cap
+- `test_retrieve.py` — vec-only retrieval, fts-only retrieval, hybrid score-based merge, top-K cap
 - `test_provider.py` — mock provider used in all higher-level tests; real provider gated behind `RUN_LIVE_LLM=1`
 - Coverage: new modules at 100%, retrieval at ≥ 95%
 
@@ -326,9 +338,9 @@ All new env vars validated at startup with clear errors. Default values document
 
 **Eval set:**
 
-- `tests/fixtures/eval_questions.json` — 20 questions paired with the artifact slugs whose chunks should appear in the top-K retrieval
-- Run via `uv run pytest tests/test_eval.py --eval` (gated, not in default CI)
-- Bar: ≥ 80% of questions have at least one correct artifact in top-3 retrieved chunks
+- 10 questions hardcoded in `scripts/eval.py` (no separate JSON fixture file)
+- Run via `uv run scripts/eval.py` — retrieval-only, no generation cost
+- Bar: ≥ 8/10 questions return at least one result (`PASS_THRESHOLD = 8`); currently 10/10 on dogfood corpus
 
 ## Acceptance criteria
 
@@ -340,7 +352,7 @@ A Phase C release ships when **all** of the following are true:
 - [ ] `/chat` route renders, accepts input, displays answer + citations, and clicking a citation opens the source artifact
 - [ ] Hybrid retrieval beats FTS5-only on the eval set (measurable improvement, even if small)
 - [ ] `claims` and `claim_sources` tables exist, no rows yet, no extraction logic shipped
-- [ ] New tests pass; existing 70 tests still pass; CI green
+- [ ] New tests pass; existing tests still pass; CI green
 - [ ] No regressions in portal v0.1.0 functionality — grid, search, viewer still work
 - [ ] `CHANGELOG.md` entry for v0.2.0 complete
 - [ ] `CLAUDE.md` updated to reflect Phase C shipped, Phase D next
@@ -351,8 +363,8 @@ A Phase C release ships when **all** of the following are true:
 
 | Risk | Mitigation |
 |---|---|
-| Embedding cost unbounded | Default to OpenAI `text-embedding-3-small` (~$0.02/1M tokens); incremental mode skips re-work |
-| Provider lock-in | `Provider` interface from day one; OpenAI and Anthropic both implemented |
+| Embedding cost unbounded | Cohere Embed v4 via Bedrock; incremental mode skips re-work |
+| Provider lock-in | `Provider` protocol interface from day one; new providers can implement it without touching existing code |
 | sqlite-vec dimension mismatch on model change | `--rebuild` flag forces full re-embed; error message catches mismatch at startup |
 | Chunk size badly chosen | Configurable via env; eval set re-runs cheaply once embedded |
 | Chat hallucinates outside the corpus | System prompt explicitly forbids; "I don't know" is a valid answer |
@@ -378,15 +390,15 @@ When Phase C ships, the entry under `[0.2.0] - YYYY-MM-DD` should read:
 - Chunking pipeline — `lib/chunker.py` extracts plain text from HTML and chunks it with deterministic char-offset anchoring
 - `chunks` and `embeddings` tables — `sqlite-vec` virtual table for vector similarity alongside FTS5
 - `scripts/embed.py` — incremental and rebuild modes, batched embedding with retry
-- `lib/provider.py` — pluggable LLM provider (Anthropic for chat, OpenAI for embeddings)
-- `lib/retrieve.py` — hybrid retrieval combining vector and FTS5 via Reciprocal Rank Fusion
-- `POST /api/chat` — grounded chat over the corpus with cited responses
-- `/chat` route in the portal — sidebar chat UI with clickable citations
-- `claims` and `claim_sources` schema stubs — populated in Phase E
+- `lib/provider.py` — pluggable LLM provider (BedrockProvider: Claude Sonnet 4.6 + Cohere Embed v4 via boto3)
+- `lib/retrieval.py` — hybrid retrieval combining vector and FTS5 via score-based merge
+- `POST /chat` — grounded chat over the corpus with cited responses (FastAPI at repo root)
+- `/chat` route in the portal — chat UI with source list and match_type badges
+- `claims` and `claim_sources` schema stubs — populated in Phase F
 - Migration system — versioned forward-only SQL migrations under `scripts/migrations/`
-- 20-question evaluation set with retrieval quality gate
-- New env vars: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `EVO_LLM_PROVIDER`, `EVO_EMBED_MODEL`, `EVO_CHUNK_SIZE`, `EVO_CHUNK_OVERLAP`
-- New tests: 20+ pytest, 15+ vitest
+- 10-question eval set with retrieval quality gate (≥8/10)
+- New env vars: `AWS_PROFILE`, `AWS_REGION`, `EVO_LLM_PROVIDER`, `EVO_CHUNK_SIZE`, `EVO_CHUNK_OVERLAP`
+- 84 pytest tests, 4 vitest tests
 
 ### Changed
 

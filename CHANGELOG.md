@@ -17,10 +17,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `scripts/migrate.py` — forward-only migration runner with backup enforcement and sqlite-vec loading
 - `lib/chunker.py` — sentence-boundary-respecting text splitter (`chunk_size=800`, `overlap=100`); trafilatura extraction with BS4 fallback
 - `scripts/ingest.py` patched — `chunk_and_store()` runs automatically on every artifact ingest; re-ingest is idempotent
-- `lib/provider.py` — `Provider` protocol with `AnthropicProvider` (chat) and `OpenAIProvider` (embeddings); `get_provider()` factory; provider swappable via `EVO_LLM_PROVIDER` env var; `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` for proxy/OpenRouter support
+- `lib/provider.py` — `Provider` protocol with `BedrockProvider` (boto3); Claude Sonnet 4.6 for chat, Cohere Embed v4 at 1024 dims for embeddings; `get_provider()` factory; provider swappable via `EVO_LLM_PROVIDER` env var (default `bedrock`)
 - `scripts/embed.py` — incremental (default) and rebuild embed pipeline; batch size 64; exponential backoff on rate limits; progress output
-- `lib/retrieval.py` — `fts_search` (BM25 over FTS5), `vec_search` (sqlite-vec cosine), `hybrid_search` (ThreadPoolExecutor merge, dedup by chunk_id, `match_type` tagging)
-- `chat_server.py` — FastAPI server on `EVO_CHAT_PORT` (default 8765); `POST /chat` embeds query → hybrid retrieval → Anthropic generation → answer + sources; `GET /health` reports corpus stats; DB opened once at startup via lifespan
+- `lib/retrieval.py` — `fts_search` (BM25 over FTS5), `vec_search` (sqlite-vec cosine), `hybrid_search` (sequential merge, dedup by chunk_id, `match_type` tagging)
+- `chat_server.py` — FastAPI server on `EVO_CHAT_PORT` (default 8765); `POST /chat` embeds query → hybrid retrieval → Bedrock generation → answer + sources; `GET /health` reports corpus stats; DB opened once at startup via lifespan
 - `portal/lib/chat.ts` — typed chat client (`ChatRequest`, `ChatSource`, `ChatResponse`); throws on non-200 with error passthrough
 - `portal/app/chat/page.tsx` — chat UI: query input, answer prose, source list with `match_type` badges and scores; dark/light theme aware
 - `scripts/eval.py` — 10-question retrieval smoke test; exits 0 if ≥8/10 questions return at least one result; retrieval-only (no generation cost)
@@ -39,17 +39,19 @@ uvicorn chat_server:app --port 8765    # start chat server
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `OPENAI_API_KEY` | — | Required for embeddings |
-| `ANTHROPIC_API_KEY` | — | Required for chat generation |
-| `EVO_LLM_PROVIDER` | `anthropic` | Select chat provider |
-| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Override for OpenRouter/proxy |
-| `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` | Override for proxy |
+| `AWS_PROFILE` | — | AWS credentials profile for Bedrock access |
+| `AWS_REGION` | `us-east-1` | AWS region for Bedrock API calls |
+| `EVO_LLM_PROVIDER` | `bedrock` | Select LLM provider (currently only `bedrock`) |
 | `EVO_CHAT_PORT` | `8765` | FastAPI server port |
 
 ### Tests
 
-- 86 Python tests passing (44 Phase A/B + 42 Phase C), 2 skipped behind `RUN_LIVE_LLM=1`
-- Portal build green; 4 new bun tests for chat client
+- 84 Python tests passing, 2 skipped behind `RUN_LIVE_LLM=1`
+- Portal: 4 vitest tests pass (Phase C chat client); 4 pre-existing Phase B tests have `vi.hoisted` compatibility errors — fix in flight as v0.2.0.1 patch
+
+### Post-release notes
+
+Post-release commits `59989c0` and `87a8fe2` replaced the original Anthropic + OpenAI provider implementation with Bedrock-only (boto3). This changelog reflects what's actually in the codebase after those commits landed on main.
 
 ---
 
