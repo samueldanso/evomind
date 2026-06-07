@@ -106,7 +106,7 @@ cd portal && bun test && bun run build
 ## Structure decisions (locked)
 
 - `agents/` goes inside `core/agents/` when Phase D creates it — not top-level
-- `server.py` → `server/` with `routes/`, `middleware/`, `config.py`, `utils/` when `/agent` route lands in Phase D — that's the threshold
+- `server.py` → `server/` with `routes/`, `config.py`, `utils.py` when `/agent` route lands in Phase D — that's the threshold. `middleware/` promoted to its own dir only when 2+ middleware concerns exist (CORS alone stays inline).
 - No phantom files — only create files in the phase that needs them
 - Phase D UI: agent invocation is the home page (`/`). Artifact grid moves to `/kb`. Chat at `/chat`. Run history at `/runs`.
 
