@@ -104,6 +104,12 @@ cd portal && bun test && bun run build
 - Run `uv run pytest && cd portal && bun test && bun run build` before every commit
 - Every phase ships a tagged release with a complete CHANGELOG entry
 
+## Structure decisions (locked)
+
+- `agents/` goes inside `core/agents/` when Phase D creates it — not top-level
+- `server.py` → `server/` with `routes/`, `middleware/`, `config.py`, `utils/` when `/agent` route lands in Phase D — that's the threshold
+- No phantom files — only create files in the phase that needs them
+
 ## Working agreement
 
 - **Samuel** — Product Owner. Approves vision changes, phase reordering, public-API changes.
