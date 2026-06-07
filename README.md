@@ -6,7 +6,7 @@ EvoResearch is an agent-first learning platform. You direct agents to go deep on
 
 ## Architecture
 
-EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it that turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
+EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it tåhat turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
 
 ```
                        ┌─────────────────────────────┐
@@ -97,13 +97,13 @@ core/                     # harness — platform primitives
 │   ├── db.py             #   shared DB helpers
 │   ├── retrieval.py      #   hybrid FTS5 + vec search
 │   └── chunker.py        #   sentence-boundary splitter
+├── agents/               #   🟡 Phase D — agent definitions
 ├── runtime/              #   🟡 Phase D — agent execution loop
 ├── tools/                #   🟡 Phase D — tool interface
 ├── prompts/              #   🟡 Phase D — skill instruction sets
 └── governance/           #   🟡 Phase D — audit + allowlist
 
-agents/                   # 🟡 Phase D — product layer (what agents DO)
-server.py                 # FastAPI — /chat + /agent (Phase D)
+server.py                 # FastAPI — /chat (→ server/ in Phase D)
 scripts/                  # CLI tools (ingest, embed, eval, migrate)
 tests/                    # pytest suite (84 passing)
 portal/                   # Next.js frontend
