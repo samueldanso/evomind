@@ -11,6 +11,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.3.0] - 2026-06-08
 
+### Fixed — Post-release patches (live E2E T8)
+
+- `f09b3a2` fix(portal): force light background on artifact iframe to prevent black render
+- `fb16b3b` fix(agents): strip HTML tags from research summary before storing
+- `aefef6a` fix(portal): pre-fill topic from slug when navigating via "Teach me this"
+- `34c264a` feat(tools): embed new chunks inline after ingest for immediate retrieval
+
+### Notes
+
+Teaching Agent ships as non-interactive (auto-advance 3 turns) in this release. Interactive session UI (`teach-session.tsx`, real `/message` polling loop, `paused_awaiting_input` state machine) is deferred to v0.3.1.
+
+---
+
 ### Added — Phase D: Agent Foundation
 
 - `scripts/migrations/003_phase_d.sql` — `agent_runs` table with indexes for status and agent_type queries
