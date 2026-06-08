@@ -6,7 +6,7 @@ export function ArtifactViewer({ html }: { html: string }) {
       srcDoc={html}
       sandbox="allow-scripts"
       className="w-full rounded-lg border-0"
-      style={{ height: "100vh", minHeight: "800px" }}
+      style={{ height: "100vh", minHeight: "800px", backgroundColor: "white", colorScheme: "light" }}
       title="Artifact content"
     />
   );
