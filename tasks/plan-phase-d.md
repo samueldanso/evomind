@@ -583,6 +583,10 @@ Evo runs this autonomously after T7 passes:
 
 ## Post-Phase-D backlog (logged, not actioned yet)
 
+**cost_usd always 0.0** (T4 audit, Samuel 2026-06-08) — `generate.py` hardcodes `cost_usd: 0.0`. Bedrock's `invoke_model` response includes `usage.inputTokens` and `usage.outputTokens`. Wire through `provider.chat()` return value → `generate` tool → `call_tool` accumulator in Phase G (or earlier if cost display is needed in portal). Action: add `usage` dict to `ChatResponse`; update `generate` tool to read it; accumulate in `loop.py`.
+
+**Migration not auto-applied** (T4 audit, Samuel 2026-06-08) — `open_db()` doesn't run pending migrations. Fixed in T5 (Part 5, Fix 2). Tracking here as resolved-in-T5.
+
 **Phase E — Skill file YAML frontmatter** (T3 audit note, Samuel 2026-06-08)
 
 `core/prompts/research_wiki.md` and `core/prompts/teach_me.md` are functional but lack YAML frontmatter. Agent platforms (Claude Code, Hermes, Cursor) use self-describing skill files with `name`, `description`, `version`, `metadata` front-matter. When Phase E portability work ships, `templates.py` should parse frontmatter + body separately. This is a one-task refactor — no architectural change.
