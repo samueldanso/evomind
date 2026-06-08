@@ -43,7 +43,8 @@ def run_research_agent(task: ResearchTask, call_tool: Callable[[str, dict], dict
 
     # Step 4: Ingest artifact into KB
     slug = re.sub(r"[^a-z0-9-]", "", task.topic.lower().replace(" ", "-"))[:60]
-    summary = notes[:500]
+    plain_notes = re.sub(r"<[^>]+>", "", notes)
+    summary = plain_notes[:300].strip()
 
     ingest_out = call_tool("ingest", {
         "title": task.topic,
