@@ -29,9 +29,13 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy scripts/ core/ server.py
+        env:
+          EVO_RESEARCH_STORE: /tmp/evo-test-store
+        run: uv run mypy scripts/ core/ server/
 
       - name: Run tests
+        env:
+          EVO_RESEARCH_STORE: /tmp/evo-test-store
         run: uv run pytest -v
 
   portal:
