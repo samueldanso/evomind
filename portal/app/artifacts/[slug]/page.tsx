@@ -46,10 +46,10 @@ export default async function ArtifactPage({ params }: { params: Promise<{ slug:
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <nav className="mb-6">
           <Link
-            href="/"
+            href="/kb"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Research
+            ← Knowledge Base
           </Link>
         </nav>
 
@@ -62,6 +62,16 @@ export default async function ArtifactPage({ params }: { params: Promise<{ slug:
                 {tag}
               </Badge>
             ))}
+          </div>
+          <div className="mt-4">
+            <Link href={`/?task=teach&slug=${artifact.slug}`}>
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+              >
+                Teach me this &rarr;
+              </button>
+            </Link>
           </div>
         </header>
 

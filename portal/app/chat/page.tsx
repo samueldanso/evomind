@@ -38,9 +38,7 @@ export default function ChatPage() {
       <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Research Chat</h1>
-          <p className="mt-1 text-muted-foreground">
-            Ask questions grounded in your research corpus
-          </p>
+          <p className="mt-1 text-muted-foreground">Query what agents built.</p>
         </header>
 
         <form onSubmit={handleSubmit} className="flex gap-2">
