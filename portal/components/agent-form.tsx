@@ -4,8 +4,29 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { dispatchAgent } from "@/lib/agent-client";
-import type { AgentResponse } from "@/lib/agent-client";
+import type { AgentResponse, AgentRunData } from "@/lib/agent-client";
 import { RunStatus } from "./run-status";
+import { TeachSession } from "./teach-session";
+
+function getTeachRun(result: AgentResponse): AgentRunData | null {
+  const teachRun = result.teach_run;
+  if (teachRun && (teachRun.status === "paused_awaiting_input" || teachRun.status === "running")) {
+    return teachRun;
+  }
+  const run = result.run;
+  if (run.agent_type === "teaching_agent" && (run.status === "paused_awaiting_input" || run.status === "running")) {
+    return run;
+  }
+  return null;
+}
+
+function getInitialReply(run: AgentRunData): string | undefined {
+  if (run.session_log && run.session_log.length > 0) {
+    const first = run.session_log.find((m) => m.role === "assistant");
+    return first?.content;
+  }
+  return undefined;
+}
 
 export function AgentForm() {
   const searchParams = useSearchParams();
@@ -58,6 +79,23 @@ export function AgentForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  const activeTeachRun = result ? getTeachRun(result) : null;
+
+  if (activeTeachRun) {
+    return (
+      <div className="space-y-4">
+        {result && result.run.agent_type === "research_agent" && (
+          <RunStatus response={{ run: result.run, teach_run: null }} />
+        )}
+        <TeachSession
+          runId={activeTeachRun.id}
+          topic={topic}
+          initialReply={getInitialReply(activeTeachRun)}
+        />
+      </div>
+    );
   }
 
   return (
