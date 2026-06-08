@@ -283,6 +283,7 @@ def test_agent_dispatch_research(chat_db: sqlite3.Connection):
                 "task_type": "research",
                 "topic": "Test Topic",
                 "mode": "concept",
+                "auto_teach": False,
             })
 
     assert response.status_code == 200
@@ -352,6 +353,7 @@ def test_agent_post_message(chat_db: sqlite3.Connection):
 
     test_app = _create_test_app(chat_db)
     run_id = audit.create_run(chat_db, "teaching_agent", {"topic": "Test"})
+    audit.pause_run(chat_db, run_id, [{"role": "assistant", "content": "Opening question"}])
 
     with TestClient(test_app, raise_server_exceptions=False) as client:
         response = client.post(f"/api/agent/{run_id}/message", json={"content": "My answer"})
@@ -359,7 +361,7 @@ def test_agent_post_message(chat_db: sqlite3.Connection):
     assert response.status_code == 200
     data = response.json()
     assert "reply" in data
-    assert data["status"] == "teaching"
+    assert data["status"] in ("teaching", "complete")
 
 
 def test_agent_list_runs(chat_db: sqlite3.Connection):

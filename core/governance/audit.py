@@ -61,6 +61,24 @@ def fail_run(
     db.commit()
 
 
+def pause_run(db: sqlite3.Connection, run_id: int, session_log: list[dict]) -> None:
+    """Pause a teaching run awaiting user input."""
+    db.execute(
+        "UPDATE agent_runs SET status = 'paused_awaiting_input', session_log = ? WHERE id = ?",
+        (json.dumps(session_log), run_id),
+    )
+    db.commit()
+
+
+def resume_run(db: sqlite3.Connection, run_id: int) -> None:
+    """Resume a paused run back to running status."""
+    db.execute(
+        "UPDATE agent_runs SET status = 'running' WHERE id = ?",
+        (run_id,),
+    )
+    db.commit()
+
+
 def get_run(db: sqlite3.Connection, run_id: int) -> dict | None:
     """Fetch a single run by ID. Returns dict or None if not found."""
     db.row_factory = sqlite3.Row
@@ -73,6 +91,8 @@ def get_run(db: sqlite3.Connection, run_id: int) -> dict | None:
         result["output"] = json.loads(result["output"])
     if result["task_input"]:
         result["task_input"] = json.loads(result["task_input"])
+    if result.get("session_log"):
+        result["session_log"] = json.loads(result["session_log"])
     return result
 
 
@@ -90,5 +110,7 @@ def list_runs(db: sqlite3.Connection, limit: int = 20) -> list[dict]:
             r["output"] = json.loads(r["output"])
         if r["task_input"]:
             r["task_input"] = json.loads(r["task_input"])
+        if r.get("session_log"):
+            r["session_log"] = json.loads(r["session_log"])
         results.append(r)
     return results

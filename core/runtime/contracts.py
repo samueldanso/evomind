@@ -40,7 +40,7 @@ class AgentRun:
     id: int | None
     agent_type: str
     task_input: dict
-    status: Literal["running", "complete", "failed"]
+    status: Literal["running", "complete", "failed", "paused_awaiting_input"]
     output: dict | None
     error: str | None
     tool_calls: list[ToolCallRecord]
@@ -48,6 +48,7 @@ class AgentRun:
     cost_usd: float
     started_at: str
     finished_at: str | None
+    session_log: list[dict] | None = None
 
 
 def validate_task(task: ResearchTask | TeachTask) -> None:

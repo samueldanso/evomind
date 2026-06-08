@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import struct
 import sqlite3
 from datetime import UTC, datetime
@@ -12,6 +13,22 @@ from core.llm.bedrock import BedrockProvider
 from core.tools.base import Tool
 
 EMBED_BATCH_SIZE = 64
+
+LIGHT_OVERRIDE = (
+    "<style>"
+    "html,body{background:#fff!important;color:#111!important;}"
+    "* {color-scheme: light!important;}"
+    "</style>"
+)
+
+
+def inject_light_css(html: str) -> str:
+    """Inject a light-mode CSS override into HTML content."""
+    head_match = re.search(r"<head[^>]*>", html, re.IGNORECASE)
+    if head_match:
+        pos = head_match.end()
+        return html[:pos] + LIGHT_OVERRIDE + html[pos:]
+    return LIGHT_OVERRIDE + html
 
 
 def _embed_new_chunks(db: sqlite3.Connection, artifact_id: int, provider: BedrockProvider) -> int:
@@ -63,7 +80,7 @@ def build_ingest_tool(db: sqlite3.Connection, vault_path: Path) -> Tool:
     def execute(input: dict) -> dict:
         slug = input["slug"]
         title = input["title"]
-        html_content = input["html_content"]
+        html_content = inject_light_css(input["html_content"])
         summary = input["summary"]
         tags = ",".join(input.get("tags", []))
 
