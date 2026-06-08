@@ -1,20 +1,18 @@
-"""FastAPI chat server — retrieval + LLM chat over the EvoResearch corpus."""
+"""Chat and health routes — moved verbatim from server.py."""
 
 from __future__ import annotations
 
 import contextlib
-import os
 import sqlite3
-from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from core.llm.bedrock import BedrockProvider, ChatMessage
-from core.memory.db import default_db_path, load_sqlite_vec, open_db
 from core.memory.retrieval import hybrid_search
+
+router = APIRouter()
 
 
 class ChatRequest(BaseModel):
@@ -22,43 +20,7 @@ class ChatRequest(BaseModel):
     limit: int = 5
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    db_path = default_db_path()
-    try:
-        conn = open_db(db_path)
-        load_sqlite_vec(conn)
-    except Exception as exc:
-        raise RuntimeError(f"Failed to open database: {exc}") from exc
-
-    try:
-        provider = BedrockProvider()
-    except ValueError as exc:
-        app.state.startup_error = f"Provider init failed: {exc}"
-        app.state.db = None
-        app.state.provider = None
-        yield
-        return
-
-    app.state.db = conn
-    app.state.provider = provider
-    app.state.startup_error = None
-    app.state.db_path = str(db_path)
-    yield
-    conn.close()
-
-
-app = FastAPI(lifespan=lifespan)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_methods=["POST", "OPTIONS"],
-    allow_headers=["content-type"],
-)
-
-
-@app.get("/health")
+@router.get("/health")
 async def health(request: Request):
     if getattr(request.app.state, "startup_error", None):
         return JSONResponse(
@@ -80,7 +42,7 @@ async def health(request: Request):
     }
 
 
-@app.post("/chat")
+@router.post("/chat")
 async def chat(request: Request, body: ChatRequest):
     if getattr(request.app.state, "startup_error", None):
         return JSONResponse(
@@ -124,9 +86,3 @@ async def chat(request: Request, body: ChatRequest):
     ]
 
     return {"answer": response.content, "sources": sources}
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("EVO_CHAT_PORT", "8765")))
