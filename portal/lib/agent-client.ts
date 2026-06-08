@@ -35,8 +35,12 @@ export type MessageResponse = {
 	status: "teaching" | "complete" | "failed";
 };
 
+export type RunHistoryItem = AgentRunData & {
+	task_input: Record<string, unknown>;
+};
+
 export type RunsResponse = {
-	runs: AgentRunData[];
+	runs: RunHistoryItem[];
 };
 
 export async function dispatchAgent(body: AgentRequest): Promise<AgentResponse> {
