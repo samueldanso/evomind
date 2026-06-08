@@ -9,6 +9,30 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.3.1] - 2026-06-08
+
+### Fixed
+
+- Research artifacts now render with white background in KB viewer (light CSS override injected at ingest time)
+- `scripts/fix_summaries.py` — one-time retrofix strips raw HTML/markdown fences from existing artifact summaries
+
+### Added — Phase D.1: Interactive Teaching Session
+
+- `scripts/migrations/004_phase_d1.sql` — `session_log` TEXT column on `agent_runs`
+- `core/governance/audit.py` — `pause_run()`, `resume_run()`, `get_run()` now returns `session_log`
+- `core/runtime/contracts.py` — `paused_awaiting_input` status, `session_log` field on `AgentRun`
+- `core/agents/teaching.py` — `run_teaching_turn()` with per-turn pause/resume logic
+- `server/routes/agent.py` — real `POST /{run_id}/message` handler replaces stub; teaching dispatch starts interactive session
+- `portal/components/teach-session.tsx` — conversation thread UI with 2s polling, input box, typing indicator
+- `portal/components/run-status.tsx` — wires `TeachSession` when teaching run is `paused_awaiting_input`
+
+### Tests
+
+- 153 Python tests passing (+16 new: CSS inject, summary strip, audit pause/resume, teaching turn), 2 skipped behind `RUN_LIVE_LLM=1`
+- Portal: 48 tests passing (+7 new: message proxy route, teach session API interactions)
+
+---
+
 ## [0.3.0] - 2026-06-08
 
 ### Fixed — Post-release patches (live E2E T8)
@@ -133,7 +157,8 @@ Post-release commits `59989c0` and `87a8fe2` replaced the original Anthropic + O
 - 33 vitest tests covering all four API route handlers
 - CI: GitHub Actions gates on `pytest`, `bun run test`, and `bun run build`
 
-[Unreleased]: https://github.com/samueldanso/evo-research/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/samueldanso/evo-research/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/samueldanso/evo-research/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/samueldanso/evo-research/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/samueldanso/evo-research/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/samueldanso/evo-research/releases/tag/v0.1.0
