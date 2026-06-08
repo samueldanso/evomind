@@ -31,7 +31,7 @@ EvoResearch is an **agent-first learning platform**. You direct agents to go dee
   - `core/tools/` — tool interface (Phase D)
   - `core/prompts/` — skill instruction sets (Phase D)
   - `core/governance/` — audit + allowlist (Phase D)
-- **Server:** `server.py` — FastAPI (`/chat`, `/agent` in Phase D)
+- **Server:** `server/` — FastAPI package (`/chat`, `/api/agent`)
 - **Portal:** `portal/` (Next.js 16)
 - **Scripts:** `scripts/` — `ingest.py`, `embed.py`, agent scripts (Phase D)
 - **Migrations:** `scripts/migrations/` — versioned forward-only SQL
@@ -41,13 +41,9 @@ EvoResearch is an **agent-first learning platform**. You direct agents to go dee
 **Shipped:**
 - v0.1.0 — Phases A + B (ingest pipeline + local portal)
 - **v0.2.0 — Phase C: Intelligence Substrate** — provider abstraction (Bedrock-only: Claude Sonnet 4.6 + Cohere Embed v4), hybrid retrieval (vec + FTS + score-based merge), embedding pipeline, eval harness (gate 8/10, currently 10/10), chat surface, migration 002 (chunks + embeddings + claims stub), 84 tests passing + 2 skipped
+- **v0.3.0 — Phase D: Agent Foundation** — tool interface wrapping v0.2.0 code, execution loop, research + teaching agents, auto-chain dispatcher, governance (allowlist + audit), server restructure, agent API, portal agent UI, 137 tests + 41 portal tests
 
-**Active:**
-- **Phase D — Agent Foundation** — target release v0.3.0
-- Detailed spec at [specs/phase-d-agent-foundation.md](./specs/phase-d-agent-foundation.md)
-- Patch in flight: v0.2.0.1 — markdown rendering fix in chat surface, vitest pre-existing failures
-
-**Next after Phase D:**
+**Next:**
 - E — Multi-source Ingest (v0.4.0)
 - F — Knowledge Quality / claims activation (v0.5.0)
 - G — Agent Expansion + async runtime + web_search (v0.6.0)
@@ -69,9 +65,9 @@ cd portal && bun dev
 # Phase C (shipped, v0.2.0) — embeddings + chat
 uv run scripts/embed.py --rebuild
 uv run scripts/embed.py --incremental
-uvicorn server:app --port 8765  # FastAPI server (file at repo root)
+uvicorn server:app --port 8765  # FastAPI server (server/ package)
 
-# Phase D (coming in v0.3.0) — agent runtime
+# Phase D (shipped, v0.3.0) — agent runtime
 uv run scripts/agent.py --task research --topic "..." --mode concept
 uv run scripts/agent.py --task teach --topic "..."
 

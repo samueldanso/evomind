@@ -9,6 +9,47 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.3.0] - 2026-06-08
+
+### Added — Phase D: Agent Foundation
+
+- `scripts/migrations/003_phase_d.sql` — `agent_runs` table with indexes for status and agent_type queries
+- `core/runtime/contracts.py` — typed task contracts (`ResearchTask`, `TeachTask`, `ToolCallRecord`, `AgentRun`) with `validate_task()` dispatch-time validation
+- `core/runtime/loop.py` — `run_agent()` execution loop with tool-call closure, allowlist enforcement, and audit recording
+- `core/runtime/dispatcher.py` — `dispatch()` with auto-chain (Research → Teaching by default)
+- `core/governance/allowlist.py` — per-agent tool allowlists with `PermissionError` on violation
+- `core/governance/audit.py` — `create_run`, `record_tool_call`, `complete_run`, `fail_run`, `get_run`, `list_runs` — full agent_runs lifecycle
+- `core/tools/base.py` — `Tool` dataclass and `ToolRegistry` container
+- `core/tools/retrieve.py` — wraps `hybrid_search` as a tool closure
+- `core/tools/generate.py` — wraps `provider.chat()` as a tool closure
+- `core/tools/ingest.py` — wraps artifact save + chunk_and_store as a tool closure
+- `core/tools/web_search.py` — stub returning empty results (real implementation Phase G)
+- `core/agents/research.py` — research agent: retrieve → generate notes → produce HTML → ingest (4 tool calls)
+- `core/agents/teaching.py` — teaching agent: retrieve → opening → multi-turn → connections → checklist → ingest
+- `core/prompts/templates.py` — system prompts and instruction templates for research and teaching agents
+- `scripts/agent.py` — CLI entry point: `--task research|teach --topic "..." --mode concept|tool|company`
+- `server/` — FastAPI restructured from single file to package with `routes/chat.py` and `routes/agent.py`
+- `server/routes/agent.py` — `POST /api/agent`, `GET /api/agent/runs`, `GET /api/agent/{run_id}`, `POST /api/agent/{run_id}/message`
+- Portal: agent invocation form as home page (`/`), artifact grid moved to `/kb`, run history at `/runs`
+- `portal/components/agent-form.tsx` — task type, mode, slug, context, auto-teach toggle
+- `portal/components/run-status.tsx` — run result display with status badges and artifact links
+- `portal/components/run-history.tsx` — recent runs list with type/status/topic/cost
+- `portal/lib/agent-client.ts` — typed API client for agent dispatch, run fetch, message send, run listing
+
+### New commands
+
+```bash
+uv run scripts/agent.py --task research --topic "..." --mode concept
+uv run scripts/agent.py --task teach --topic "..."
+```
+
+### Tests
+
+- 137 Python tests passing, 2 skipped behind `RUN_LIVE_LLM=1`
+- Portal: 41 vitest tests pass (agent client, proxy routes, chat client, search/artifact routes)
+
+---
+
 ## [0.2.0] - 2026-05-29
 
 ### Added — Phase C: Intelligence Layer
@@ -79,6 +120,7 @@ Post-release commits `59989c0` and `87a8fe2` replaced the original Anthropic + O
 - 33 vitest tests covering all four API route handlers
 - CI: GitHub Actions gates on `pytest`, `bun run test`, and `bun run build`
 
-[Unreleased]: https://github.com/samueldanso/evo-research/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/samueldanso/evo-research/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/samueldanso/evo-research/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/samueldanso/evo-research/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/samueldanso/evo-research/releases/tag/v0.1.0

@@ -16,31 +16,31 @@ EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The
                        └──────────────┬──────────────┘
                                       │
   ┌───────────────────┐   ┌───────────▼───────────┐   ┌───────────────────┐
-  │ PROMPT         🟡 │◄─►│     Inner Loop     🟡 │◄─►│ TOOLS & SKILLS    │
-  │ core/prompts/  🟡 │   │  ┌─────────────────┐  │   │ core/tools/    🟡 │
+  │ PROMPT         ✅ │◄─►│     Inner Loop     ✅ │◄─►│ TOOLS & SKILLS    │
+  │ core/prompts/  ✅ │   │  ┌─────────────────┐  │   │ core/tools/    ✅ │
   │ research-wiki     │   │  │ Context         │  │   │  retrieve      ✅ │
   │ teach-me          │   │  │ Observe         │  │   │  generate      ✅ │
   └───────────────────┘   │  │ Reason          │  │   │  ingest        ✅ │
                           │  │ Act             │  │   │  web_search    🔵 │
   ┌───────────────────┐   │  └─────────────────┘  │   └───────────────────┘
-  │ ORCHESTRATION  🟡 │   │  core/runtime/     🟡 │
+  │ ORCHESTRATION  ✅ │   │  core/runtime/     ✅ │
   │ Agent dispatcher  │   └───────────┬───────────┘   ┌───────────────────┐
   │ Research→Teaching │               │               │ SECURITY & AUDIT  │
-  │ auto-chain        │               │               │ Tool allowlist 🟡 │
-  └───────────────────┘               │               │ agent_runs log 🟡 │
-                                      ▼               │ cost tracking  🟡 │
+  │ auto-chain        │               │               │ Tool allowlist ✅ │
+  └───────────────────┘               │               │ agent_runs log ✅ │
+                                      ▼               │ cost tracking  ✅ │
                        ┌─────────────────────────────┐└───────────────────┘
                        │ MEMORY                      │
                        │  artifacts             ✅   │
                        │  chunks                ✅   │
                        │  embeddings            ✅   │
                        │  claims (stub)         ✅   │
-                       │  agent_runs            🟡   │
-                       │  mastery checklists    🟡   │
+                       │  agent_runs            ✅   │
+                       │  mastery checklists    ✅   │
                        └─────────────────────────────┘
 ```
 
-**Status:** ✅ shipped in v0.2.0 (intelligence substrate) · 🟡 lands in v0.3.0 (Phase D — agent runtime) · 🔵 later phases
+**Status:** ✅ shipped through v0.3.0 (agent foundation) · 🔵 later phases
 
 Phase D wraps the existing v0.2.0 retrieval pipeline and Provider abstraction under Tool interfaces. No retrieval rebuild, no provider rewrite.
 
@@ -56,7 +56,11 @@ uv run scripts/ingest.py \
 # Embed chunks for retrieval
 uv run scripts/embed.py --incremental
 
-# Start the chat server
+# Run an agent
+uv run scripts/agent.py --task research --topic "KV Cache" --mode concept
+uv run scripts/agent.py --task teach --topic "KV Cache"
+
+# Start the server
 uvicorn server:app --port 8765
 
 # Run the portal
@@ -97,16 +101,18 @@ core/                     # harness — platform primitives
 │   ├── db.py             #   shared DB helpers
 │   ├── retrieval.py      #   hybrid FTS5 + vec search
 │   └── chunker.py        #   sentence-boundary splitter
-├── agents/               #   🟡 Phase D — agent definitions
-├── runtime/              #   🟡 Phase D — agent execution loop
-├── tools/                #   🟡 Phase D — tool interface
-├── prompts/              #   🟡 Phase D — skill instruction sets
-└── governance/           #   🟡 Phase D — audit + allowlist
+├── agents/               #   agent definitions (research, teaching)
+├── runtime/              #   execution loop, dispatcher, contracts
+├── tools/                #   tool interface (retrieve, generate, ingest)
+├── prompts/              #   skill instruction templates
+└── governance/           #   audit + allowlist
 
-server.py                 # FastAPI — /chat (→ server/ in Phase D)
-scripts/                  # CLI tools (ingest, embed, eval, migrate)
-tests/                    # pytest suite (84 passing)
-portal/                   # Next.js frontend
+server/                   # FastAPI package — /chat, /api/agent
+├── __init__.py           #   app factory, lifespan, CORS
+└── routes/               #   route modules (chat, agent)
+scripts/                  # CLI tools (ingest, embed, eval, migrate, agent)
+tests/                    # pytest suite (137 passing)
+portal/                   # Next.js frontend (41 tests)
 ```
 
 ## Read more
