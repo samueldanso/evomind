@@ -583,6 +583,10 @@ Evo runs this autonomously after T7 passes:
 
 ## Post-Phase-D backlog (logged, not actioned yet)
 
+**server/utils.py unused** (T5 audit, Samuel 2026-06-08) — `get_db()`, `get_provider()` helpers exist but routes access `request.app.state` directly. Refactor routes to use helpers OR remove utils.py. Low priority — Phase E/F cleanup.
+
+**Synchronous dispatch** (T5 audit, Samuel 2026-06-08) — `POST /api/agent` blocks until both agents complete (including auto-chain). Fine for Phase D local tool. Phase G async runtime: return `run_id` immediately, client polls for status. Non-blocking now.
+
 **cost_usd always 0.0** (T4 audit, Samuel 2026-06-08) — `generate.py` hardcodes `cost_usd: 0.0`. Bedrock's `invoke_model` response includes `usage.inputTokens` and `usage.outputTokens`. Wire through `provider.chat()` return value → `generate` tool → `call_tool` accumulator in Phase G (or earlier if cost display is needed in portal). Action: add `usage` dict to `ChatResponse`; update `generate` tool to read it; accumulate in `loop.py`.
 
 **Migration not auto-applied** (T4 audit, Samuel 2026-06-08) — `open_db()` doesn't run pending migrations. Fixed in T5 (Part 5, Fix 2). Tracking here as resolved-in-T5.
