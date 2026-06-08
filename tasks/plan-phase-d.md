@@ -528,6 +528,16 @@ CI check: `.github/workflows/ci.yml` — confirm new test files are included. If
 
 `README.md` — add Phase D commands + update architecture diagram status from 🟡 to ✅ for Phase D components.
 
+`.conductor/settings.toml` — create placeholder (committed to repo). Conductor is deferred to post-Phase D but the config file is committed now so workspace config is ready when adoption decision is made. Minimal content:
+```toml
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "uv sync && cd portal && bun install"
+run = "uv run python -m server.main --port $CONDUCTOR_PORT"
+run_mode = "concurrent"
+```
+
 ---
 
 ### T8 — Ship (Evo-owned, not Claude Code)
@@ -568,6 +578,16 @@ Evo runs this autonomously after T7 passes:
 - Do not create phantom files — only create files the phase actually needs
 - Do not commit with phase-tracking messages ("T1 complete", "Phase D done") — describe what changed
 - Do not make web API calls outside of the LLM provider (Bedrock) — no telemetry, no analytics
+
+---
+
+## Post-Phase-D backlog (logged, not actioned yet)
+
+**Phase E — Skill file YAML frontmatter** (T3 audit note, Samuel 2026-06-08)
+
+`core/prompts/research_wiki.md` and `core/prompts/teach_me.md` are functional but lack YAML frontmatter. Agent platforms (Claude Code, Hermes, Cursor) use self-describing skill files with `name`, `description`, `version`, `metadata` front-matter. When Phase E portability work ships, `templates.py` should parse frontmatter + body separately. This is a one-task refactor — no architectural change.
+
+Action when scheduled: add frontmatter to both skill files + update `templates.py` `_load()` to strip frontmatter before returning body.
 
 ---
 
