@@ -24,7 +24,15 @@ export function AgentForm() {
     const taskParam = searchParams.get("task");
     const slugParam = searchParams.get("slug");
     if (taskParam === "teach") setTaskType("teach");
-    if (slugParam) setArtifactSlug(slugParam);
+    if (slugParam) {
+      setArtifactSlug(slugParam);
+      setTopic((prev) => {
+        if (prev) return prev;
+        return slugParam
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+      });
+    }
   }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
