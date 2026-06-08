@@ -11,7 +11,7 @@ export type AgentRequest = {
 export type AgentRunData = {
 	id: number;
 	agent_type: string;
-	status: "running" | "complete" | "failed";
+	status: "running" | "complete" | "failed" | "paused_awaiting_input";
 	output: Record<string, unknown> | null;
 	error: string | null;
 	cost_tokens: number;
@@ -19,6 +19,7 @@ export type AgentRunData = {
 	started_at: string;
 	finished_at: string | null;
 	tool_calls: unknown[];
+	session_log?: { role: string; content: string }[] | null;
 };
 
 export type AgentResponse = {
@@ -33,6 +34,7 @@ export type AgentRunResponse = {
 export type MessageResponse = {
 	reply: string;
 	status: "teaching" | "complete" | "failed";
+	session_log_length?: number;
 };
 
 export type RunHistoryItem = AgentRunData & {

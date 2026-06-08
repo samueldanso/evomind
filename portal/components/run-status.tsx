@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { AgentResponse, AgentRunData } from "@/lib/agent-client";
+import { TeachSession } from "@/components/teach-session";
 
 function RunCard({ run, label }: { run: AgentRunData; label: string }) {
   const slug = (
@@ -24,7 +25,7 @@ function RunCard({ run, label }: { run: AgentRunData; label: string }) {
                 : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
           }`}
         >
-          {run.status}
+          {run.status === "paused_awaiting_input" ? "awaiting input" : run.status}
         </span>
         <span className="text-xs text-muted-foreground ml-auto">
           {run.cost_tokens} tokens
@@ -47,12 +48,29 @@ function RunCard({ run, label }: { run: AgentRunData; label: string }) {
   );
 }
 
+function getInitialReply(run: AgentRunData): string | undefined {
+  if (run.session_log && run.session_log.length > 0) {
+    const first = run.session_log.find((m) => m.role === "assistant");
+    return first?.content;
+  }
+  return undefined;
+}
+
 export function RunStatus({ response }: { response: AgentResponse }) {
+  const teachRun = response.teach_run;
+  const showTeachSession =
+    teachRun &&
+    (teachRun.status === "paused_awaiting_input" || teachRun.status === "running");
+
   return (
     <div className="space-y-3">
       <RunCard run={response.run} label="Research" />
-      {response.teach_run && (
-        <RunCard run={response.teach_run} label="Teaching" />
+      {teachRun && !showTeachSession && <RunCard run={teachRun} label="Teaching" />}
+      {showTeachSession && teachRun && (
+        <TeachSession
+          runId={teachRun.id}
+          initialReply={getInitialReply(teachRun)}
+        />
       )}
     </div>
   );
