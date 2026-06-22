@@ -75,7 +75,7 @@ cd portal && bun test && bun run build
 
 Artifacts are stored at:
 ```
-~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/KB/
+~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/
 ├── manifest.db    # SQLite + FTS5 + sqlite-vec
 ├── html/          # Permanent HTML pages
 └── summaries/     # Companion .md notes

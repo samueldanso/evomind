@@ -13,7 +13,6 @@ _DEFAULT_STORE = (
     / "Samuel's Vault"
     / "SamuelOS"
     / "Knowledge"
-    / "KB"
 )
 
 

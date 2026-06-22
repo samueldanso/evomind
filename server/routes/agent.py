@@ -214,7 +214,7 @@ def _build_call_tool(db, provider, request: Request):
     vault_path = Path(os.environ.get(
         "EVO_STORE",
         str(Path.home() / "Library" / "Mobile Documents" / "iCloud~md~obsidian"
-            / "Documents" / "Samuel's Vault" / "SamuelOS" / "Knowledge" / "KB")
+            / "Documents" / "Samuel's Vault" / "SamuelOS" / "Knowledge")
     ))
 
     tools = {

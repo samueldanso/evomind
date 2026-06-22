@@ -20,7 +20,7 @@ Evo is an **agent-first learning platform**. You direct agents to go deep on a t
 
 ## Key paths
 
-- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/KB/`
+- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/`
   - `manifest.db` — SQLite with FTS5 + sqlite-vec
   - `html/` — permanent HTML research pages
   - `summaries/` — companion .md notes

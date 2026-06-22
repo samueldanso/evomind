@@ -17,7 +17,7 @@ MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 DEFAULT_VAULT = (
     Path.home()
     / "Library/Mobile Documents/iCloud~md~obsidian/Documents"
-    / "Samuel's Vault/SamuelOS/Knowledge/KB"
+    / "Samuel's Vault/SamuelOS/Knowledge"
 )
 
 
