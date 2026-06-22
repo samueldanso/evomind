@@ -21,7 +21,7 @@ _DEFAULT_STORE = (
     / "iCloud~md~obsidian"
     / "Documents"
     / "Samuel's Vault"
-    / "HomeOS"
+    / "SamuelOS"
     / "Knowledge"
     / "Research"
 )

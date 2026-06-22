@@ -11,7 +11,7 @@ export function resolveVaultRoot(): string {
         "iCloud~md~obsidian",
         "Documents",
         "Samuel's Vault",
-        "HomeOS",
+        "SamuelOS",
         "Knowledge",
         "Research"
       )

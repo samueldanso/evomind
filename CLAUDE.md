@@ -20,7 +20,7 @@ EvoResearch is an **agent-first learning platform**. You direct agents to go dee
 
 ## Key paths
 
-- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/HomeOS/Knowledge/Research/`
+- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/Research/`
   - `manifest.db` — SQLite with FTS5 + sqlite-vec
   - `html/` — permanent HTML research pages
   - `summaries/` — companion .md notes
