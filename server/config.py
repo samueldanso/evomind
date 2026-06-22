@@ -6,4 +6,4 @@ import os
 
 EVO_CHAT_PORT = int(os.environ.get("EVO_CHAT_PORT", "8765"))
 EVO_TEACH_MAX_TURNS = int(os.environ.get("EVO_TEACH_MAX_TURNS", "20"))
-EVO_RESEARCH_STORE = os.environ.get("EVO_RESEARCH_STORE")
+EVO_STORE = os.environ.get("EVO_STORE")

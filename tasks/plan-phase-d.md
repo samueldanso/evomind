@@ -12,7 +12,7 @@
 
 → **Custom Python execution loop.** No smolagents, no pydantic-ai, no LangGraph.
 
-This is not an implementation shortcut decision. EvoResearch is being built as an AI Platform Engineering portfolio artifact. The engineering thesis — *Agent = LLM + Harness* — requires building the harness. A framework wrapper demonstrates configuration skill, not platform engineering. The loop itself (`core/runtime/loop.py`) is the critical learning path: observe → reason → act, tool dispatch, run logging, error handling, cost accumulation. Every subsequent phase (Fact-Checker, Deepener, Reconciler) slots into this loop without restructuring. Custom keeps the runtime fully auditable, no abstraction tax, no version drift.
+This is not an implementation shortcut decision. Evo is being built as an AI Platform Engineering portfolio artifact. The engineering thesis — *Agent = LLM + Harness* — requires building the harness. A framework wrapper demonstrates configuration skill, not platform engineering. The loop itself (`core/runtime/loop.py`) is the critical learning path: observe → reason → act, tool dispatch, run logging, error handling, cost accumulation. Every subsequent phase (Fact-Checker, Deepener, Reconciler) slots into this loop without restructuring. Custom keeps the runtime fully auditable, no abstraction tax, no version drift.
 
 Dependencies: none new for the loop itself.
 
@@ -334,7 +334,7 @@ Evo runs `uv run scripts/agent.py --task research --topic "vLLM" --mode tool` vi
 ```
 server/
   __init__.py      — exports `app` (FastAPI instance)
-  config.py        — EVO_CHAT_PORT, EVO_TEACH_MAX_TURNS, EVO_RESEARCH_STORE, startup validation
+  config.py        — EVO_CHAT_PORT, EVO_TEACH_MAX_TURNS, EVO_STORE, startup validation
   utils.py         — shared helpers (DB open, provider init)
   routes/
     __init__.py
@@ -472,7 +472,7 @@ Run Phase C eval harness: `uv run scripts/eval.py` — must score 10/10. This is
 
 Run full test suite: `uv run pytest && cd portal && bun test && bun run build` — all must pass. Count: 84+ Python tests (new Phase D tests add to this count), existing vitest tests + new agent.test.ts.
 
-CI check: `.github/workflows/ci.yml` — confirm new test files are included. If any new test requires additional setup (e.g., test DB initialization for agent_runs), update CI accordingly. `EVO_RESEARCH_STORE` must be set to a tmp path in CI.
+CI check: `.github/workflows/ci.yml` — confirm new test files are included. If any new test requires additional setup (e.g., test DB initialization for agent_runs), update CI accordingly. `EVO_STORE` must be set to a tmp path in CI.
 
 **Files to modify:**
 

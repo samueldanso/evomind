@@ -1,5 +1,5 @@
 [project]
-name = "evo-research"
+name = "evo"
 version = "0.1.0"
 description = "Persistent corpus-aware research knowledge system"
 requires-python = ">=3.12"

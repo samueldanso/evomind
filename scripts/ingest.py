@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EvoResearch ingest CLI — save, search, and list research artifacts."""
+"""Evo ingest CLI — save, search, and list research artifacts."""
 
 import argparse
 import json
@@ -23,7 +23,7 @@ _DEFAULT_STORE = (
     / "Samuel's Vault"
     / "SamuelOS"
     / "Knowledge"
-    / "Research"
+    / "KB"
 )
 
 _SCHEMA = """
@@ -95,7 +95,7 @@ class Artifact:
 
 
 def get_store_path() -> Path:
-    env = os.environ.get("EVO_RESEARCH_STORE")
+    env = os.environ.get("EVO_STORE")
     return Path(env) if env else _DEFAULT_STORE
 
 
@@ -278,7 +278,7 @@ def cmd_list(_args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="EvoResearch artifact ingest and query CLI")
+    parser = argparse.ArgumentParser(description="Evo artifact ingest and query CLI")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--html", metavar="PATH", help="Source HTML file to ingest")
     group.add_argument("--search", metavar="QUERY", help="Full-text search query")

@@ -1,4 +1,4 @@
-"""EvoResearch FastAPI server — agent + chat endpoints."""
+"""Evo FastAPI server — agent + chat endpoints."""
 
 from __future__ import annotations
 

@@ -344,7 +344,7 @@ wheels = [
 ]
 
 [[package]]
-name = "evo-research"
+name = "evo"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

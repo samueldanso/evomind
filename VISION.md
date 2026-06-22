@@ -1,4 +1,4 @@
-# EvoResearch — Product Vision
+# Evo — Product Vision
 
 > Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
 
@@ -72,7 +72,7 @@ The loop is the product. Every component exists to serve it.
 
 ## Engineering positioning
 
-EvoResearch is built as an **agent platform product, not a RAG app.**
+Evo is built as an **agent platform product, not a RAG app.**
 
 The distinction:
 
@@ -129,11 +129,11 @@ The intelligence substrate (retrieval, embeddings, provider abstraction, eval ha
 
 ## Architecture reference: Agent = LLM + Harness
 
-EvoResearch's architecture follows the industry-emerging *Agent = LLM + Harness* framework (NVIDIA GTC 2026). An agent is the LLM plus everything around it that makes the LLM useful in a loop: context assembly, the observe-reason-act cycle, memory that persists across runs, tools the agent can call, skills the agent follows, an orchestration layer that dispatches and chains agents, and security/governance that bounds behavior and audits it.
+Evo's architecture follows the industry-emerging *Agent = LLM + Harness* framework (NVIDIA GTC 2026). An agent is the LLM plus everything around it that makes the LLM useful in a loop: context assembly, the observe-reason-act cycle, memory that persists across runs, tools the agent can call, skills the agent follows, an orchestration layer that dispatches and chains agents, and security/governance that bounds behavior and audits it.
 
-EvoResearch's component map:
+Evo's component map:
 
-| Harness component | EvoResearch implementation |
+| Harness component | Evo implementation |
 |---|---|
 | **LLM** | Bedrock — Claude Sonnet 4.6 + Cohere Embed v4 via `core/llm/bedrock.py` |
 | **Context** | Skill prompt + retrieved chunks + task input + tool results, assembled per turn |
@@ -144,7 +144,7 @@ EvoResearch's component map:
 | **Orchestration** | Agent dispatcher + Research → Teaching auto-chain (`core/runtime/`) |
 | **Security & Governance** | Tool allowlist per agent + `agent_runs` audit log + cost tracking |
 
-The "Platform layers" diagram above is EvoResearch's specific instantiation of this framework. The harness components are the universal pattern; the layers diagram is the concrete code organization.
+The "Platform layers" diagram above is Evo's specific instantiation of this framework. The harness components are the universal pattern; the layers diagram is the concrete code organization.
 
 ---
 
@@ -195,7 +195,7 @@ When you go deep on something the job is building durable understanding. Not col
 
 What people use today is a patchwork: browser tabs, ChatGPT for explanation, Notion for notes, their own memory to hold it together. The memory layer is the failure point. Understanding never accumulates. It evaporates.
 
-EvoResearch is the missing memory layer. Agents build it. You direct them. It compounds.
+Evo is the missing memory layer. Agents build it. You direct them. It compounds.
 
 ---
 
@@ -216,9 +216,9 @@ EvoResearch is the missing memory layer. Agents build it. You direct them. It co
 
 ## Positioning
 
-If Hermes is "Cursor for everything you do", EvoResearch is "Cursor for everything you learn."
+If Hermes is "Cursor for everything you do", Evo is "Cursor for everything you learn."
 
-Hermes acts on your tasks. EvoResearch builds your understanding.
+Hermes acts on your tasks. Evo builds your understanding.
 
 ---
 

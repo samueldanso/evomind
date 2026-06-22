@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to EvoResearch are documented here.
+All notable changes to Evo are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -140,7 +140,7 @@ Post-release commits `59989c0` and `87a8fe2` replaced the original Anthropic + O
 - `scripts/ingest.py` — CLI to ingest HTML research artifacts into a SQLite FTS5 manifest
 - SQLite schema: `artifacts` table + `artifacts_fts` virtual table with insert/update/delete triggers
 - Vault layout: `html/` for permanent HTML pages, `summaries/` for companion `.md` notes
-- `EVO_RESEARCH_STORE` env var for vault path override (used by tests and CI)
+- `EVO_STORE` env var for vault path override (used by tests and CI)
 - `--html`, `--search`, `--list` CLI modes
 - 37 pytest tests with 100% coverage of `ingest.py`
 
@@ -157,8 +157,8 @@ Post-release commits `59989c0` and `87a8fe2` replaced the original Anthropic + O
 - 33 vitest tests covering all four API route handlers
 - CI: GitHub Actions gates on `pytest`, `bun run test`, and `bun run build`
 
-[Unreleased]: https://github.com/samueldanso/evo-research/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/samueldanso/evo-research/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/samueldanso/evo-research/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/samueldanso/evo-research/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/samueldanso/evo-research/releases/tag/v0.1.0
+[Unreleased]: https://github.com/samueldanso/evo/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/samueldanso/evo/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/samueldanso/evo/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/samueldanso/evo/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/samueldanso/evo/releases/tag/v0.1.0

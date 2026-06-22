@@ -61,12 +61,12 @@ def _make_artifact(store: Path, html_path: str, **overrides) -> ingest.Artifact:
 
 def test_get_store_path_default():
     path = ingest.get_store_path()
-    assert "Research" in str(path)
+    assert "KB" in str(path)
     assert str(Path.home()) in str(path)
 
 
 def test_get_store_path_env_override(monkeypatch, tmp_path):
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(tmp_path / "custom"))
+    monkeypatch.setenv("EVO_STORE", str(tmp_path / "custom"))
     path = ingest.get_store_path()
     assert path == tmp_path / "custom"
 
@@ -292,7 +292,7 @@ def test_list_ordered_newest_first(db, store, sample_html):
 
 def test_cmd_ingest_copies_html(monkeypatch, tmp_path, sample_html):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     args = _build_ingest_args(sample_html)
     ingest.cmd_ingest(args)
@@ -304,7 +304,7 @@ def test_cmd_ingest_copies_html(monkeypatch, tmp_path, sample_html):
 
 def test_cmd_ingest_writes_md(monkeypatch, tmp_path, sample_html):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     args = _build_ingest_args(sample_html)
     ingest.cmd_ingest(args)
@@ -315,7 +315,7 @@ def test_cmd_ingest_writes_md(monkeypatch, tmp_path, sample_html):
 
 def test_cmd_ingest_writes_db(monkeypatch, tmp_path, sample_html):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     args = _build_ingest_args(sample_html)
     ingest.cmd_ingest(args)
@@ -328,7 +328,7 @@ def test_cmd_ingest_writes_db(monkeypatch, tmp_path, sample_html):
 
 def test_cmd_ingest_missing_html_exits(monkeypatch, tmp_path):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     args = _build_ingest_args(Path("/nonexistent/path.html"))
     with pytest.raises(SystemExit) as exc_info:
@@ -338,7 +338,7 @@ def test_cmd_ingest_missing_html_exits(monkeypatch, tmp_path):
 
 def test_cmd_search_output(monkeypatch, tmp_path, sample_html, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     # Seed via ingest; drain capsys so ingest stdout doesn't bleed into parse
     ingest.cmd_ingest(_build_ingest_args(sample_html, title="Searchable Item"))
@@ -355,7 +355,7 @@ def test_cmd_search_output(monkeypatch, tmp_path, sample_html, capsys):
 
 def test_cmd_search_no_results(monkeypatch, tmp_path, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     ingest.bootstrap_store(store)
 
     args = _build_search_args("nothing-here")
@@ -367,7 +367,7 @@ def test_cmd_search_no_results(monkeypatch, tmp_path, capsys):
 
 def test_cmd_list_output(monkeypatch, tmp_path, sample_html, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
 
     ingest.cmd_ingest(_build_ingest_args(sample_html))
     capsys.readouterr()  # drain ingest stdout before parsing list output
@@ -382,7 +382,7 @@ def test_cmd_list_output(monkeypatch, tmp_path, sample_html, capsys):
 
 def test_cmd_list_empty(monkeypatch, tmp_path, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     ingest.bootstrap_store(store)
 
     args = type("Args", (), {"list": True})()
@@ -404,7 +404,7 @@ def test_build_parser_returns_parser():
 
 def test_main_list(monkeypatch, tmp_path, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     ingest.bootstrap_store(store)
     monkeypatch.setattr(sys, "argv", ["ingest.py", "--list"])
     ingest.main()
@@ -414,7 +414,7 @@ def test_main_list(monkeypatch, tmp_path, capsys):
 
 def test_main_search(monkeypatch, tmp_path, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     ingest.bootstrap_store(store)
     monkeypatch.setattr(sys, "argv", ["ingest.py", "--search", "query"])
     ingest.main()
@@ -424,7 +424,7 @@ def test_main_search(monkeypatch, tmp_path, capsys):
 
 def test_main_html_missing_required_args(monkeypatch, tmp_path, sample_html):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     monkeypatch.setattr(sys, "argv", ["ingest.py", "--html", str(sample_html), "--title", "T"])
     with pytest.raises(SystemExit):
         ingest.main()
@@ -432,7 +432,7 @@ def test_main_html_missing_required_args(monkeypatch, tmp_path, sample_html):
 
 def test_main_empty_search_exits(monkeypatch, tmp_path):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     monkeypatch.setattr(sys, "argv", ["ingest.py", "--search", "   "])
     with pytest.raises(SystemExit):
         ingest.main()
@@ -440,7 +440,7 @@ def test_main_empty_search_exits(monkeypatch, tmp_path):
 
 def test_main_ingest(monkeypatch, tmp_path, sample_html, capsys):
     store = tmp_path / "vault"
-    monkeypatch.setenv("EVO_RESEARCH_STORE", str(store))
+    monkeypatch.setenv("EVO_STORE", str(store))
     monkeypatch.setattr(
         sys,
         "argv",

@@ -1,4 +1,4 @@
-"""Shared database utilities for EvoResearch."""
+"""Shared database utilities for Evo."""
 
 import os
 import sqlite3
@@ -13,12 +13,12 @@ _DEFAULT_STORE = (
     / "Samuel's Vault"
     / "SamuelOS"
     / "Knowledge"
-    / "Research"
+    / "KB"
 )
 
 
 def default_db_path() -> Path:
-    env = os.environ.get("EVO_RESEARCH_STORE")
+    env = os.environ.get("EVO_STORE")
     store = Path(env) if env else _DEFAULT_STORE
     return store / "manifest.db"
 

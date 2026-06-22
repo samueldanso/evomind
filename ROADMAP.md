@@ -1,6 +1,6 @@
 # Roadmap
 
-EvoResearch evolves from a personal local tool into an open-source agent-first learning platform.
+Evo evolves from a personal local tool into an open-source agent-first learning platform.
 
 > Read [VISION.md](./VISION.md) first. The vision is the destination — agents that research, write notes, and teach you, with a KB that compounds over time. The roadmap is the path.
 

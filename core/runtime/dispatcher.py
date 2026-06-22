@@ -34,7 +34,7 @@ def dispatch(
     """Dispatch task to correct agent. If Research + auto_teach=True, chain Teaching after."""
     validate_task(task)
 
-    vault_path = Path(os.environ.get("EVO_RESEARCH_STORE", str(default_db_path().parent)))
+    vault_path = Path(os.environ.get("EVO_STORE", str(default_db_path().parent)))
     registry = _build_registry(db, provider, vault_path)
 
     if isinstance(task, ResearchTask):

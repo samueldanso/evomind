@@ -1,4 +1,4 @@
-# EvoResearch v0.3.1 — Interactive Teaching Session
+# Evo v0.3.1 — Interactive Teaching Session
 
 **Version:** 0.3.1
 **Status:** Ready to build

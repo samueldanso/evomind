@@ -113,7 +113,7 @@ class TestTeachingAgent:
 
 class TestDispatcher:
     def test_dispatcher_research_only(self, db, provider, store):
-        with patch.dict("os.environ", {"EVO_RESEARCH_STORE": str(store)}):
+        with patch.dict("os.environ", {"EVO_STORE": str(store)}):
             task = ResearchTask(task_type="research", topic="Dispatch Test", mode="concept")
             result = dispatch(task, db, provider, auto_teach=False)
 
@@ -123,7 +123,7 @@ class TestDispatcher:
         assert "artifact_slug" in result.output
 
     def test_dispatcher_auto_chain(self, db, provider, store):
-        with patch.dict("os.environ", {"EVO_RESEARCH_STORE": str(store)}):
+        with patch.dict("os.environ", {"EVO_STORE": str(store)}):
             task = ResearchTask(task_type="research", topic="Chain Test", mode="concept")
             result = dispatch(task, db, provider, auto_teach=True)
 
@@ -146,7 +146,7 @@ class TestDispatcher:
 
         provider.chat = failing_chat
 
-        with patch.dict("os.environ", {"EVO_RESEARCH_STORE": str(store)}):
+        with patch.dict("os.environ", {"EVO_STORE": str(store)}):
             task = ResearchTask(task_type="research", topic="Isolated Test", mode="concept")
             result = dispatch(task, db, provider, auto_teach=True)
 
@@ -156,7 +156,7 @@ class TestDispatcher:
         assert teach_run.status == "failed"
 
     def test_dispatcher_validates_task(self, db, provider, store):
-        with patch.dict("os.environ", {"EVO_RESEARCH_STORE": str(store)}):
+        with patch.dict("os.environ", {"EVO_STORE": str(store)}):
             task = ResearchTask(task_type="research", topic="", mode="concept")
             with pytest.raises(ValueError, match="non-empty"):
                 dispatch(task, db, provider)

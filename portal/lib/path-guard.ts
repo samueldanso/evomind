@@ -3,7 +3,7 @@ import path from "node:path";
 
 export function resolveVaultRoot(): string {
   return path.resolve(
-    process.env.EVO_RESEARCH_STORE ??
+    process.env.EVO_STORE ??
       path.join(
         os.homedir(),
         "Library",
@@ -13,7 +13,7 @@ export function resolveVaultRoot(): string {
         "Samuel's Vault",
         "SamuelOS",
         "Knowledge",
-        "Research"
+        "KB"
       )
   );
 }

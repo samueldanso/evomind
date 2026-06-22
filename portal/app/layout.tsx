@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EvoResearch",
+  title: "Evo",
   description: "Agent-first learning platform",
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <nav className="flex items-center justify-between border-b px-6 py-3">
           <Link href="/" className="text-sm font-bold">
-            EvoResearch
+            Evo
           </Link>
           <div className="flex gap-4 text-sm">
             <Link href="/kb" className="text-muted-foreground hover:text-foreground transition-colors">

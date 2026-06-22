@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI dispatch for EvoResearch agents.
+"""CLI dispatch for Evo agents.
 
 Usage:
     uv run scripts/agent.py --task research --topic "KV Cache" --mode concept
@@ -22,7 +22,7 @@ from core.runtime.dispatcher import dispatch
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="EvoResearch agent CLI")
+    parser = argparse.ArgumentParser(description="Evo agent CLI")
     parser.add_argument("--task", choices=["research", "teach"], required=True)
     parser.add_argument("--topic", required=True)
     parser.add_argument("--mode", choices=["concept", "tool", "company"], default="concept")

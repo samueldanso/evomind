@@ -39,7 +39,7 @@ describe("GET /api/artifacts/[slug]/html", () => {
     db = makeTestDb();
     mockGetDb.mockReturnValue(db);
     // Point the route handler at our test vault root.
-    process.env.EVO_RESEARCH_STORE = TEST_VAULT;
+    process.env.EVO_STORE = TEST_VAULT;
     // Safe defaults — tests override as needed.
     mockExistsSync.mockReturnValue(false);
     mockReadFileSync.mockReturnValue("");
@@ -47,7 +47,7 @@ describe("GET /api/artifacts/[slug]/html", () => {
 
   afterEach(() => {
     db.close();
-    delete process.env.EVO_RESEARCH_STORE;
+    delete process.env.EVO_STORE;
     vi.clearAllMocks();
   });
 

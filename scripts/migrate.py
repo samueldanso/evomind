@@ -1,4 +1,4 @@
-"""scripts/migrate.py — forward-only DB migration runner for EvoResearch.
+"""scripts/migrate.py — forward-only DB migration runner for Evo.
 
 Usage:
     uv run scripts/migrate.py [--db PATH] [--skip-backup-check]
@@ -17,12 +17,12 @@ MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 DEFAULT_VAULT = (
     Path.home()
     / "Library/Mobile Documents/iCloud~md~obsidian/Documents"
-    / "Samuel's Vault/SamuelOS/Knowledge/Research"
+    / "Samuel's Vault/SamuelOS/Knowledge/KB"
 )
 
 
 def _db_path_from_env() -> Path:
-    env = os.environ.get("EVO_RESEARCH_STORE")
+    env = os.environ.get("EVO_STORE")
     if env:
         return Path(env) / "manifest.db"
     return DEFAULT_VAULT / "manifest.db"
@@ -112,7 +112,7 @@ def apply_migrations(
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="EvoResearch DB migration runner")
+    parser = argparse.ArgumentParser(description="Evo DB migration runner")
     parser.add_argument("--db", type=Path, default=None, help="Path to manifest.db")
     parser.add_argument(
         "--skip-backup-check",

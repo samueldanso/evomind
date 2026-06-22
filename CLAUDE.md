@@ -1,4 +1,4 @@
-# EvoResearch — Project Context
+# Evo — Project Context
 
 ## Orientation
 
@@ -12,15 +12,15 @@ Read these in order before touching the codebase:
 
 ## What this is
 
-EvoResearch is an **agent-first learning platform**. You direct agents to go deep on a topic. They research it, write structured notes into the KB, then teach you from those notes. Every session compounds into the next. Chat is the retrieval surface for querying what agents built.
+Evo is an **agent-first learning platform**. You direct agents to go deep on a topic. They research it, write structured notes into the KB, then teach you from those notes. Every session compounds into the next. Chat is the retrieval surface for querying what agents built.
 
 **Not a chatbot.** Not a RAG app with agents planned later. A platform where agents are primary, chat is secondary, and the KB compounds with every run.
 
-**Engineering positioning:** EvoResearch is built as an agent platform product, not a RAG app. The primary interface is agent invocation. The primary output is a compounding knowledge base. The secondary interface is retrieval over what agents built. Every phase adds capability that earns its place because the product demanded it. See [CAPABILITIES.md](./CAPABILITIES.md) for the full map.
+**Engineering positioning:** Evo is built as an agent platform product, not a RAG app. The primary interface is agent invocation. The primary output is a compounding knowledge base. The secondary interface is retrieval over what agents built. Every phase adds capability that earns its place because the product demanded it. See [CAPABILITIES.md](./CAPABILITIES.md) for the full map.
 
 ## Key paths
 
-- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/Research/`
+- **Research store (vault):** `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/KB/`
   - `manifest.db` — SQLite with FTS5 + sqlite-vec
   - `html/` — permanent HTML research pages
   - `summaries/` — companion .md notes
@@ -88,7 +88,7 @@ cd portal && bun test && bun run build
 
 - Raw SQL only (no ORM)
 - `pathlib.Path` for all paths; never string paths
-- Never hardcode home dir — use `Path.home()` or `EVO_RESEARCH_STORE`
+- Never hardcode home dir — use `Path.home()` or `EVO_STORE`
 - Never write research to `/tmp`
 - Atomic DB operations always
 - FTS triggers and vec sync must be exercised by tests

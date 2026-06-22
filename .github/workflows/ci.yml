@@ -30,12 +30,12 @@ jobs:
 
       - name: Type check
         env:
-          EVO_RESEARCH_STORE: /tmp/evo-test-store
+          EVO_STORE: /tmp/evo-test-store
         run: uv run mypy scripts/ core/ server/
 
       - name: Run tests
         env:
-          EVO_RESEARCH_STORE: /tmp/evo-test-store
+          EVO_STORE: /tmp/evo-test-store
         run: uv run pytest -v
 
   portal:

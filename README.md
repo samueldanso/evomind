@@ -1,12 +1,12 @@
-# EvoResearch
+# Evo
 
 > Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
 
-EvoResearch is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
+Evo is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
 
 ## Architecture
 
-EvoResearch follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it tåhat turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
+Evo follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it tåhat turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
 
 ```
                        ┌─────────────────────────────┐
@@ -75,13 +75,13 @@ cd portal && bun test && bun run build
 
 Artifacts are stored at:
 ```
-~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/Research/
+~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/KB/
 ├── manifest.db    # SQLite + FTS5 + sqlite-vec
 ├── html/          # Permanent HTML pages
 └── summaries/     # Companion .md notes
 ```
 
-Override with `EVO_RESEARCH_STORE=/path/to/store`.
+Override with `EVO_STORE=/path/to/store`.
 
 ## Stack
 

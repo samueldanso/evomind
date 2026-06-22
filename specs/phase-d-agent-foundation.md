@@ -4,7 +4,7 @@
 
 ## Objective
 
-Introduce the agent runtime as the core architectural primitive of EvoResearch. This is the phase where the product becomes an agent platform.
+Introduce the agent runtime as the core architectural primitive of Evo. This is the phase where the product becomes an agent platform.
 
 Ship:
 - A typed task contract system

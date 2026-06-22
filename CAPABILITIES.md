@@ -1,6 +1,6 @@
 # Capabilities
 
-> What EvoResearch is, in platform terms. Agent runtime first. Tools second. Retrieval third. Storage at the foundation.
+> What Evo is, in platform terms. Agent runtime first. Tools second. Retrieval third. Storage at the foundation.
 >
 > Read [VISION.md](./VISION.md) for the product framing. Read [ROADMAP.md](./ROADMAP.md) for phase timing.
 
