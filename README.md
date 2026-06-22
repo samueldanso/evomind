@@ -1,6 +1,6 @@
 # Evo
 
-> Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
+> Your personal knowledge base where agents research, write, and teach — understanding compounds with every session.
 
 Evo is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
 
