@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeuroWiKi — AI-Powered Knowledge Base",
+  title: "EvoMind — AI-Powered Knowledge Base",
   description:
     "Personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.",
 };
@@ -56,9 +56,9 @@ export default function RootLayout({
         >
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-              <span className="text-[17px] font-medium text-[#f5f5f4]">N</span>
+              <span className="text-[17px] font-medium text-[#f5f5f4]">E</span>
               <span className="hidden sm:inline text-[11px] font-medium tracking-[0.2em] uppercase text-[rgba(245,245,244,0.45)]">
-                NeuroWiKi
+                EVOMIND
               </span>
             </Link>
           </div>
@@ -70,7 +70,7 @@ export default function RootLayout({
 
           <div className="flex items-center">
             <a
-              href="https://github.com/samueldanso/neurowiki"
+              href="https://github.com/samueldanso/evo"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg text-[rgba(245,245,244,0.4)] hover:text-[#f5f5f4] hover:bg-[rgba(255,255,255,0.04)] transition-all"

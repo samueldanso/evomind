@@ -1,4 +1,4 @@
-# NeuroWiKi
+# EvoMind
 
 > AI-powered personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.
 

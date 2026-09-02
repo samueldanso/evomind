@@ -1,8 +1,8 @@
-# NeuroWiKi — Project Context
+# EvoMind — Project Context
 
 ## What this is
 
-NeuroWiKi is an AI-powered personal knowledge base — a portfolio project demonstrating hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph. Built with Python (FastAPI + SQLite) on the backend and Next.js 16 on the frontend.
+EvoMind is an AI-powered personal knowledge base — a portfolio project demonstrating hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph. Built with Python (FastAPI + SQLite) on the backend and Next.js 16 on the frontend.
 
 **Engineering thesis:** Agent runtime first. Tools that agents call second. Retrieval as a tool third. Storage at the foundation.
 

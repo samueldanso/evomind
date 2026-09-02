@@ -1,6 +1,6 @@
-# NeuroWiKi Portfolio Reskin
+# EvoMind Portfolio Reskin
 
-> Rebrand and reskin Evo into NeuroWiKi — a polished, demo-ready AI knowledge base for Samuel's portfolio. No new backend features. Portal redesign only.
+> Rebrand and reskin Evo into EvoMind — a polished, demo-ready AI knowledge base for Samuel's portfolio. No new backend features. Portal redesign only.
 
 **Date:** 2026-09-02
 **Status:** Approved
@@ -12,9 +12,9 @@
 
 Evo shipped through Phase D (v0.3.1) with a working Python backend: hybrid retrieval (vector + FTS5), research agents, embedding pipeline, eval harness (10/10), agent audit log, and ingest pipeline. The portal looks like a developer tool — functional but not portfolio-ready.
 
-NeuroWiKi is a hackathon project (built with a friend) with the same concept — AI-powered knowledge base — but with a polished dark UI, clear information hierarchy, and demo-ready visual craft.
+EvoMind is a hackathon project (built with a friend) with the same concept — AI-powered knowledge base — but with a polished dark UI, clear information hierarchy, and demo-ready visual craft.
 
-**The play:** Port NeuroWiKi's design language onto Evo's backend. The visitor sees a polished product. The interviewer reads the Python backend and sees real AI platform engineering.
+**The play:** Port EvoMind's design language onto Evo's backend. The visitor sees a polished product. The interviewer reads the Python backend and sees real AI platform engineering.
 
 **What this is NOT:**
 - Not a product for customers
@@ -26,7 +26,7 @@ NeuroWiKi is a hackathon project (built with a friend) with the same concept —
 
 ## 2. Brand Identity
 
-- **Name:** NeuroWiKi
+- **Name:** EvoMind
 - **Tagline:** "The goal isn't to remember everything. It's to never lose what matters."
 - **Portfolio pitch:** AI-powered personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.
 
@@ -34,7 +34,7 @@ NeuroWiKi is a hackathon project (built with a friend) with the same concept —
 
 ## 3. Design System
 
-Ported from the NeuroWiKi hackathon project's `globals.css` (830-line design system).
+Ported from the EvoMind hackathon project's `globals.css` (830-line design system).
 
 ### Palette (dark-first)
 
@@ -84,7 +84,7 @@ Ported from the NeuroWiKi hackathon project's `globals.css` (830-line design sys
 **Purpose:** First impression. Sell the project in 5 seconds.
 
 **Structure:**
-- Hero section: animated tagline (WordsPullUp or FadeUp from NeuroWiKi), one-line description, two CTAs ("Explore Wiki" → `/wiki`, "Ask a Question" → `/search`)
+- Hero section: animated tagline (WordsPullUp or FadeUp from EvoMind), one-line description, two CTAs ("Explore Wiki" → `/wiki`, "Ask a Question" → `/search`)
 - Feature cards section (3-4 cards):
   - **Hybrid RAG Retrieval** — Vector + FTS5 search with score-based merge
   - **Research Agents** — Autonomous topic research with structured note generation
@@ -153,7 +153,7 @@ Ported from the NeuroWiKi hackathon project's `globals.css` (830-line design sys
 ## 5. Navigation
 
 **Topbar:** Fixed/sticky, 52px height, glassy blur on scroll.
-- **Left:** NeuroWiKi logo/wordmark
+- **Left:** EvoMind logo/wordmark
 - **Center:** `Wiki` | `Search`
 - **Right:** GitHub repo link icon
 
@@ -182,7 +182,7 @@ Two nav items. Nothing else.
 - `app/wiki/page.tsx` — wiki browser
 - `app/wiki/[slug]/page.tsx` — wiki detail
 - `app/search/page.tsx` — dual-mode search/ask
-- `app/globals.css` — rewritten with NeuroWiKi design tokens
+- `app/globals.css` — rewritten with EvoMind design tokens
 - `app/layout.tsx` — rewritten with new fonts, topbar, dark theme
 - `components/topbar.tsx` — new navigation
 - `components/wiki-card.tsx` — artifact card restyled
@@ -224,7 +224,7 @@ Two nav items. Nothing else.
 ## 8. Project Root Changes
 
 ### README.md — Full rewrite
-- Project name: NeuroWiKi
+- Project name: EvoMind
 - One-line description
 - Screenshot(s) or architecture diagram
 - "What it demonstrates" section: Hybrid RAG, Agent orchestration, Embedding pipeline, Eval harness, Local-first SQLite
@@ -234,8 +234,8 @@ Two nav items. Nothing else.
 - Link to portfolio site
 
 ### Branding updates
-- `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — update "Evo" references to "NeuroWiKi" where visible. Keep the engineering content intact.
-- `portal/app/layout.tsx` — metadata title/description → NeuroWiKi
+- `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — update "Evo" references to "EvoMind" where visible. Keep the engineering content intact.
+- `portal/app/layout.tsx` — metadata title/description → EvoMind
 
 ---
 

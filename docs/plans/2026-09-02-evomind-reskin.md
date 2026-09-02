@@ -1,10 +1,10 @@
-# NeuroWiKi Portfolio Reskin — Implementation Plan
+# EvoMind Portfolio Reskin — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Reskin Evo's portal into NeuroWiKi — a polished, dark-themed AI knowledge base portfolio piece.
+**Goal:** Reskin Evo's portal into EvoMind — a polished, dark-themed AI knowledge base portfolio piece.
 
-**Architecture:** Replace portal's design system, delete agent/teaching UI, rebuild 4 pages (Landing, Wiki, Wiki Detail, Search) using NeuroWiKi's dark design language. Keep all existing API routes and Python backend untouched.
+**Architecture:** Replace portal's design system, delete agent/teaching UI, rebuild 4 pages (Landing, Wiki, Wiki Detail, Search) using EvoMind's dark design language. Keep all existing API routes and Python backend untouched.
 
 **Tech Stack:** Next.js 16, React 19, Tailwind v4, shadcn/ui, Inter + Instrument Serif + JetBrains Mono, better-sqlite3 (readonly), Framer Motion (new dep)
 
@@ -62,7 +62,7 @@ git commit -m "feat(portal): add framer-motion dependency"
 - Consumes: framer-motion from Task 1
 - Produces: Full dark design system — CSS tokens, card/button/input primitives, typography utilities, wiki prose styles. Root layout with Inter font, dark body, simple topbar with `Wiki` and `Search` nav links plus GitHub icon.
 
-- [ ] **Step 1: Replace globals.css with NeuroWiKi design system**
+- [ ] **Step 1: Replace globals.css with EvoMind design system**
 
 Rewrite `portal/app/globals.css` with the dark palette, surface tokens, typography scale, card/button/input primitives, wiki prose styles, scrollbar styles, and animation keyframes. Key tokens:
 
@@ -136,7 +136,7 @@ Rewrite `portal/app/globals.css` with the dark palette, surface tokens, typograp
 }
 ```
 
-Include all the utility classes from the NeuroWiKi reference:
+Include all the utility classes from the EvoMind reference:
 - `.app-card` / `.surface-card` / `.surface-elevated` / `.surface-glass`
 - `.btn-primary` / `.btn-secondary` / `.btn-ghost` (pill-shaped)
 - `.input-field`
@@ -179,7 +179,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeuroWiKi — AI-Powered Knowledge Base",
+  title: "EvoMind — AI-Powered Knowledge Base",
   description:
     "Personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.",
 };
@@ -214,7 +214,7 @@ export default function RootLayout({
             <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
               <span className="text-[17px] font-medium text-[#f5f5f4]">N</span>
               <span className="hidden sm:inline text-[11px] font-medium tracking-[0.2em] uppercase text-[rgba(245,245,244,0.45)]">
-                NeuroWiKi
+                EvoMind
               </span>
             </Link>
           </div>
@@ -226,7 +226,7 @@ export default function RootLayout({
 
           <div className="flex items-center">
             <a
-              href="https://github.com/samueldanso/neurowiki"
+              href="https://github.com/samueldanso/evo"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg text-[rgba(245,245,244,0.4)] hover:text-[#f5f5f4] hover:bg-[rgba(255,255,255,0.04)] transition-all"
@@ -269,7 +269,7 @@ Expected: Build succeeds. Pages may error at runtime (old pages reference delete
 
 ```bash
 git add portal/app/globals.css portal/app/layout.tsx
-git commit -m "feat(portal): replace design system with NeuroWiKi dark theme"
+git commit -m "feat(portal): replace design system with EvoMind dark theme"
 ```
 
 ---
@@ -631,7 +631,7 @@ Open `http://localhost:3000` — confirm hero renders with warm gold glow, featu
 
 ```bash
 git add portal/app/page.tsx
-git commit -m "feat(portal): add NeuroWiKi landing page with hero and feature cards"
+git commit -m "feat(portal): add EvoMind landing page with hero and feature cards"
 ```
 
 ---
@@ -1519,7 +1519,7 @@ git commit -m "feat(portal): add search page with Ask AI and keyword search tabs
 
 **Files:**
 - Rewrite: `README.md` (project root)
-- Modify: `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — find/replace "Evo" → "NeuroWiKi" in titles and visible copy (leave code paths and internal references as-is)
+- Modify: `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — find/replace "Evo" → "EvoMind" in titles and visible copy (leave code paths and internal references as-is)
 
 **Interfaces:**
 - Produces: Portfolio-ready README and consistent branding across docs
@@ -1529,7 +1529,7 @@ git commit -m "feat(portal): add search page with Ask AI and keyword search tabs
 Replace the project root `README.md`:
 
 ```markdown
-# NeuroWiKi
+# EvoMind
 
 > AI-powered personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.
 
@@ -1637,7 +1637,7 @@ MIT
 
 - [ ] **Step 2: Update branding in project docs**
 
-In `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — replace the first-line title and any prominent "Evo" references with "NeuroWiKi". Leave internal code paths (`EVO_STORE`, `EVO_SERVER_URL`, etc.) unchanged since those are actual env var names.
+In `VISION.md`, `ROADMAP.md`, `CAPABILITIES.md`, `CHANGELOG.md` — replace the first-line title and any prominent "Evo" references with "EvoMind". Leave internal code paths (`EVO_STORE`, `EVO_SERVER_URL`, etc.) unchanged since those are actual env var names.
 
 Use find/replace judiciously — only visible titles and descriptions, not code references.
 
@@ -1645,7 +1645,7 @@ Use find/replace judiciously — only visible titles and descriptions, not code 
 
 ```bash
 git add README.md VISION.md ROADMAP.md CAPABILITIES.md CHANGELOG.md
-git commit -m "docs: rebrand to NeuroWiKi, rewrite README for portfolio"
+git commit -m "docs: rebrand to EvoMind, rewrite README for portfolio"
 ```
 
 ---
@@ -1711,5 +1711,5 @@ git commit -m "fix(portal): address final verification issues"
 - [ ] **Step 6: Tag release**
 
 ```bash
-git tag -a v0.4.0-neurowiki -m "NeuroWiKi portfolio reskin"
+git tag -a v0.4.0-evomind -m "EvoMind portfolio reskin"
 ```
