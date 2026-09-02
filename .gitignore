@@ -26,7 +26,11 @@ node_modules/
 
 # Claude Code — local workspace only
 .claude/
-# tasks/ — now tracked (PM planning docs)
+
+# Agent/editor configs — machine-specific
+.codex/
+.conductor/
+.superpowers/
 
 # Env
 .env

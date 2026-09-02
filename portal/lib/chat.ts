@@ -16,7 +16,10 @@ export interface ChatResponse {
   sources: ChatSource[];
 }
 
-const CHAT_SERVER_URL = "http://localhost:8765/chat";
+const CHAT_SERVER_URL =
+  typeof window === "undefined"
+    ? `${process.env.EVO_SERVER_URL ?? "http://127.0.0.1:8765"}/chat`
+    : "/api/chat";
 
 export async function chat(query: string, limit = 5): Promise<ChatResponse> {
   const res = await fetch(CHAT_SERVER_URL, {
