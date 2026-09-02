@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArtifactCard } from "@/components/artifact-card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { WikiCard } from "@/components/wiki-card";
 import type { Artifact } from "@/lib/types";
 import { parseTags } from "@/lib/utils";
 
@@ -17,10 +16,9 @@ function uniqueTags(artifacts: Artifact[]): string[] {
   return Array.from(seen).sort();
 }
 
-export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
+export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  // null = search inactive (show all); array = search results
   const [searchResults, setSearchResults] = useState<Artifact[] | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -43,7 +41,6 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
           signal: controller.signal,
         });
         if (!res.ok) {
-          console.error(`[search] API error ${res.status} for query: ${q}`);
           setSearchResults([]);
           return;
         }
@@ -51,7 +48,6 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
         setSearchResults(data);
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") return;
-        console.error("[search] fetch failed:", err);
         setSearchResults([]);
       }
     }, 300);
@@ -64,17 +60,13 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
 
   const isSearchActive = searchResults !== null;
   const baseList = isSearchActive ? searchResults : artifacts;
-
   const allTags = uniqueTags(artifacts);
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) => {
       const next = new Set(prev);
-      if (next.has(tag)) {
-        next.delete(tag);
-      } else {
-        next.add(tag);
-      }
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
       return next;
     });
   }
@@ -84,63 +76,72 @@ export function ArtifactGrid({ artifacts }: { artifacts: Artifact[] }) {
       ? baseList.filter((a) => parseTags(a.tags).some((tag) => selectedTags.has(tag)))
       : baseList;
 
-  if (artifacts.length === 0) {
-    return (
-      <div className="flex flex-col gap-6">
-        <Input
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search
+          size={16}
+          className="absolute left-4 top-1/2 -translate-y-1/2"
+          style={{ color: "rgba(245,245,244,0.3)" }}
+        />
+        <input
+          type="text"
           placeholder="Search research…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
+          className="input-field pl-11"
         />
-        <div className="flex flex-1 items-center justify-center py-24 text-muted-foreground">
-          No research artifacts yet.
-        </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <Input
-        placeholder="Search research…"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="max-w-sm"
-      />
-
+      {/* Tag filters */}
       {!isSearchActive && allTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {allTags.map((tag) => (
-            <button key={tag} type="button" onClick={() => toggleTag(tag)}>
-              <Badge
-                variant={selectedTags.has(tag) ? "default" : "outline"}
-                className="cursor-pointer"
+          {allTags.map((tag) => {
+            const active = selectedTags.has(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={{
+                  background: active ? "rgba(212,165,116,0.15)" : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${active ? "rgba(212,165,116,0.3)" : "rgba(255,255,255,0.08)"}`,
+                  color: active ? "#d4a574" : "rgba(245,245,244,0.5)",
+                }}
               >
                 {tag}
-              </Badge>
-            </button>
-          ))}
+              </button>
+            );
+          })}
           {selectedTags.size > 0 && (
-            <button type="button" onClick={() => setSelectedTags(new Set())}>
-              <Badge variant="ghost" className="cursor-pointer">
-                Clear
-              </Badge>
+            <button
+              type="button"
+              onClick={() => setSelectedTags(new Set())}
+              className="px-3 py-1 rounded-full text-xs font-medium text-[rgba(245,245,244,0.35)] hover:text-[rgba(245,245,244,0.6)] transition-colors"
+            >
+              Clear
             </button>
           )}
         </div>
       )}
 
+      {/* Grid */}
       {displayed.length === 0 ? (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          {isSearchActive
-            ? `No results for "${searchQuery.trim()}".`
-            : "No artifacts match the selected tags."}
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-sm" style={{ color: "rgba(245,245,244,0.4)" }}>
+            {isSearchActive
+              ? `No results for "${searchQuery.trim()}".`
+              : artifacts.length === 0
+                ? "No research artifacts yet."
+                : "No artifacts match the selected tags."}
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayed.map((artifact) => (
-            <ArtifactCard key={artifact.id} artifact={artifact} />
+            <WikiCard key={artifact.id} artifact={artifact} />
           ))}
         </div>
       )}
