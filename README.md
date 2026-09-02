@@ -1,123 +1,104 @@
-# Evo
+# NeuroWiKi
 
-> Your personal knowledge base where agents research, write, and teach — understanding compounds with every session.
+> AI-powered personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.
 
-Evo is an agent-first learning platform. You direct agents to go deep on a topic. They research it, write structured notes into your knowledge base, then teach you from those notes. Every session compounds into the next. Chat is how you retrieve what the agents built.
+**"The goal isn't to remember everything. It's to never lose what matters."**
+
+## What This Demonstrates
+
+| Capability | Implementation |
+|---|---|
+| **Hybrid RAG Retrieval** | Vector search (sqlite-vec, Cohere Embed v4 at 1024 dims) + FTS5 full-text search, fused via score-based merge |
+| **Research Agents** | Autonomous tool-calling loop: retrieve → generate → ingest. Allowlist-enforced, fully audited. |
+| **Embedding Pipeline** | Sentence-boundary chunking, batched embedding with exponential backoff, incremental + full rebuild |
+| **Eval Harness** | 10-question retrieval quality gate — currently 10/10. No change ships if retrieval regresses. |
+| **Provider Abstraction** | BedrockProvider (Claude Sonnet 4.6 + Cohere Embed v4). Swappable via `EVO_LLM_PROVIDER`. |
+| **Migration-Versioned Schema** | Forward-only SQL migrations. SQLite + sqlite-vec + FTS5 in a single local file. |
 
 ## Architecture
 
-Evo follows the *Agent = LLM + Harness* framework (NVIDIA GTC 2026). The LLM is the reasoning core; the harness is everything around it tåhat turns reasoning into compounding action — context assembly, the observe-reason-act loop, persistent memory, tools, skills, orchestration, and audit.
-
 ```
-                       ┌─────────────────────────────┐
-                       │  LLM (Bedrock)           ✅ │
-                       │  Claude Sonnet 4.6          │
-                       │  core/llm/bedrock.py        │
-                       └──────────────┬──────────────┘
-                                      │
-  ┌───────────────────┐   ┌───────────▼───────────┐   ┌───────────────────┐
-  │ PROMPT         ✅ │◄─►│     Inner Loop     ✅ │◄─►│ TOOLS & SKILLS    │
-  │ core/prompts/  ✅ │   │  ┌─────────────────┐  │   │ core/tools/    ✅ │
-  │ research-wiki     │   │  │ Context         │  │   │  retrieve      ✅ │
-  │ teach-me          │   │  │ Observe         │  │   │  generate      ✅ │
-  └───────────────────┘   │  │ Reason          │  │   │  ingest        ✅ │
-                          │  │ Act             │  │   │  web_search    🔵 │
-  ┌───────────────────┐   │  └─────────────────┘  │   └───────────────────┘
-  │ ORCHESTRATION  ✅ │   │  core/runtime/     ✅ │
-  │ Agent dispatcher  │   └───────────┬───────────┘   ┌───────────────────┐
-  │ Research→Teaching │               │               │ SECURITY & AUDIT  │
-  │ auto-chain        │               │               │ Tool allowlist ✅ │
-  └───────────────────┘               │               │ agent_runs log ✅ │
-                                      ▼               │ cost tracking  ✅ │
-                       ┌─────────────────────────────┐└───────────────────┘
-                       │ MEMORY                      │
-                       │  artifacts             ✅   │
-                       │  chunks                ✅   │
-                       │  embeddings            ✅   │
-                       │  claims (stub)         ✅   │
-                       │  agent_runs            ✅   │
-                       │  mastery checklists    ✅   │
-                       └─────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  Portal (Next.js 16, React 19, Tailwind v4)         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ Landing   │  │ Wiki     │  │ Search   │          │
+│  │ Page      │  │ Browser  │  │ Ask AI   │          │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘          │
+│       │              │              │                │
+│  SQLite (readonly)   │         POST /chat            │
+│  better-sqlite3      │              │                │
+└──────────────────────┼──────────────┼────────────────┘
+                       │              │
+┌──────────────────────┼──────────────┼────────────────┐
+│  Server (FastAPI)    │              │                │
+│  ┌───────────────────▼──────────────▼───────────┐    │
+│  │  Hybrid Retrieval: vec_search + fts_search   │    │
+│  │  → score-based merge → dedup by chunk_id     │    │
+│  └──────────────────────────────────────────────┘    │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────┐   │
+│  │ Research    │  │ Provider     │  │ Embedding │    │
+│  │ Agent       │  │ (Bedrock)    │  │ Pipeline  │    │
+│  └─────────────┘  └──────────────┘  └───────────┘   │
+│  ┌─────────────┐  ┌──────────────┐                   │
+│  │ Tool Router │  │ Governance   │                   │
+│  │ + Allowlist │  │ + Audit Log  │                   │
+│  └─────────────┘  └──────────────┘                   │
+└──────────────────────────────────────────────────────┘
+                       │
+              ┌────────▼────────┐
+              │  manifest.db    │
+              │  SQLite + FTS5  │
+              │  + sqlite-vec   │
+              └─────────────────┘
 ```
 
-**Status:** ✅ shipped through v0.3.0 (agent foundation) · 🔵 later phases
+## Tech Stack
 
-Phase D wraps the existing v0.2.0 retrieval pipeline and Provider abstraction under Tool interfaces. No retrieval rebuild, no provider rewrite.
+**Backend:** Python 3.12+ · FastAPI · SQLite (FTS5 + sqlite-vec) · AWS Bedrock (Claude Sonnet 4.6 + Cohere Embed v4) · pytest (153 tests)
 
-## Quick start
+**Frontend:** Next.js 16 · React 19 · Tailwind v4 · shadcn/ui · better-sqlite3
 
+## Run Locally
+
+### Prerequisites
+- Python 3.12+, [uv](https://docs.astral.sh/uv/)
+- Node.js 20+, [bun](https://bun.sh)
+- AWS credentials with Bedrock access (`AWS_PROFILE` + `AWS_REGION` in env)
+
+### Backend
 ```bash
-# Ingest a research artifact
-uv run scripts/ingest.py \
-  --title "..." --slug "my-topic" \
-  --tags "ai,agents" --topics "llm,tooling" \
-  --summary "..." --html /path/to/file.html
+# Apply migrations
+uv run scripts/migrate.py
 
-# Embed chunks for retrieval
+# Embed existing artifacts (if any)
 uv run scripts/embed.py --incremental
 
-# Run an agent
-uv run scripts/agent.py --task research --topic "KV Cache" --mode concept
-uv run scripts/agent.py --task teach --topic "KV Cache"
-
-# Start the server
+# Start server
 uvicorn server:app --port 8765
-
-# Run the portal
-cd portal && bun dev
-
-# Run tests
-uv run pytest
-cd portal && bun test && bun run build
 ```
 
-## Vault
-
-Artifacts are stored at:
-```
-~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Samuel's Vault/SamuelOS/Knowledge/
-├── manifest.db    # SQLite + FTS5 + sqlite-vec
-├── html/          # Permanent HTML pages
-└── summaries/     # Companion .md notes
+### Portal
+```bash
+cd portal
+bun install
+bun dev
 ```
 
-Override with `EVO_STORE=/path/to/store`.
+Open `http://localhost:3000`
 
-## Stack
-
-- **Brain:** Python 3.12+, uv, FastAPI, SQLite (FTS5 + sqlite-vec), boto3 (Bedrock)
-- **Portal:** Next.js 16, React 19, Tailwind v4, shadcn/ui, Biome, bun
-- **LLM:** Bedrock — Claude Sonnet 4.6 (chat) + Cohere Embed v4 (embeddings, 1024 dims)
-
-## Project structure
-
-```
-core/                     # harness — platform primitives
-├── llm/                  #   LLM provider layer
-│   ├── __init__.py       #   re-exports
-│   └── bedrock.py        #   BedrockProvider (Claude + Cohere Embed)
-├── memory/               #   KB read/write + retrieval
-│   ├── __init__.py       #   re-exports
-│   ├── db.py             #   shared DB helpers
-│   ├── retrieval.py      #   hybrid FTS5 + vec search
-│   └── chunker.py        #   sentence-boundary splitter
-├── agents/               #   agent definitions (research, teaching)
-├── runtime/              #   execution loop, dispatcher, contracts
-├── tools/                #   tool interface (retrieve, generate, ingest)
-├── prompts/              #   skill instruction templates
-└── governance/           #   audit + allowlist
-
-server/                   # FastAPI package — /chat, /api/agent
-├── __init__.py           #   app factory, lifespan, CORS
-└── routes/               #   route modules (chat, agent)
-scripts/                  # CLI tools (ingest, embed, eval, migrate, agent)
-tests/                    # pytest suite (137 passing)
-portal/                   # Next.js frontend (41 tests)
+### Ingest research
+```bash
+uv run scripts/ingest.py --title "..." --slug "..." --tags "..." --topics "..." --summary "..." --html /path/to/file.html
 ```
 
-## Read more
+### Run tests
+```bash
+uv run pytest                    # 153 Python tests
+cd portal && bun test            # Portal tests
+cd portal && bun run build       # Build check
+uv run scripts/eval.py           # Retrieval quality gate (10/10)
+```
 
-- [VISION.md](./VISION.md) — product vision, harness component map, agent descriptions
-- [ROADMAP.md](./ROADMAP.md) — phase sequence with acceptance criteria
-- [CAPABILITIES.md](./CAPABILITIES.md) — platform capability map with phase-by-phase justification
-- [CHANGELOG.md](./CHANGELOG.md) — what's actually shipped
+## License
+
+MIT

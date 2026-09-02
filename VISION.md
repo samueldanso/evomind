@@ -1,4 +1,4 @@
-# Evo — Product Vision
+# NeuroWiKi — Product Vision
 
 > Spin up agents to go deep on anything. They research, write notes, teach you. It compounds.
 
