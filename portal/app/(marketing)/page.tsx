@@ -38,7 +38,7 @@ export default function Home() {
   const containerRef = useScrollReveal();
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-black">
+    <div ref={containerRef} className="min-h-screen bg-[var(--background)]">
       {/* Hero */}
       <section className="relative min-h-[100dvh] flex items-center justify-center px-6 overflow-hidden">
         {/* Subtle warm ambient glow */}
