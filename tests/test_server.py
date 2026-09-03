@@ -191,6 +191,7 @@ def _create_test_app(db: sqlite3.Connection):
     from fastapi import FastAPI
 
     from server.routes.agent import router as agent_router
+    from server.routes.artifacts import router as artifacts_router
     from server.routes.chat import router as chat_router
 
     @asynccontextmanager
@@ -207,6 +208,7 @@ def _create_test_app(db: sqlite3.Connection):
         yield
 
     test_app = FastAPI(lifespan=test_lifespan)
+    test_app.include_router(artifacts_router)
     test_app.include_router(chat_router)
     test_app.include_router(agent_router)
 
@@ -390,3 +392,117 @@ def test_chat_still_works_after_restructure(chat_db: sqlite3.Connection):
 
     assert response.status_code == 200
     assert "answer" in response.json()
+
+
+# --- Artifacts API tests ---
+
+
+def test_list_artifacts(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.get("/api/artifacts")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+    assert data[0]["slug"] in ("quantum-computing", "machine-learning")
+    # Each artifact has the expected keys
+    for artifact in data:
+        assert "id" in artifact
+        assert "slug" in artifact
+        assert "title" in artifact
+        assert "summary" in artifact
+        assert "tags" in artifact
+        assert "created_at" in artifact
+
+
+def test_get_artifact_by_slug(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.get("/api/artifacts/quantum-computing")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["slug"] == "quantum-computing"
+    assert data["title"] == "Quantum Computing Basics"
+
+
+def test_get_artifact_not_found(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.get("/api/artifacts/nonexistent")
+
+    assert response.status_code == 404
+
+
+def test_search_artifacts_empty_query(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.get("/api/search")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+
+
+def test_search_artifacts_with_query(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.get("/api/search?q=quantum")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    # Should find quantum computing via LIKE fallback or FTS
+    assert len(data) >= 1
+
+
+def test_delete_artifact(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        # Verify it exists first
+        response = client.get("/api/artifacts/quantum-computing")
+        assert response.status_code == 200
+
+        # Delete it
+        response = client.delete("/api/artifacts/quantum-computing")
+        assert response.status_code == 204
+
+        # Verify it's gone
+        response = client.get("/api/artifacts/quantum-computing")
+        assert response.status_code == 404
+
+        # List should have one less
+        response = client.get("/api/artifacts")
+        assert len(response.json()) == 1
+
+
+def test_delete_artifact_not_found(chat_db: sqlite3.Connection):
+    from starlette.testclient import TestClient
+
+    test_app = _create_test_app(chat_db)
+
+    with TestClient(test_app, raise_server_exceptions=False) as client:
+        response = client.delete("/api/artifacts/nonexistent")
+
+    assert response.status_code == 404

@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.llm.bedrock import get_provider
 from core.memory.db import default_db_path, load_sqlite_vec, open_db
 from server.routes.agent import router as agent_router
+from server.routes.artifacts import router as artifacts_router
 from server.routes.chat import router as chat_router
 from server.routes.ingest import router as ingest_router
 from server.routes.upload import router as upload_router
@@ -55,6 +56,7 @@ app.add_middleware(
     allow_headers=["content-type"],
 )
 
+app.include_router(artifacts_router)
 app.include_router(chat_router)
 app.include_router(agent_router)
 app.include_router(ingest_router)
