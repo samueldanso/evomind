@@ -145,12 +145,15 @@ function SidebarLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+      className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
         active
-          ? "bg-[rgba(255,255,255,0.06)] text-[#f5f5f4] border border-[rgba(255,255,255,0.08)]"
+          ? "bg-[rgba(255,255,255,0.06)] text-[#f5f5f4] border border-[rgba(255,255,255,0.1)]"
           : "text-[rgba(245,245,244,0.45)] hover:text-[rgba(245,245,244,0.8)] hover:bg-[rgba(255,255,255,0.03)] border border-transparent"
       }`}
     >
+      {active && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full bg-[#d4a574]" />
+      )}
       <Icon size={18} weight={active ? "fill" : "bold"} className="flex-shrink-0" />
       <span>{label}</span>
     </Link>
