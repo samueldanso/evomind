@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { WikiCard } from "@/components/wiki-card";
 import type { Artifact } from "@/lib/types";
 import { parseTags } from "@/lib/utils";
@@ -80,8 +80,9 @@ export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
     <div className="flex flex-col gap-6">
       {/* Search */}
       <div className="relative max-w-md">
-        <Search
+        <MagnifyingGlass
           size={16}
+          weight="bold"
           className="absolute left-4 top-1/2 -translate-y-1/2"
           style={{ color: "rgba(245,245,244,0.3)" }}
         />
@@ -104,7 +105,7 @@ export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
                 key={tag}
                 type="button"
                 onClick={() => toggleTag(tag)}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
                 style={{
                   background: active ? "rgba(212,165,116,0.15)" : "rgba(255,255,255,0.04)",
                   border: `1px solid ${active ? "rgba(212,165,116,0.3)" : "rgba(255,255,255,0.08)"}`,

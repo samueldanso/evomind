@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Search, Sparkles, Loader2, Send, MessageSquare } from "lucide-react";
+import { MagnifyingGlass, Sparkle, SpinnerGap, PaperPlaneTilt, ChatCircle } from "@phosphor-icons/react";
 import { type ChatResponse, type ChatSource, chat } from "@/lib/chat";
 import type { Artifact } from "@/lib/types";
 
@@ -21,16 +21,16 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState<Tab>("ask");
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-20">
       <div className="mx-auto max-w-4xl px-6 py-12">
         {/* Tab switcher */}
-        <div className="flex gap-1 mb-8 p-1 rounded-xl w-fit" style={{ background: "rgba(255,255,255,0.04)" }}>
+        <div className="flex gap-1 mb-8 p-1 rounded-full w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
-            <Sparkles size={13} />
+            <Sparkle size={14} weight="fill" />
             Ask AI
           </TabButton>
           <TabButton active={activeTab === "search"} onClick={() => setActiveTab("search")}>
-            <Search size={13} />
+            <MagnifyingGlass size={14} weight="bold" />
             Search
           </TabButton>
         </div>
@@ -50,7 +50,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+      className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
       style={{
         background: active ? "rgba(255,255,255,0.08)" : "transparent",
         color: active ? "#f5f5f4" : "rgba(245,245,244,0.45)",
@@ -61,7 +61,7 @@ function TabButton({
   );
 }
 
-/* ── Ask AI Tab ─────────────────────────────────── */
+/* -- Ask AI Tab -- */
 
 interface QAPair {
   question: string;
@@ -117,7 +117,7 @@ function AskAITab() {
               className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
               style={{ background: "rgba(212,165,116,0.1)" }}
             >
-              <MessageSquare size={24} style={{ color: "#d4a574" }} />
+              <ChatCircle size={24} weight="duotone" style={{ color: "#d4a574" }} />
             </div>
             <h2 className="text-lg font-medium mb-2" style={{ color: "#f5f5f4" }}>
               Ask your knowledge base
@@ -131,19 +131,11 @@ function AskAITab() {
                   key={q}
                   type="button"
                   onClick={() => handleSuggestion(q)}
-                  className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-[rgba(212,165,116,0.3)] hover:text-[#d4a574]"
                   style={{
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "rgba(245,245,244,0.5)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(212,165,116,0.3)";
-                    e.currentTarget.style.color = "#d4a574";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.color = "rgba(245,245,244,0.5)";
                   }}
                 >
                   {q}
@@ -194,12 +186,10 @@ function AskAITab() {
         {/* Loading */}
         {loading && (
           <div className="flex justify-start">
-            <div
-              className="surface-card px-5 py-4 flex items-center gap-3"
-            >
-              <Loader2 size={14} className="animate-spin" style={{ color: "#d4a574" }} />
+            <div className="surface-card px-5 py-4 flex items-center gap-3">
+              <SpinnerGap size={14} className="animate-spin" style={{ color: "#d4a574" }} />
               <span className="text-sm" style={{ color: "rgba(245,245,244,0.5)" }}>
-                Searching corpus and generating answer…
+                Searching corpus and generating answer...
               </span>
             </div>
           </div>
@@ -225,7 +215,7 @@ function AskAITab() {
       {/* Input — sticky at bottom */}
       <div
         className="sticky bottom-0 pt-4 pb-2"
-        style={{ background: "linear-gradient(transparent, #09090b 20%)" }}
+        style={{ background: "linear-gradient(transparent, #000000 20%)" }}
       >
         <form onSubmit={handleSubmit} className="flex gap-3">
           <div className="relative flex-1">
@@ -233,7 +223,7 @@ function AskAITab() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask anything about your research…"
+              placeholder="Ask anything about your research..."
               disabled={loading}
               className="input-field pr-4"
             />
@@ -243,7 +233,7 @@ function AskAITab() {
             disabled={loading || !query.trim()}
             className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed px-4"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+            {loading ? <SpinnerGap size={16} className="animate-spin" /> : <PaperPlaneTilt size={16} weight="fill" />}
           </button>
         </form>
       </div>
@@ -263,7 +253,7 @@ function SourceChip({ source }: { source: ChatSource }) {
   return (
     <Link href={`/wiki/${source.slug}`}>
       <span
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all hover:opacity-80"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:opacity-80"
         style={{
           background: `${color}10`,
           border: `1px solid ${color}25`,
@@ -277,7 +267,7 @@ function SourceChip({ source }: { source: ChatSource }) {
   );
 }
 
-/* ── Search Tab ─────────────────────────────────── */
+/* -- Search Tab -- */
 
 function SearchTab() {
   const [query, setQuery] = useState("");
@@ -322,8 +312,9 @@ function SearchTab() {
   return (
     <div>
       <div className="relative">
-        <Search
+        <MagnifyingGlass
           size={16}
+          weight="bold"
           className="absolute left-4 top-1/2 -translate-y-1/2"
           style={{ color: "rgba(245,245,244,0.3)" }}
         />
@@ -331,7 +322,7 @@ function SearchTab() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by keyword…"
+          placeholder="Search by keyword..."
           className="input-field pl-11"
         />
       </div>
@@ -348,7 +339,7 @@ function SearchTab() {
                 <Link key={artifact.id} href={`/wiki/${artifact.slug}`}>
                   <div className="surface-card p-4 group">
                     <h4
-                      className="text-sm font-medium group-hover:text-[#f5f5f4] transition-colors"
+                      className="text-sm font-medium group-hover:text-[#f5f5f4] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
                       style={{ color: "rgba(245,245,244,0.8)" }}
                     >
                       {artifact.title}
