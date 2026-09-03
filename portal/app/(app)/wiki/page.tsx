@@ -22,7 +22,7 @@ export default async function WikiPage() {
         <header className="mb-10">
           <span className="kicker">{artifacts.length} artifacts</span>
           <h1 className="section-title mt-2">Knowledge base</h1>
-          <p className="mt-2 text-sm" style={{ color: "rgba(245,245,244,0.45)" }}>
+          <p className="mt-2 text-sm" style={{ color: "var(--ink-muted)" }}>
             Research artifacts built by agents and ingested from web sources.
           </p>
         </header>
