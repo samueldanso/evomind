@@ -4,17 +4,23 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MagnifyingGlass, Sparkle, SpinnerGap, PaperPlaneTilt, ChatCircle } from "@phosphor-icons/react";
+import {
+  MagnifyingGlass,
+  Sparkle,
+  SpinnerGap,
+  PaperPlaneTilt,
+  ChatCircle,
+} from "@phosphor-icons/react";
 import { type ChatResponse, type ChatSource, chat } from "@/lib/chat";
 import type { Artifact } from "@/lib/types";
 
 type Tab = "ask" | "search";
 
 const SUGGESTED_QUESTIONS = [
-  "How does hybrid search work?",
-  "What is retrieval-augmented generation?",
-  "How do embedding models compare?",
-  "What chunking strategies exist for retrieval?",
+  "How does the transformer attention mechanism work?",
+  "What is rapamycin and how does it extend lifespan?",
+  "Why is VO2max the strongest predictor of mortality?",
+  "How does Apple Silicon's unified memory benefit ML?",
 ];
 
 export default function SearchPage() {
@@ -25,7 +31,13 @@ export default function SearchPage() {
       <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Tab switcher */}
         <div className="flex justify-center mb-8">
-          <div className="flex gap-1 p-1 rounded-full w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div
+            className="flex gap-1 p-1 rounded-full w-fit"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
             <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
               <Sparkle size={14} weight="fill" />
               Ask Evo AI
@@ -47,7 +59,11 @@ function TabButton({
   active,
   onClick,
   children,
-}: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -55,7 +71,7 @@ function TabButton({
       className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
       style={{
         background: active ? "rgba(255,255,255,0.08)" : "transparent",
-        color: active ? "#f5f5f4" : "rgba(245,245,244,0.45)",
+        color: active ? "var(--ink)" : "rgba(245,245,244,0.45)",
       }}
     >
       {children}
@@ -170,10 +186,13 @@ function AskAITab() {
             >
               <ChatCircle size={24} weight="duotone" style={{ color: "#d4a574" }} />
             </div>
-            <h2 className="text-lg font-medium mb-2" style={{ color: "#f5f5f4" }}>
+            <h2 className="text-lg font-medium mb-2" style={{ color: "var(--ink)" }}>
               Ask your knowledge base
             </h2>
-            <p className="text-sm mb-8 text-center max-w-md" style={{ color: "rgba(245,245,244,0.4)" }}>
+            <p
+              className="text-sm mb-8 text-center max-w-md"
+              style={{ color: "var(--ink-muted)" }}
+            >
               Get cited answers grounded in your research corpus using hybrid RAG retrieval.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -186,7 +205,7 @@ function AskAITab() {
                   style={{
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(245,245,244,0.5)",
+                    color: "var(--ink-tertiary)",
                   }}
                 >
                   {q}
@@ -205,7 +224,7 @@ function AskAITab() {
                 className="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-md text-sm"
                 style={{
                   background: "rgba(212,165,116,0.12)",
-                  color: "#f5f5f4",
+                  color: "var(--ink)",
                 }}
               >
                 {pair.question}
@@ -239,7 +258,7 @@ function AskAITab() {
           <div className="flex justify-start">
             <div className="surface-card px-5 py-4 flex items-center gap-3">
               <SpinnerGap size={14} className="animate-spin" style={{ color: "#d4a574" }} />
-              <span className="text-sm" style={{ color: "rgba(245,245,244,0.5)" }}>
+              <span className="text-sm" style={{ color: "var(--ink-tertiary)" }}>
                 Searching corpus and generating answer...
               </span>
             </div>
@@ -284,7 +303,11 @@ function AskAITab() {
             disabled={loading || !query.trim()}
             className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed px-4"
           >
-            {loading ? <SpinnerGap size={16} className="animate-spin" /> : <PaperPlaneTilt size={16} weight="fill" />}
+            {loading ? (
+              <SpinnerGap size={16} className="animate-spin" />
+            ) : (
+              <PaperPlaneTilt size={16} weight="fill" />
+            )}
           </button>
         </form>
       </div>
@@ -299,7 +322,7 @@ function SourceChip({ source }: { source: ChatSource }) {
     fts: "#7BD0E8",
     hybrid: "#d4a574",
   };
-  const color = matchColors[source.match_type] ?? "rgba(245,245,244,0.4)";
+  const color = matchColors[source.match_type] ?? "var(--ink-muted)";
 
   return (
     <Link href={`/wiki/${source.slug}`}>
@@ -367,7 +390,7 @@ function SearchTab() {
           size={16}
           weight="bold"
           className="absolute left-4 top-1/2 -translate-y-1/2"
-          style={{ color: "rgba(245,245,244,0.3)" }}
+          style={{ color: "var(--ink-faint)" }}
         />
         <input
           type="text"
@@ -381,7 +404,7 @@ function SearchTab() {
       {results !== null && (
         <div className="mt-6">
           {results.length === 0 ? (
-            <p className="text-sm text-center py-12" style={{ color: "rgba(245,245,244,0.4)" }}>
+            <p className="text-sm text-center py-12" style={{ color: "var(--ink-muted)" }}>
               No results for &ldquo;{query.trim()}&rdquo;
             </p>
           ) : (
@@ -390,14 +413,14 @@ function SearchTab() {
                 <Link key={artifact.id} href={`/wiki/${artifact.slug}`}>
                   <div className="surface-card p-4 group">
                     <h4
-                      className="text-sm font-medium group-hover:text-[#f5f5f4] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                      style={{ color: "rgba(245,245,244,0.8)" }}
+                      className="text-sm font-medium group-hover:text-[var(--ink)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                      style={{ color: "var(--ink-secondary)" }}
                     >
                       {artifact.title}
                     </h4>
                     <p
                       className="text-xs mt-1 line-clamp-1"
-                      style={{ color: "rgba(245,245,244,0.4)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {artifact.summary}
                     </p>
@@ -410,7 +433,7 @@ function SearchTab() {
       )}
 
       {results === null && (
-        <p className="text-sm text-center py-12" style={{ color: "rgba(245,245,244,0.3)" }}>
+        <p className="text-sm text-center py-12" style={{ color: "var(--ink-faint)" }}>
           Start typing to search across all artifacts.
         </p>
       )}

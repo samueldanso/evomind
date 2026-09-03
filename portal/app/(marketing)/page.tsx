@@ -2,7 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, MagnifyingGlass, Database, ShieldCheck, Stack, ChatCircle } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  MagnifyingGlass,
+  Upload,
+  ShieldCheck,
+  Stack,
+  ChatCircle,
+} from "@phosphor-icons/react";
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -21,7 +28,7 @@ function useScrollReveal() {
           }
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
     );
 
     for (const el of elements) {
@@ -45,7 +52,8 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(212,165,116,0.08) 0%, rgba(212,165,116,0.03) 40%, transparent 70%)",
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(212,165,116,0.08) 0%, rgba(212,165,116,0.03) 40%, transparent 70%)",
           }}
         />
 
@@ -53,19 +61,25 @@ export default function Home() {
           <div className="reveal mb-6">
             <span className="kicker inline-flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#d4a574]" />
-              Hybrid RAG knowledge base
+              Personal knowledge base
             </span>
           </div>
 
-          <h1 className="reveal text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-balance text-gradient" style={{ lineHeight: 1.05, letterSpacing: "-0.03em" }}>
-            Your research,
+          <h1
+            className="reveal text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-balance text-gradient"
+            style={{ lineHeight: 1.05, letterSpacing: "-0.03em" }}
+          >
+            Remember everything
             <br />
-            compounding over time
+            you&apos;ve ever read
           </h1>
 
-          <p className="reveal mt-6 text-base sm:text-lg max-w-xl mx-auto text-pretty" style={{ color: "rgba(245,245,244,0.5)", lineHeight: 1.6 }}>
-            Ingest web research. Embed it into a hybrid vector + full-text search index.
-            Ask questions and get cited answers grounded in your own knowledge base.
+          <p
+            className="reveal mt-6 text-base sm:text-lg max-w-xl mx-auto text-pretty"
+            style={{ color: "var(--ink-tertiary)", lineHeight: 1.6 }}
+          >
+            Drop in articles, PDFs, or research notes. EvoMind chunks, embeds, and indexes them —
+            then answers your questions with citations.
           </p>
 
           <div className="reveal mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -89,8 +103,8 @@ export default function Home() {
       <section className="px-6 py-24 border-t border-[rgba(255,255,255,0.04)]">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 max-w-lg reveal">
-            <span className="kicker">Under the hood</span>
-            <h2 className="section-title mt-2 text-balance">Built with engineering depth</h2>
+            <span className="kicker">How it works</span>
+            <h2 className="section-title mt-2 text-balance">Ingest. Search. Understand.</h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 reveal-stagger">
@@ -102,11 +116,16 @@ export default function Home() {
               >
                 <Stack size={20} weight="duotone" />
               </div>
-              <h3 className="text-lg font-medium mb-3" style={{ color: "#f5f5f4" }}>
-                Hybrid RAG retrieval
+              <h3 className="text-lg font-medium mb-3" style={{ color: "var(--ink)" }}>
+                Hybrid search
               </h3>
-              <p className="text-sm leading-relaxed max-w-lg" style={{ color: "rgba(245,245,244,0.5)" }}>
-                Vector search (sqlite-vec) fused with FTS5 full-text search via score-based merge. Neither alone covers the question space — hybrid retrieval combines semantic similarity with exact keyword matching for comprehensive recall.
+              <p
+                className="text-sm leading-relaxed max-w-lg"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                Every query runs two search strategies in parallel — semantic vector similarity and
+                full-text keyword matching — then fuses the results. You get the precision of exact
+                terms and the recall of meaning.
               </p>
             </div>
 
@@ -119,11 +138,12 @@ export default function Home() {
                 >
                   <ChatCircle size={20} weight="duotone" />
                 </div>
-                <h3 className="text-base font-medium mb-2" style={{ color: "#f5f5f4" }}>
+                <h3 className="text-base font-medium mb-2" style={{ color: "var(--ink)" }}>
                   Cited answers
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(245,245,244,0.5)" }}>
-                  Ask a question in natural language, get an answer grounded in your knowledge base with source citations. Every answer traces back to the chunks that informed it.
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-tertiary)" }}>
+                  Ask a question, get an answer grounded in your sources with inline citations. No
+                  hallucination without attribution — every claim traces back to what you ingested.
                 </p>
               </div>
 
@@ -132,13 +152,14 @@ export default function Home() {
                   className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
                   style={{ background: "rgba(212,165,116,0.1)", color: "#d4a574" }}
                 >
-                  <Database size={20} weight="duotone" />
+                  <Upload size={20} weight="duotone" />
                 </div>
-                <h3 className="text-base font-medium mb-2" style={{ color: "#f5f5f4" }}>
-                  Embedding pipeline
+                <h3 className="text-base font-medium mb-2" style={{ color: "var(--ink)" }}>
+                  Any source, any format
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(245,245,244,0.5)" }}>
-                  Sentence-boundary chunking with configurable overlap. Local ONNX embeddings via fastembed — no external API dependency for vector generation.
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-tertiary)" }}>
+                  Paste text, drop a URL, or upload a PDF. EvoMind extracts content, splits it into
+                  chunks, and embeds it locally — no data leaves your pipeline.
                 </p>
               </div>
             </div>
@@ -153,11 +174,16 @@ export default function Home() {
                   <ShieldCheck size={20} weight="duotone" />
                 </div>
                 <div>
-                  <h3 className="text-base font-medium mb-2" style={{ color: "#f5f5f4" }}>
-                    Eval-gated quality
+                  <h3 className="text-base font-medium mb-2" style={{ color: "var(--ink)" }}>
+                    Quality you can measure
                   </h3>
-                  <p className="text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(245,245,244,0.5)" }}>
-                    Retrieval quality harness with curated test questions gates every change. No schema migration, no embedding model swap, no chunking adjustment ships without passing the eval. The eval is the contract.
+                  <p
+                    className="text-sm leading-relaxed max-w-2xl"
+                    style={{ color: "var(--ink-tertiary)" }}
+                  >
+                    A retrieval eval harness runs on every change to the system. If search quality
+                    drops, the change doesn&apos;t ship. Your knowledge base stays reliable as it
+                    grows.
                   </p>
                 </div>
               </div>
@@ -169,7 +195,10 @@ export default function Home() {
       {/* Tagline — no italic, use weight + muted color */}
       <section className="px-6 py-24 border-t border-[rgba(255,255,255,0.04)]">
         <div className="max-w-3xl mx-auto text-center reveal">
-          <p className="text-xl font-medium text-balance" style={{ color: "rgba(245,245,244,0.5)" }}>
+          <p
+            className="text-xl font-medium text-balance"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
             &ldquo;The goal isn&apos;t to remember everything.
             <br className="hidden sm:inline" />
             It&apos;s to never lose what matters.&rdquo;

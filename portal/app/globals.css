@@ -83,7 +83,7 @@
   --surface-1: #0c0c0e;
   --surface-2: #111113;
   --surface-3: #181818;
-  --surface-elevated: #1F1F1F;
+  --surface-elevated: #1f1f1f;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.04);
@@ -149,19 +149,19 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .light {
-  --background: #fafaf8;
+  --background: #f8f6f2;
   --foreground: #1a1a1a;
-  --card: #ffffff;
+  --card: #fefdfb;
   --card-foreground: #1a1a1a;
-  --popover: #ffffff;
+  --popover: #fefdfb;
   --popover-foreground: #1a1a1a;
   --primary: #1a1a1a;
-  --primary-foreground: #fafaf8;
-  --secondary: #f0eeeb;
+  --primary-foreground: #f8f6f2;
+  --secondary: #f0ede8;
   --secondary-foreground: #1a1a1a;
-  --muted: #f0eeeb;
+  --muted: #f0ede8;
   --muted-foreground: #6b6b6b;
-  --accent: #f0eeeb;
+  --accent: #f0ede8;
   --accent-foreground: #1a1a1a;
   --destructive: #dc2626;
   --border: rgba(0, 0, 0, 0.08);
@@ -181,11 +181,11 @@
   --ink-faint: rgba(26, 26, 26, 0.1);
   --ink-ghost: rgba(26, 26, 26, 0.05);
 
-  --surface-0: #fafaf8;
-  --surface-1: #ffffff;
-  --surface-2: #f5f4f1;
-  --surface-3: #eeedea;
-  --surface-elevated: #ffffff;
+  --surface-0: #f8f6f2;
+  --surface-1: #fefdfb;
+  --surface-2: #f3f1ec;
+  --surface-3: #ebe8e3;
+  --surface-elevated: #fefdfb;
 
   --border-subtle: rgba(0, 0, 0, 0.04);
   --border-default: rgba(0, 0, 0, 0.08);
@@ -201,9 +201,9 @@
   --ink-mute: rgba(26, 26, 26, 0.5);
   --hair: rgba(0, 0, 0, 0.07);
   --hair-strong: rgba(0, 0, 0, 0.14);
-  --surface: #ffffff;
-  --surface-hover: #f5f4f1;
-  --surface-hi: #eeedea;
+  --surface: #fefdfb;
+  --surface-hover: #f3f1ec;
+  --surface-hi: #ebe8e3;
   --warm: #b8895a;
   --warm-soft: rgba(184, 137, 90, 0.6);
 }
@@ -284,7 +284,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .text-gradient {
-  background: linear-gradient(to right, #FFFFFF 0%, #9B9B9B 100%);
+  background: linear-gradient(to right, #ffffff 0%, #9b9b9b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -545,13 +545,27 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @keyframes fadeIn {
-  from { opacity: 0; filter: blur(8px); }
-  to { opacity: 1; filter: blur(0); }
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); filter: blur(8px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .animate-fade-in {
@@ -595,7 +609,9 @@
   outline: none;
 }
 .focus-ring:focus-visible {
-  box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px var(--border-emphasis);
+  box-shadow:
+    0 0 0 2px var(--surface-0),
+    0 0 0 4px var(--border-emphasis);
 }
 
 /* Global focus-visible for interactive elements */
@@ -611,9 +627,10 @@ input:focus-visible {
   opacity: 0;
   transform: translateY(24px);
   filter: blur(8px);
-  transition: opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.8s cubic-bezier(0.32, 0.72, 0, 1),
-              filter 0.8s cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.8s cubic-bezier(0.32, 0.72, 0, 1),
+    filter 0.8s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .reveal.revealed {
@@ -623,10 +640,18 @@ input:focus-visible {
 }
 
 /* Staggered children */
-.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
-.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
-.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
-.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+.reveal-stagger > .reveal:nth-child(1) {
+  transition-delay: 0ms;
+}
+.reveal-stagger > .reveal:nth-child(2) {
+  transition-delay: 80ms;
+}
+.reveal-stagger > .reveal:nth-child(3) {
+  transition-delay: 160ms;
+}
+.reveal-stagger > .reveal:nth-child(4) {
+  transition-delay: 240ms;
+}
 
 /* Noise texture — disabled for performance */
 .noise-overlay {

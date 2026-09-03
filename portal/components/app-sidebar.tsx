@@ -55,7 +55,13 @@ export function AppSidebar() {
     else setTheme("dark");
   }
 
-  const ThemeIcon = !mounted ? Monitor : theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
+  const ThemeIcon = !mounted
+    ? Monitor
+    : theme === "dark"
+      ? Moon
+      : theme === "light"
+        ? Sun
+        : Monitor;
 
   return (
     <>
@@ -96,15 +102,26 @@ export function AppSidebar() {
         }}
       >
         {/* Header */}
-        <div className={`flex items-center h-14 flex-shrink-0 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}>
+        <div
+          className={`flex items-center h-14 flex-shrink-0 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}
+        >
           <Link
             href="/"
             className="flex items-center gap-2.5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:opacity-80"
             onClick={() => setMobileOpen(false)}
           >
-            <Image src="/logo.svg" alt="EvoMind" width={20} height={20} className="rounded-md flex-shrink-0" />
+            <Image
+              src="/logo.svg"
+              alt="EvoMind"
+              width={20}
+              height={20}
+              className="rounded-md flex-shrink-0"
+            />
             {!collapsed && (
-              <span className="text-xs font-medium tracking-[0.15em] uppercase" style={{ color: "var(--ink-muted)" }}>
+              <span
+                className="text-xs font-medium tracking-[0.15em] uppercase"
+                style={{ color: "var(--ink-muted)" }}
+              >
                 EvoMind
               </span>
             )}
@@ -182,7 +199,10 @@ export function AppSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className={`py-3 border-t flex-shrink-0 space-y-0.5 ${collapsed ? "px-1.5" : "px-3"}`} style={{ borderColor: "var(--border-subtle)" }}>
+        <div
+          className={`py-3 border-t flex-shrink-0 space-y-0.5 ${collapsed ? "px-1.5" : "px-3"}`}
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
           {/* Theme toggle */}
           <button
             type="button"
@@ -194,7 +214,17 @@ export function AppSidebar() {
             title={collapsed ? `Theme: ${theme}` : undefined}
           >
             <ThemeIcon size={18} weight="bold" className="flex-shrink-0" />
-            {!collapsed && <span>{!mounted ? "Theme" : theme === "dark" ? "Dark" : theme === "light" ? "Light" : "System"}</span>}
+            {!collapsed && (
+              <span>
+                {!mounted
+                  ? "Theme"
+                  : theme === "dark"
+                    ? "Dark"
+                    : theme === "light"
+                      ? "Light"
+                      : "System"}
+              </span>
+            )}
           </button>
 
           {/* GitHub */}
@@ -212,7 +242,15 @@ export function AppSidebar() {
             {!collapsed && (
               <>
                 <span>GitHub</span>
-                <svg width={11} height={11} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5} className="opacity-50 ml-auto">
+                <svg
+                  width={11}
+                  height={11}
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  className="opacity-50 ml-auto"
+                >
                   <path d="M3.5 1.5h7v7M10.5 1.5L1.5 10.5" />
                 </svg>
               </>
@@ -257,7 +295,10 @@ function SidebarLink({
       title={collapsed ? label : undefined}
     >
       {active && !collapsed && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full" style={{ background: "var(--accent-warm)" }} />
+        <span
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full"
+          style={{ background: "var(--accent-warm)" }}
+        />
       )}
       <Icon size={18} weight={active ? "fill" : "bold"} className="flex-shrink-0" />
       {!collapsed && <span>{label}</span>}

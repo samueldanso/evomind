@@ -1,9 +1,7 @@
 import path from "node:path";
 
 export function resolveVaultRoot(): string {
-  return path.resolve(
-    process.env.EVO_STORE ?? path.join(process.cwd(), "..", "data")
-  );
+  return path.resolve(process.env.EVO_STORE ?? path.join(process.cwd(), "..", "data"));
 }
 
 export function assertInsideVault(filePath: string): string {

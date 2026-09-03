@@ -12,10 +12,7 @@ interface IngestResult {
   chunks: number;
 }
 
-export function AddSourceDialog({
-  open,
-  onClose,
-}: { open: boolean; onClose: () => void }) {
+export function AddSourceDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [tags, setTags] = useState("");
@@ -97,7 +94,11 @@ export function AddSourceDialog({
           <div className="flex items-center gap-2">
             <kbd
               className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono"
-              style={{ background: "var(--surface-3)", color: "var(--ink-muted)", border: "1px solid var(--border-default)" }}
+              style={{
+                background: "var(--surface-3)",
+                color: "var(--ink-muted)",
+                border: "1px solid var(--border-default)",
+              }}
             >
               ESC
             </kbd>
@@ -117,7 +118,16 @@ export function AddSourceDialog({
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={16}
+                  height={16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#34d399"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
               </div>
@@ -127,7 +137,11 @@ export function AddSourceDialog({
               </p>
             </div>
             <div className="flex gap-3">
-              <Link href={`/wiki/${result.slug}`} className="btn-primary text-sm" onClick={handleClose}>
+              <Link
+                href={`/wiki/${result.slug}`}
+                className="btn-primary text-sm"
+                onClick={handleClose}
+              >
                 View article
               </Link>
               <button type="button" onClick={handleReset} className="btn-secondary text-sm">
@@ -139,7 +153,11 @@ export function AddSourceDialog({
           /* Form */
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="dialog-title" className="block text-sm font-medium mb-1.5" style={{ color: "var(--ink-secondary)" }}>
+              <label
+                htmlFor="dialog-title"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: "var(--ink-secondary)" }}
+              >
                 Title
               </label>
               <input
@@ -156,7 +174,11 @@ export function AddSourceDialog({
             </div>
 
             <div>
-              <label htmlFor="dialog-content" className="block text-sm font-medium mb-1.5" style={{ color: "var(--ink-secondary)" }}>
+              <label
+                htmlFor="dialog-content"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: "var(--ink-secondary)" }}
+              >
                 Content
               </label>
               <textarea
@@ -171,9 +193,15 @@ export function AddSourceDialog({
             </div>
 
             <div>
-              <label htmlFor="dialog-tags" className="block text-sm font-medium mb-1.5" style={{ color: "var(--ink-secondary)" }}>
+              <label
+                htmlFor="dialog-tags"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: "var(--ink-secondary)" }}
+              >
                 Tags
-                <span className="ml-1.5 font-normal" style={{ color: "var(--ink-muted)" }}>(comma-separated)</span>
+                <span className="ml-1.5 font-normal" style={{ color: "var(--ink-muted)" }}>
+                  (comma-separated)
+                </span>
               </label>
               <input
                 id="dialog-tags"
@@ -187,7 +215,13 @@ export function AddSourceDialog({
             </div>
 
             {state === "error" && (
-              <div className="rounded-xl p-3" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <div
+                className="rounded-xl p-3"
+                style={{
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                }}
+              >
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
@@ -200,8 +234,21 @@ export function AddSourceDialog({
               {state === "loading" ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} strokeLinecap="round" className="opacity-25" />
-                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                    <circle
+                      cx={12}
+                      cy={12}
+                      r={10}
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                      className="opacity-25"
+                    />
+                    <path
+                      d="M4 12a8 8 0 018-8"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                    />
                   </svg>
                   Processing...
                 </span>

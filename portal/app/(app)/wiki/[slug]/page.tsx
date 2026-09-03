@@ -52,8 +52,8 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
         <nav className="mb-8">
           <Link
             href="/wiki"
-            className="inline-flex items-center gap-1.5 text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[#f5f5f4]"
-            style={{ color: "rgba(245,245,244,0.4)" }}
+            className="inline-flex items-center gap-1.5 text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[var(--ink)]"
+            style={{ color: "var(--ink-muted)" }}
           >
             <ArrowLeft size={14} weight="bold" />
             Back to wiki
@@ -66,7 +66,7 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
             <header className="mb-8">
               <h1
                 className="text-2xl sm:text-3xl font-semibold tracking-tight text-balance"
-                style={{ color: "#f5f5f4", letterSpacing: "-0.02em" }}
+                style={{ color: "var(--ink)", letterSpacing: "-0.02em" }}
               >
                 {artifact.title}
               </h1>
@@ -74,7 +74,7 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
               {artifact.summary && (
                 <p
                   className="mt-4 text-lg leading-relaxed font-medium text-pretty"
-                  style={{ color: "rgba(245,245,244,0.55)" }}
+                  style={{ color: "var(--ink-tertiary)" }}
                 >
                   {artifact.summary}
                 </p>
@@ -99,21 +99,21 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
               <div className="surface-card p-5 space-y-4">
                 <h4
                   className="text-xs font-medium uppercase tracking-wider"
-                  style={{ color: "rgba(245,245,244,0.35)" }}
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   Details
                 </h4>
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} weight="bold" style={{ color: "rgba(245,245,244,0.3)" }} />
-                    <span className="text-sm" style={{ color: "rgba(245,245,244,0.6)" }}>
+                    <Calendar size={14} weight="bold" style={{ color: "var(--ink-faint)" }} />
+                    <span className="text-sm" style={{ color: "var(--ink-tertiary)" }}>
                       {date}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock size={14} weight="bold" style={{ color: "rgba(245,245,244,0.3)" }} />
-                    <span className="text-sm" style={{ color: "rgba(245,245,244,0.6)" }}>
+                    <Clock size={14} weight="bold" style={{ color: "var(--ink-faint)" }} />
+                    <span className="text-sm" style={{ color: "var(--ink-tertiary)" }}>
                       {readTime} min read
                     </span>
                   </div>
@@ -122,10 +122,10 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
                 {tags.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Tag size={14} weight="bold" style={{ color: "rgba(245,245,244,0.3)" }} />
+                      <Tag size={14} weight="bold" style={{ color: "var(--ink-faint)" }} />
                       <span
                         className="text-xs font-medium uppercase tracking-wider"
-                        style={{ color: "rgba(245,245,244,0.35)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         Tags
                       </span>
@@ -137,7 +137,7 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
                           className="px-2 py-0.5 rounded text-xs font-medium"
                           style={{
                             background: "rgba(255,255,255,0.04)",
-                            color: "rgba(245,245,244,0.5)",
+                            color: "var(--ink-tertiary)",
                             border: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >

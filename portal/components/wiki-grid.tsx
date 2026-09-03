@@ -84,7 +84,7 @@ export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
           size={16}
           weight="bold"
           className="absolute left-4 top-1/2 -translate-y-1/2"
-          style={{ color: "rgba(245,245,244,0.3)" }}
+          style={{ color: "var(--ink-faint)" }}
         />
         <input
           type="text"
@@ -120,7 +120,7 @@ export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
             <button
               type="button"
               onClick={() => setSelectedTags(new Set())}
-              className="px-3 py-1 rounded-full text-xs font-medium text-[rgba(245,245,244,0.35)] hover:text-[rgba(245,245,244,0.6)] transition-colors"
+              className="px-3 py-1 rounded-full text-xs font-medium text-[var(--ink-muted)] hover:text-[var(--ink-tertiary)] transition-colors"
             >
               Clear
             </button>
@@ -131,7 +131,7 @@ export function WikiGrid({ artifacts }: { artifacts: Artifact[] }) {
       {/* Grid */}
       {displayed.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm" style={{ color: "rgba(245,245,244,0.4)" }}>
+          <p className="text-sm" style={{ color: "var(--ink-muted)" }}>
             {isSearchActive
               ? `No results for "${searchQuery.trim()}".`
               : artifacts.length === 0

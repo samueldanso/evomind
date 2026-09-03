@@ -12,7 +12,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 function TypeBadge({ type }: { type: string }) {
-  const color = TYPE_COLORS[type.toLowerCase()] ?? "rgba(245,245,244,0.4)";
+  const color = TYPE_COLORS[type.toLowerCase()] ?? "var(--ink-muted)";
   return (
     <span
       className="inline-block px-2 py-0.5 rounded-full text-xs font-medium uppercase tracking-wider"
@@ -37,19 +37,19 @@ export function WikiCard({ artifact }: { artifact: Artifact }) {
       <article className="app-card h-full group">
         <TypeBadge type={type} />
         <h3
-          className="text-base font-medium mt-3 mb-2 group-hover:text-[#f5f5f4] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] line-clamp-1"
-          style={{ color: "rgba(245,245,244,0.9)" }}
+          className="text-base font-medium mt-3 mb-2 group-hover:text-[var(--ink)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] line-clamp-1"
+          style={{ color: "var(--ink)" }}
         >
           {artifact.title}
         </h3>
         <p
           className="text-sm leading-relaxed line-clamp-2"
-          style={{ color: "rgba(245,245,244,0.4)" }}
+          style={{ color: "var(--ink-muted)" }}
         >
           {excerpt}
         </p>
         <div className="flex items-center gap-2 mt-4">
-          <span className="text-xs" style={{ color: "rgba(245,245,244,0.25)" }}>
+          <span className="text-xs" style={{ color: "var(--ink-faint)" }}>
             {date}
           </span>
           {tags.length > 1 &&
@@ -59,7 +59,7 @@ export function WikiCard({ artifact }: { artifact: Artifact }) {
                 className="text-[10px] px-1.5 py-0.5 rounded"
                 style={{
                   background: "rgba(255,255,255,0.04)",
-                  color: "rgba(245,245,244,0.35)",
+                  color: "var(--ink-muted)",
                 }}
               >
                 {tag}

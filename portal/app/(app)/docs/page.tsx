@@ -64,7 +64,10 @@ export default function DocsPage() {
                 </span>
                 <div>
                   <h2 className="text-base font-medium text-[var(--ink)] mb-2">{step.title}</h2>
-                  <p className="text-sm leading-relaxed mb-3" style={{ color: "var(--ink-tertiary)" }}>
+                  <p
+                    className="text-sm leading-relaxed mb-3"
+                    style={{ color: "var(--ink-tertiary)" }}
+                  >
                     {step.description}
                   </p>
                   <Link
@@ -73,7 +76,16 @@ export default function DocsPage() {
                     style={{ color: "var(--ink-muted)" }}
                   >
                     {step.linkLabel}
-                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width={14}
+                      height={14}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </Link>
@@ -81,31 +93,6 @@ export default function DocsPage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Architecture note */}
-        <div className="mt-14 animate-slide-up" style={{ animationDelay: "160ms" }}>
-          <h2 className="text-lg font-medium text-[var(--ink)] mb-4">Under the hood</h2>
-          <div className="surface-card p-6">
-            <ul className="space-y-3 text-sm leading-relaxed" style={{ color: "var(--ink-tertiary)" }}>
-              <li className="flex gap-3">
-                <span style={{ color: "var(--ink-muted)" }}>Storage</span>
-                <span>SQLite with FTS5 full-text search + sqlite-vec for vector embeddings</span>
-              </li>
-              <li className="flex gap-3">
-                <span style={{ color: "var(--ink-muted)" }}>Embeddings</span>
-                <span>384-dimension vectors via fastembed (BAAI/bge-small-en-v1.5)</span>
-              </li>
-              <li className="flex gap-3">
-                <span style={{ color: "var(--ink-muted)" }}>Retrieval</span>
-                <span>Hybrid search — vector similarity fused with BM25 keyword matching</span>
-              </li>
-              <li className="flex gap-3">
-                <span style={{ color: "var(--ink-muted)" }}>Generation</span>
-                <span>Claude Sonnet via AWS Bedrock, grounded in retrieved context</span>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
