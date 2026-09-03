@@ -29,7 +29,9 @@ async def health(request: Request):
         )
 
     db: sqlite3.Connection = request.app.state.db
-    chunk_count = db.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
+    chunk_count = 0
+    with contextlib.suppress(Exception):
+        chunk_count = db.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
     embedding_count = 0
     with contextlib.suppress(Exception):
         embedding_count = db.execute("SELECT COUNT(*) FROM embeddings").fetchone()[0]

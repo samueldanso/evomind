@@ -5,7 +5,9 @@ import struct
 import sys
 from pathlib import Path
 
-DB_DIR = Path(__file__).resolve().parent.parent / "data"
+import os
+
+DB_DIR = Path(os.environ.get("EVO_STORE", str(Path(__file__).resolve().parent.parent / "data")))
 DB_PATH = DB_DIR / "manifest.db"
 
 EMBEDDING_DIM = 384  # BAAI/bge-small-en-v1.5
