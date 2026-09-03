@@ -1,4 +1,4 @@
-"""OpenRouter provider — free LLaMA chat + local fastembed embeddings."""
+"""OpenRouter provider — free Gemma chat + local fastembed embeddings."""
 
 from __future__ import annotations
 
@@ -23,14 +23,22 @@ def _get_embedder():
 
 
 class OpenRouterProvider:
-    """Provider using OpenRouter (free LLaMA 3.3 70B) for chat and fastembed for embeddings."""
+    """Provider using OpenRouter (free models) for chat and fastembed for embeddings."""
+
+    # Free models ordered by quality — falls through on failure
+    FREE_MODELS = [
+        "google/gemma-4-26b-a4b-it:free",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "minimax/minimax-m3:free",
+    ]
 
     def __init__(
         self,
-        chat_model: str = "meta-llama/llama-3.3-70b-instruct:free",
+        chat_model: str | None = None,
         api_key: str | None = None,
     ) -> None:
-        self.chat_model = chat_model
+        self.chat_model = chat_model or self.FREE_MODELS[0]
+        self.fallback_models = [m for m in self.FREE_MODELS if m != self.chat_model]
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
         if not self.api_key:
             raise ValueError(
@@ -45,33 +53,42 @@ class OpenRouterProvider:
         return [e.tolist() for e in embeddings]
 
     def chat(self, messages: list[ChatMessage], context_chunks: list[str]) -> ChatResponse:
-        """Generate a response via OpenRouter API."""
+        """Generate a response via OpenRouter API with model fallback."""
         context_block = "\n\n---\n\n".join(context_chunks)
         user_content = f"<context>\n\n{context_block}\n\n</context>\n\n{messages[-1].content}"
 
-        payload: dict[str, Any] = {
-            "model": self.chat_model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a research assistant. Answer using only the provided context chunks. Cite sources inline.",
-                },
-                {"role": "user", "content": user_content},
-            ],
-            "max_tokens": 1024,
-        }
+        models_to_try = [self.chat_model] + self.fallback_models
+        last_error: Exception | None = None
 
-        response = httpx.post(
-            f"{self.base_url}/chat/completions",
-            json=payload,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            },
-            timeout=60.0,
-        )
-        response.raise_for_status()
+        for model in models_to_try:
+            payload: dict[str, Any] = {
+                "model": model,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a research assistant. Answer using only the provided context chunks. Cite sources inline.",
+                    },
+                    {"role": "user", "content": user_content},
+                ],
+                "max_tokens": 1024,
+            }
 
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        return ChatResponse(content=content, citations=[])
+            try:
+                response = httpx.post(
+                    f"{self.base_url}/chat/completions",
+                    json=payload,
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+                data = response.json()
+                content = data["choices"][0]["message"]["content"]
+                return ChatResponse(content=content, citations=[])
+            except Exception as exc:
+                last_error = exc
+                continue
+
+        raise last_error or RuntimeError("All models failed")

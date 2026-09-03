@@ -115,7 +115,7 @@ export default function Home() {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             {[
               "Python", "FastAPI", "SQLite", "sqlite-vec", "FTS5",
-              "OpenRouter", "LLaMA 3.3", "fastembed",
+              "OpenRouter", "Gemma 4", "fastembed",
               "Next.js 16", "React 19", "Tailwind v4",
             ].map((tech) => (
               <span
