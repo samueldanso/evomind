@@ -69,12 +69,42 @@ interface QAPair {
   sources: ChatSource[];
 }
 
+const CHAT_STORAGE_KEY = "evomind-chat-history";
+const MAX_STORED_PAIRS = 20;
+
 function AskAITab() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<QAPair[]>([]);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Restore history from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as QAPair[];
+        if (Array.isArray(parsed)) {
+          setHistory(parsed.slice(-MAX_STORED_PAIRS));
+        }
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Persist history to localStorage on change
+  useEffect(() => {
+    if (history.length > 0) {
+      try {
+        const toStore = history.slice(-MAX_STORED_PAIRS);
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
+      } catch {
+        // Ignore quota errors
+      }
+    }
+  }, [history]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,10 +136,29 @@ function AskAITab() {
     setQuery(q);
   }
 
+  function handleClearHistory() {
+    setHistory([]);
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+  }
+
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 220px)" }}>
       {/* Chat area */}
       <div className="flex-1 space-y-6 pb-6">
+        {/* Clear history button */}
+        {history.length > 0 && !loading && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              className="btn-ghost text-xs"
+              style={{ color: "var(--ink-muted)" }}
+            >
+              Clear history
+            </button>
+          </div>
+        )}
+
         {/* Empty state */}
         {history.length === 0 && !loading && !error && (
           <div className="flex flex-col items-center justify-center py-16">
