@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -26,6 +27,9 @@ export const metadata: Metadata = {
   title: "EvoMind — AI-Powered Knowledge Base",
   description:
     "Personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export const viewport: Viewport = {
@@ -55,10 +59,10 @@ export default function RootLayout({
           }}
         >
           <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-              <span className="text-[17px] font-medium text-[#f5f5f4]">E</span>
+            <Link href="/" className="flex items-center gap-2.5 hover:opacity-70 transition-opacity">
+              <Image src="/logo.svg" alt="EvoMind" width={24} height={24} className="rounded-md" />
               <span className="hidden sm:inline text-[11px] font-medium tracking-[0.2em] uppercase text-[rgba(245,245,244,0.45)]">
-                EVOMIND
+                EvoMind
               </span>
             </Link>
           </div>
@@ -70,7 +74,7 @@ export default function RootLayout({
 
           <div className="flex items-center">
             <a
-              href="https://github.com/samueldanso/evo"
+              href="https://github.com/samueldanso/evomind"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg text-[rgba(245,245,244,0.4)] hover:text-[#f5f5f4] hover:bg-[rgba(255,255,255,0.04)] transition-all"
