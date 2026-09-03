@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { X } from "@phosphor-icons/react";
+import Link from "next/link";
+import { useState } from "react";
 
 type IngestState = "idle" | "loading" | "success" | "error";
 
@@ -70,11 +70,13 @@ export function AddSourceDialog({ open, onClose }: { open: boolean; onClose: () 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0"
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
         onClick={handleClose}
         onKeyDown={(e) => e.key === "Escape" && handleClose()}
         style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+        aria-label="Close dialog"
       />
 
       {/* Dialog */}
@@ -127,6 +129,7 @@ export function AddSourceDialog({ open, onClose }: { open: boolean; onClose: () 
                   strokeWidth={2.5}
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  aria-hidden="true"
                 >
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
@@ -169,7 +172,6 @@ export function AddSourceDialog({ open, onClose }: { open: boolean; onClose: () 
                 className="input-field"
                 required
                 disabled={state === "loading"}
-                autoFocus
               />
             </div>
 
@@ -233,7 +235,12 @@ export function AddSourceDialog({ open, onClose }: { open: boolean; onClose: () 
             >
               {state === "loading" ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
                     <circle
                       cx={12}
                       cy={12}

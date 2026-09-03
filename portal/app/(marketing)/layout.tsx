@@ -13,11 +13,11 @@ export default function MarketingLayout({
         <nav
           className="pointer-events-auto flex items-center gap-1 h-11 px-2 rounded-full"
           style={{
-            background: "rgba(24,24,24,0.75)",
+            background: "var(--surface-3)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset",
+            border: "1px solid var(--border-default)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.15), 0 0 0 1px var(--border-subtle) inset",
           }}
         >
           <Link
@@ -30,7 +30,7 @@ export default function MarketingLayout({
             </span>
           </Link>
 
-          <div className="w-px h-4 bg-[rgba(255,255,255,0.08)]" />
+          <div className="w-px h-4 bg-[var(--border-default)]" />
 
           <NavLink href="/wiki">Wiki</NavLink>
           <NavLink href="/search">Search</NavLink>
@@ -57,10 +57,7 @@ export default function MarketingLayout({
                   EvoMind
                 </span>
               </div>
-              <p
-                className="text-sm leading-relaxed max-w-xs"
-                style={{ color: "var(--ink-muted)" }}
-              >
+              <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
                 Your personal research agent. Ingest, embed, and retrieve your knowledge with hybrid
                 RAG.
               </p>
@@ -143,6 +140,7 @@ function FooterLink({
           stroke="currentColor"
           strokeWidth={1.5}
           className="opacity-50"
+          aria-hidden="true"
         >
           <path d="M3.5 1.5h7v7M10.5 1.5L1.5 10.5" />
         </svg>

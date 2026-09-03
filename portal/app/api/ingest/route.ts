@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const SERVER_URL = process.env.EVO_SERVER_URL ?? "http://127.0.0.1:8765";
 

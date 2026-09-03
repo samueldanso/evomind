@@ -1,7 +1,7 @@
 import fs from "node:fs";
+import { ArrowLeft, Calendar, Clock, Tag } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, Tag, Clock } from "@phosphor-icons/react/dist/ssr";
 import { ArtifactViewer } from "@/components/artifact-viewer";
 import { getDb } from "@/lib/db";
 import { assertInsideVault } from "@/lib/path-guard";
@@ -136,9 +136,9 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
                           key={tag}
                           className="px-2 py-0.5 rounded text-xs font-medium"
                           style={{
-                            background: "rgba(255,255,255,0.04)",
+                            background: "var(--surface-2)",
                             color: "var(--ink-tertiary)",
-                            border: "1px solid rgba(255,255,255,0.06)",
+                            border: "1px solid var(--border-default)",
                           }}
                         >
                           {tag}

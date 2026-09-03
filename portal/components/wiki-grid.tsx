@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
 import { WikiCard } from "@/components/wiki-card";
 import type { Artifact } from "@/lib/types";
 import { parseTags } from "@/lib/utils";
