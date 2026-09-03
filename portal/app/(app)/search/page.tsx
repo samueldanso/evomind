@@ -27,7 +27,7 @@ export default function SearchPage() {
         <div className="flex gap-1 mb-8 p-1 rounded-full w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
             <Sparkle size={14} weight="fill" />
-            Ask AI
+            Ask Evo AI
           </TabButton>
           <TabButton active={activeTab === "search"} onClick={() => setActiveTab("search")}>
             <MagnifyingGlass size={14} weight="bold" />
