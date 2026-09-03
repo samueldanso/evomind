@@ -1,17 +1,23 @@
-import { getDb } from "@/lib/db";
-import type { Artifact } from "@/lib/types";
+import { NextResponse } from "next/server";
+
+const SERVER_URL = process.env.EVO_SERVER_URL ?? "http://127.0.0.1:8765";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
   try {
-    const db = getDb();
-    const artifacts = db
-      .prepare("SELECT * FROM artifacts ORDER BY created_at DESC")
-      .all() as Artifact[];
-    return Response.json(artifacts);
-  } catch (err) {
-    console.error("[GET /api/artifacts]", err);
-    return Response.json({ error: "Failed to load artifacts" }, { status: 500 });
+    const res = await fetch(`${SERVER_URL}/api/artifacts`, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) {
+      const error = await res.text().catch(() => "Backend error");
+      return NextResponse.json({ error }, { status: res.status });
+    }
+
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json({ error: "Failed to connect to backend" }, { status: 502 });
   }
 }

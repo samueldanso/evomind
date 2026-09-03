@@ -58,8 +58,8 @@ export default function MarketingLayout({
                 </span>
               </div>
               <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
-                Your personal AI knowledge base. Ingest, embed, and retrieve your knowledge with hybrid
-                RAG.
+                Your personal AI knowledge base. Ingest, embed, and retrieve your knowledge with
+                hybrid RAG.
               </p>
             </div>
             <div className="sm:col-span-3">

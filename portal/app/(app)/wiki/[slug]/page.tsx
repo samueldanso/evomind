@@ -1,48 +1,94 @@
-import fs from "node:fs";
-import { ArrowLeft, Calendar, Clock, Tag } from "@phosphor-icons/react/dist/ssr";
+"use client";
+
+import { ArrowLeft, Calendar, Clock, Tag, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArtifactViewer } from "@/components/artifact-viewer";
-import { getDb } from "@/lib/db";
-import { assertInsideVault } from "@/lib/path-guard";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { Artifact } from "@/lib/types";
 import { parseTags } from "@/lib/utils";
-
-function readHtmlContent(artifact: Artifact): string | null {
-  if (!artifact.html_path) return null;
-  try {
-    const safePath = assertInsideVault(artifact.html_path);
-    if (!fs.existsSync(safePath)) return null;
-    return fs.readFileSync(safePath, "utf-8");
-  } catch {
-    return null;
-  }
-}
 
 function estimateReadingTime(text: string): number {
   const words = text.split(/\s+/).length;
   return Math.max(1, Math.round(words / 200));
 }
 
-export default async function WikiDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default function WikiDetailPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const router = useRouter();
+  const [artifact, setArtifact] = useState<Artifact | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  let artifact: Artifact | undefined;
-  try {
-    const db = getDb();
-    artifact = db.prepare("SELECT * FROM artifacts WHERE slug = ?").get(slug) as
-      | Artifact
-      | undefined;
-  } catch (err) {
-    console.error("[WikiDetail] DB error for slug", slug, err);
-    notFound();
+  useEffect(() => {
+    fetch(`/api/artifacts/${slug}`)
+      .then((res) => {
+        if (!res.ok) {
+          setNotFound(true);
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) setArtifact(data);
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  async function handleDelete() {
+    if (!confirm("Delete this article? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/artifacts/${slug}`, { method: "DELETE" });
+      if (res.ok || res.status === 204) {
+        router.push("/wiki");
+      } else {
+        alert("Failed to delete article.");
+        setDeleting(false);
+      }
+    } catch {
+      alert("Failed to delete article.");
+      setDeleting(false);
+    }
   }
 
-  if (!artifact) notFound();
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <div className="text-sm text-center py-12" style={{ color: "var(--ink-muted)" }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !artifact) {
+    return (
+      <div className="min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <nav className="mb-8">
+            <Link
+              href="/wiki"
+              className="inline-flex items-center gap-1.5 text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[var(--ink)]"
+              style={{ color: "var(--ink-muted)" }}
+            >
+              <ArrowLeft size={14} weight="bold" />
+              Back to wiki
+            </Link>
+          </nav>
+          <p className="text-sm text-center py-12" style={{ color: "var(--ink-muted)" }}>
+            Article not found.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const tags = parseTags(artifact.tags);
   const date = artifact.created_at.slice(0, 10);
-  const htmlContent = readHtmlContent(artifact);
   const readTime = estimateReadingTime(artifact.summary ?? "");
 
   return (
@@ -81,15 +127,11 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
               )}
             </header>
 
-            {htmlContent ? (
-              <ArtifactViewer html={htmlContent} />
-            ) : (
-              <div className="surface-card p-8">
-                <div className="wiki-prose">
-                  <p>{artifact.summary}</p>
-                </div>
+            <div className="surface-card p-8">
+              <div className="wiki-prose">
+                <p>{artifact.summary}</p>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Sidebar */}
@@ -148,6 +190,21 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
                   </div>
                 )}
               </div>
+
+              {/* Delete button */}
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                style={{
+                  color: "rgb(239, 68, 68)",
+                  border: "1px solid rgba(239, 68, 68, 0.2)",
+                }}
+              >
+                <Trash size={14} weight="bold" />
+                {deleting ? "Deleting..." : "Delete article"}
+              </button>
             </div>
           </aside>
         </div>

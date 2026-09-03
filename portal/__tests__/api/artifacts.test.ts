@@ -1,27 +1,27 @@
-import type { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { insertArtifact, makeTestDb } from "../helpers/db";
-
-const mockGetDb = vi.fn<() => Database>();
-
-vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
-
 import { GET } from "@/app/api/artifacts/route";
 
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 describe("GET /api/artifacts", () => {
-  let db: Database;
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    db = makeTestDb();
-    mockGetDb.mockReturnValue(db);
+    fetchSpy = vi.spyOn(globalThis, "fetch");
   });
 
   afterEach(() => {
-    db.close();
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
-  it("returns an empty array when there are no artifacts", async () => {
+  it("returns an empty array when backend returns empty", async () => {
+    fetchSpy.mockResolvedValueOnce(jsonResponse([]));
+
     const response = await GET();
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -29,67 +29,31 @@ describe("GET /api/artifacts", () => {
   });
 
   it("returns all artifacts as a JSON array", async () => {
-    insertArtifact(db, { slug: "alpha", title: "Alpha" });
-    insertArtifact(db, { slug: "beta", title: "Beta" });
+    const artifacts = [
+      { id: 1, slug: "alpha", title: "Alpha" },
+      { id: 2, slug: "beta", title: "Beta" },
+    ];
+    fetchSpy.mockResolvedValueOnce(jsonResponse(artifacts));
 
     const response = await GET();
     expect(response.status).toBe(200);
-
     const body = await response.json();
     expect(body).toHaveLength(2);
   });
 
-  it("returns artifacts ordered by created_at DESC (newest first)", async () => {
-    insertArtifact(db, {
-      slug: "older",
-      title: "Older",
-      created_at: "2024-01-01T00:00:00.000Z",
-    });
-    insertArtifact(db, {
-      slug: "newer",
-      title: "Newer",
-      created_at: "2024-06-01T00:00:00.000Z",
-    });
+  it("returns 502 when backend is unreachable", async () => {
+    fetchSpy.mockRejectedValueOnce(new Error("ECONNREFUSED"));
 
     const response = await GET();
+    expect(response.status).toBe(502);
     const body = await response.json();
-
-    expect(body[0].slug).toBe("newer");
-    expect(body[1].slug).toBe("older");
+    expect(body).toHaveProperty("error");
   });
 
-  it("each artifact object includes the expected fields", async () => {
-    insertArtifact(db, {
-      slug: "complete",
-      title: "Complete Artifact",
-      summary: "A complete artifact.",
-      tags: "ai,llm",
-      topics: "research",
-    });
-
-    const response = await GET();
-    const [artifact] = await response.json();
-
-    expect(artifact).toMatchObject({
-      slug: "complete",
-      title: "Complete Artifact",
-      summary: "A complete artifact.",
-      tags: "ai,llm",
-      topics: "research",
-    });
-    expect(typeof artifact.id).toBe("number");
-    expect(typeof artifact.created_at).toBe("string");
-  });
-
-  it("returns 500 when the database throws", async () => {
-    mockGetDb.mockImplementation(() => {
-      throw new Error("DB unavailable");
-    });
+  it("forwards backend error status", async () => {
+    fetchSpy.mockResolvedValueOnce(new Response("Internal Server Error", { status: 500 }));
 
     const response = await GET();
     expect(response.status).toBe(500);
-
-    const body = await response.json();
-    expect(body).toHaveProperty("error");
   });
 });

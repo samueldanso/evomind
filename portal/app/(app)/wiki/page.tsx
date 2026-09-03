@@ -1,32 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { WikiGrid } from "@/components/wiki-grid";
-import { getDb, resetDb } from "@/lib/db";
 import type { Artifact } from "@/lib/types";
 
-function fetchArtifacts(): Artifact[] {
-  try {
-    const db = getDb();
-    return db.prepare("SELECT * FROM artifacts ORDER BY created_at DESC").all() as Artifact[];
-  } catch (err) {
-    resetDb();
-    console.error("[wiki] failed to load artifacts:", err);
-    return [];
-  }
-}
+export default function WikiPage() {
+  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function WikiPage() {
-  const artifacts = fetchArtifacts();
+  useEffect(() => {
+    fetch("/api/artifacts")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setArtifacts(data))
+      .catch(() => setArtifacts([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-6xl px-6 py-8">
         <header className="mb-10">
-          <span className="kicker">{artifacts.length} artifacts</span>
+          <span className="kicker">{loading ? "\u00A0" : `${artifacts.length} artifacts`}</span>
           <h1 className="section-title mt-2">Knowledge base</h1>
           <p className="mt-2 text-sm" style={{ color: "var(--ink-muted)" }}>
             Research notes and articles from your knowledge base.
           </p>
         </header>
-        <WikiGrid artifacts={artifacts} />
+        {loading ? (
+          <div className="text-sm text-center py-12" style={{ color: "var(--ink-muted)" }}>
+            Loading artifacts...
+          </div>
+        ) : (
+          <WikiGrid artifacts={artifacts} />
+        )}
       </div>
     </div>
   );

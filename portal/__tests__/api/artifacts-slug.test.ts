@@ -1,90 +1,104 @@
-import type { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { insertArtifact, makeTestDb } from "../helpers/db";
+import { DELETE, GET } from "@/app/api/artifacts/[slug]/route";
 
-const mockGetDb = vi.fn<() => Database>();
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
-vi.mock("@/lib/db", () => ({ getDb: mockGetDb }));
-
-import { GET } from "@/app/api/artifacts/[slug]/route";
-
-/** Minimal ctx shape the Next.js handler expects. */
 function makeCtx(slug: string) {
   return { params: Promise.resolve({ slug }) };
 }
 
 describe("GET /api/artifacts/[slug]", () => {
-  let db: Database;
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    db = makeTestDb();
-    mockGetDb.mockReturnValue(db);
+    fetchSpy = vi.spyOn(globalThis, "fetch");
   });
 
   afterEach(() => {
-    db.close();
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("returns the artifact JSON for a known slug", async () => {
-    insertArtifact(db, {
-      slug: "my-artifact",
-      title: "My Artifact",
-      summary: "Summary text.",
-      tags: "ml,nlp",
-      topics: "ai",
-    });
+    const artifact = { id: 1, slug: "my-artifact", title: "My Artifact" };
+    fetchSpy.mockResolvedValueOnce(jsonResponse(artifact));
 
     const req = new Request("http://localhost/api/artifacts/my-artifact");
     const response = await GET(req as never, makeCtx("my-artifact"));
 
     expect(response.status).toBe(200);
-
     const body = await response.json();
     expect(body.slug).toBe("my-artifact");
-    expect(body.title).toBe("My Artifact");
-    expect(body.summary).toBe("Summary text.");
   });
 
   it("returns 404 for an unknown slug", async () => {
-    const req = new Request("http://localhost/api/artifacts/does-not-exist");
-    const response = await GET(req as never, makeCtx("does-not-exist"));
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ error: "Not found" }), { status: 404 })
+    );
 
-    expect(response.status).toBe(404);
-
-    const body = await response.json();
-    expect(body).toHaveProperty("error");
-  });
-
-  it("returns 404 when the table is empty", async () => {
-    const req = new Request("http://localhost/api/artifacts/anything");
-    const response = await GET(req as never, makeCtx("anything"));
+    const req = new Request("http://localhost/api/artifacts/nonexistent");
+    const response = await GET(req as never, makeCtx("nonexistent"));
 
     expect(response.status).toBe(404);
   });
 
-  it("returns 500 when the database throws", async () => {
-    mockGetDb.mockImplementation(() => {
-      throw new Error("DB unavailable");
+  it("returns 502 when backend is unreachable", async () => {
+    fetchSpy.mockRejectedValueOnce(new Error("ECONNREFUSED"));
+
+    const req = new Request("http://localhost/api/artifacts/any");
+    const response = await GET(req as never, makeCtx("any"));
+
+    expect(response.status).toBe(502);
+  });
+});
+
+describe("DELETE /api/artifacts/[slug]", () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, "fetch");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("returns 204 on successful delete", async () => {
+    fetchSpy.mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    const req = new Request("http://localhost/api/artifacts/target", {
+      method: "DELETE",
     });
+    const response = await DELETE(req as never, makeCtx("target"));
 
-    const req = new Request("http://localhost/api/artifacts/boom");
-    const response = await GET(req as never, makeCtx("boom"));
-
-    expect(response.status).toBe(500);
-    const body = await response.json();
-    expect(body).toHaveProperty("error");
+    expect(response.status).toBe(204);
   });
 
-  it("does not confuse slugs that share a common prefix", async () => {
-    insertArtifact(db, { slug: "transformer", title: "Transformer" });
-    insertArtifact(db, { slug: "transformer-xl", title: "Transformer XL" });
+  it("returns 404 when artifact does not exist", async () => {
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ error: "Not found" }), { status: 404 })
+    );
 
-    const req = new Request("http://localhost/api/artifacts/transformer");
-    const response = await GET(req as never, makeCtx("transformer"));
+    const req = new Request("http://localhost/api/artifacts/missing", {
+      method: "DELETE",
+    });
+    const response = await DELETE(req as never, makeCtx("missing"));
 
-    const body = await response.json();
-    expect(body.slug).toBe("transformer");
-    expect(body.title).toBe("Transformer");
+    expect(response.status).toBe(404);
+  });
+
+  it("returns 502 when backend is unreachable", async () => {
+    fetchSpy.mockRejectedValueOnce(new Error("ECONNREFUSED"));
+
+    const req = new Request("http://localhost/api/artifacts/any", {
+      method: "DELETE",
+    });
+    const response = await DELETE(req as never, makeCtx("any"));
+
+    expect(response.status).toBe(502);
   });
 });
