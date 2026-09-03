@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import {
+  ChatCircle,
   MagnifyingGlass,
+  PaperPlaneTilt,
   Sparkle,
   SpinnerGap,
-  PaperPlaneTilt,
-  ChatCircle,
 } from "@phosphor-icons/react";
-import { type ChatResponse, type ChatSource, chat } from "@/lib/chat";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { type ChatSource, chat } from "@/lib/chat";
 import type { Artifact } from "@/lib/types";
 
 type Tab = "ask" | "search";
@@ -34,8 +34,8 @@ export default function SearchPage() {
           <div
             className="flex gap-1 p-1 rounded-full w-fit"
             style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border-default)",
             }}
           >
             <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
@@ -126,7 +126,7 @@ function AskAITab() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history, loading]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -189,10 +189,7 @@ function AskAITab() {
             <h2 className="text-lg font-medium mb-2" style={{ color: "var(--ink)" }}>
               Ask your knowledge base
             </h2>
-            <p
-              className="text-sm mb-8 text-center max-w-md"
-              style={{ color: "var(--ink-muted)" }}
-            >
+            <p className="text-sm mb-8 text-center max-w-md" style={{ color: "var(--ink-muted)" }}>
               Get cited answers grounded in your research corpus using hybrid RAG retrieval.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -203,8 +200,8 @@ function AskAITab() {
                   onClick={() => handleSuggestion(q)}
                   className="px-3 py-1.5 rounded-lg text-xs transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-[rgba(212,165,116,0.3)] hover:text-[#d4a574]"
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border-default)",
                     color: "var(--ink-tertiary)",
                   }}
                 >
@@ -216,8 +213,8 @@ function AskAITab() {
         )}
 
         {/* Q&A pairs */}
-        {history.map((pair, i) => (
-          <div key={`qa-${pair.question.slice(0, 20)}-${i}`} className="space-y-4">
+        {history.map((pair) => (
+          <div key={`qa-${pair.question}`} className="space-y-4">
             {/* Question */}
             <div className="flex justify-end">
               <div
@@ -244,7 +241,7 @@ function AskAITab() {
                 {pair.sources.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {pair.sources.map((source) => (
-                      <SourceChip key={`${source.slug}-${i}`} source={source} />
+                      <SourceChip key={source.slug} source={source} />
                     ))}
                   </div>
                 )}
@@ -285,7 +282,7 @@ function AskAITab() {
       {/* Input — sticky at bottom */}
       <div
         className="sticky bottom-0 pt-4 pb-2"
-        style={{ background: "linear-gradient(transparent, black 20%)" }}
+        style={{ background: "linear-gradient(transparent, var(--background) 20%)" }}
       >
         <form onSubmit={handleSubmit} className="flex gap-3">
           <div className="relative flex-1">
@@ -418,10 +415,7 @@ function SearchTab() {
                     >
                       {artifact.title}
                     </h4>
-                    <p
-                      className="text-xs mt-1 line-clamp-1"
-                      style={{ color: "var(--ink-muted)" }}
-                    >
+                    <p className="text-xs mt-1 line-clamp-1" style={{ color: "var(--ink-muted)" }}>
                       {artifact.summary}
                     </p>
                   </div>

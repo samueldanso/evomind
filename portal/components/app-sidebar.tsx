@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
   Books,
-  PlusCircle,
-  MagnifyingGlass,
-  Info,
   GithubLogo,
+  Info,
   List,
-  X,
+  MagnifyingGlass,
+  Monitor,
+  Moon,
+  PlusCircle,
   SidebarSimple,
   Sun,
-  Moon,
-  Monitor,
+  X,
 } from "@phosphor-icons/react";
-import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { AddSourceDialog } from "./add-source-dialog";
 import { useSidebar } from "./sidebar-context";
 
@@ -83,11 +83,13 @@ export function AppSidebar() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 lg:hidden"
+        <button
+          type="button"
+          className="fixed inset-0 z-40 lg:hidden cursor-default"
           onClick={() => setMobileOpen(false)}
           onKeyDown={(e) => e.key === "Escape" && setMobileOpen(false)}
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+          aria-label="Close menu"
         />
       )}
 
@@ -250,6 +252,7 @@ export function AppSidebar() {
                   stroke="currentColor"
                   strokeWidth={1.5}
                   className="opacity-50 ml-auto"
+                  aria-hidden="true"
                 >
                   <path d="M3.5 1.5h7v7M10.5 1.5L1.5 10.5" />
                 </svg>

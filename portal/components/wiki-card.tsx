@@ -42,10 +42,7 @@ export function WikiCard({ artifact }: { artifact: Artifact }) {
         >
           {artifact.title}
         </h3>
-        <p
-          className="text-sm leading-relaxed line-clamp-2"
-          style={{ color: "var(--ink-muted)" }}
-        >
+        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--ink-muted)" }}>
           {excerpt}
         </p>
         <div className="flex items-center gap-2 mt-4">
@@ -58,7 +55,7 @@ export function WikiCard({ artifact }: { artifact: Artifact }) {
                 key={tag}
                 className="text-[10px] px-1.5 py-0.5 rounded"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
+                  background: "var(--surface-2)",
                   color: "var(--ink-muted)",
                 }}
               >

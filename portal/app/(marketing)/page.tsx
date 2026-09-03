@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
+  ChatCircle,
   MagnifyingGlass,
-  Upload,
   ShieldCheck,
   Stack,
-  ChatCircle,
+  Upload,
 } from "@phosphor-icons/react";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -195,10 +195,7 @@ export default function Home() {
       {/* Tagline — no italic, use weight + muted color */}
       <section className="px-6 py-24 border-t border-[rgba(255,255,255,0.04)]">
         <div className="max-w-3xl mx-auto text-center reveal">
-          <p
-            className="text-xl font-medium text-balance"
-            style={{ color: "var(--ink-tertiary)" }}
-          >
+          <p className="text-xl font-medium text-balance" style={{ color: "var(--ink-tertiary)" }}>
             &ldquo;The goal isn&apos;t to remember everything.
             <br className="hidden sm:inline" />
             It&apos;s to never lose what matters.&rdquo;
