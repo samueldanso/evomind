@@ -7,9 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -45,19 +44,19 @@
 
 :root {
   /* Core palette — near-black dark theme */
-  --background: #09090b;
+  --background: #000000;
   --foreground: #fafafa;
   --card: #0c0c0e;
   --card-foreground: #fafafa;
   --popover: #0c0c0e;
   --popover-foreground: #fafafa;
   --primary: #f5f5f4;
-  --primary-foreground: #09090b;
-  --secondary: #18181b;
+  --primary-foreground: #000000;
+  --secondary: #181818;
   --secondary-foreground: #fafafa;
-  --muted: #18181b;
+  --muted: #181818;
   --muted-foreground: #71717a;
-  --accent: #18181b;
+  --accent: #181818;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --border: rgba(255, 255, 255, 0.06);
@@ -81,11 +80,11 @@
   --ink-ghost: rgba(245, 245, 244, 0.08);
 
   /* Surfaces */
-  --surface-0: #09090b;
+  --surface-0: #000000;
   --surface-1: #0c0c0e;
   --surface-2: #111113;
-  --surface-3: #18181b;
-  --surface-elevated: #1c1c1f;
+  --surface-3: #181818;
+  --surface-elevated: #1F1F1F;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.04);
@@ -98,11 +97,11 @@
   --accent-warm-soft: rgba(212, 165, 116, 0.6);
   --accent-warm-faint: rgba(212, 165, 116, 0.15);
 
-  /* Type scale */
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 15px;
-  --text-lg: 17px;
+  /* Type scale — snapped to Tailwind defaults */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
   --text-xl: 20px;
   --text-2xl: 24px;
   --text-3xl: 30px;
@@ -134,16 +133,16 @@
   --warm: #f4c77b;
   --warm-soft: rgba(244, 199, 123, 0.7);
 
-  /* Type scale aliases */
-  --fs-micro: 10px;
-  --fs-kicker: 11px;
+  /* Type scale aliases — snapped to Tailwind */
+  --fs-micro: 12px;
+  --fs-kicker: 12px;
   --fs-meta: 12px;
-  --fs-nav: 13px;
+  --fs-nav: 14px;
   --fs-body-sm: 14px;
-  --fs-body: 15px;
-  --fs-body-lg: 17px;
+  --fs-body: 16px;
+  --fs-body-lg: 18px;
   --fs-quote: 20px;
-  --fs-h1: 56px;
+  --fs-h1: 60px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -155,13 +154,17 @@
   border: 1px solid var(--hair);
   border-radius: 10px;
   padding: 18px 18px 14px;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .app-card:hover {
   background: var(--surface-hover);
   border-color: var(--hair-strong);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+}
+
+.app-card:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .kicker-rule {
@@ -217,13 +220,8 @@
    TYPOGRAPHY UTILITIES
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.font-serif-italic {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-style: italic;
-}
-
 .text-gradient {
-  background: linear-gradient(135deg, var(--ink) 0%, var(--ink-secondary) 100%);
+  background: linear-gradient(to right, #FFFFFF 0%, #9B9B9B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -258,7 +256,7 @@
   background: var(--surface-1);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  transition: all 0.2s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .surface-card:hover {
@@ -298,12 +296,16 @@
   color: var(--surface-0);
   background: var(--ink);
   border-radius: 9999px;
-  transition: all 0.15s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .btn-primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-secondary {
@@ -318,13 +320,17 @@
   background: transparent;
   border: 1px solid var(--border-default);
   border-radius: 9999px;
-  transition: all 0.15s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .btn-secondary:hover {
   background: var(--surface-2);
   border-color: var(--border-strong);
   color: var(--ink);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
 .btn-ghost {
@@ -337,12 +343,16 @@
   color: var(--ink-tertiary);
   background: transparent;
   border-radius: var(--radius-md);
-  transition: all 0.15s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .btn-ghost:hover {
   background: var(--surface-2);
   color: var(--ink);
+}
+
+.btn-ghost:active {
+  transform: scale(0.98);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -358,7 +368,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   outline: none;
-  transition: all 0.15s ease;
+  transition: all 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .input-field::placeholder {
@@ -411,7 +421,7 @@
   text-decoration: underline;
   text-decoration-color: var(--border-strong);
   text-underline-offset: 3px;
-  transition: text-decoration-color 0.15s ease;
+  transition: text-decoration-color 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .wiki-prose a:hover {
@@ -433,7 +443,7 @@
   padding-left: 1rem;
   border-left: 2px solid var(--border-strong);
   color: var(--ink-tertiary);
-  font-style: italic;
+  font-weight: 500;
 }
 
 .wiki-prose code {
@@ -465,21 +475,21 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; filter: blur(8px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(24px); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn 0.8s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.4s ease forwards;
+  animation: slideUp 0.8s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -487,7 +497,6 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .reading-prose {
-  font-family: 'Instrument Serif', Georgia, serif;
   font-size: var(--text-lg);
   line-height: 1.8;
   color: var(--ink-secondary);
@@ -499,11 +508,10 @@
 
 /* Lead paragraph for wiki */
 .wiki-prose-enhanced .wiki-prose > p:first-of-type {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-size: 1.2rem;
+  font-size: 1.125rem;
   line-height: 1.6;
   color: var(--ink);
+  font-weight: 500;
   margin-bottom: 1.5rem;
 }
 
@@ -520,7 +528,37 @@
   box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px var(--border-emphasis);
 }
 
-/* Noise texture - disabled for performance */
+/* Global focus-visible for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+  outline-offset: 2px;
+}
+
+/* Scroll reveal — elements start hidden, JS adds .revealed */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(8px);
+  transition: opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1),
+              transform 0.8s cubic-bezier(0.32, 0.72, 0, 1),
+              filter 0.8s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Staggered children */
+.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+
+/* Noise texture — disabled for performance */
 .noise-overlay {
   display: none;
 }

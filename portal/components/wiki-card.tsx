@@ -15,7 +15,7 @@ function TypeBadge({ type }: { type: string }) {
   const color = TYPE_COLORS[type.toLowerCase()] ?? "rgba(245,245,244,0.4)";
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider"
+      className="inline-block px-2 py-0.5 rounded-full text-xs font-medium uppercase tracking-wider"
       style={{ background: `${color}15`, color }}
     >
       {type}
@@ -37,7 +37,7 @@ export function WikiCard({ artifact }: { artifact: Artifact }) {
       <article className="app-card h-full group">
         <TypeBadge type={type} />
         <h3
-          className="text-base font-medium mt-3 mb-2 group-hover:text-[#f5f5f4] transition-colors duration-150 line-clamp-1"
+          className="text-base font-medium mt-3 mb-2 group-hover:text-[#f5f5f4] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] line-clamp-1"
           style={{ color: "rgba(245,245,244,0.9)" }}
         >
           {artifact.title}
