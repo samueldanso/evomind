@@ -1,6 +1,6 @@
 # EvoMind
 
-Personal knowledge base with hybrid RAG retrieval. Ingest articles, PDFs, or URLs — ask questions and get cited answers grounded in your own research.
+Personal AI knowledge base with hybrid RAG retrieval. Ingest articles, PDFs, or URLs — ask questions and get cited answers grounded in your own research.
 
 **[Live Demo](https://evomind-ai.vercel.app)** · **[GitHub](https://github.com/samueldanso/evomind)**
 
