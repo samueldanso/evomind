@@ -166,32 +166,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tech stack */}
-      <section className="px-6 py-16 border-t border-[rgba(255,255,255,0.04)]">
-        <div className="max-w-3xl mx-auto text-center reveal">
-          <span className="kicker">Stack</span>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            {[
-              "Python", "FastAPI", "SQLite", "sqlite-vec", "FTS5",
-              "OpenRouter", "Gemma 4", "fastembed",
-              "Next.js 16", "React 19", "Tailwind v4",
-            ].map((tech) => (
-              <span
-                key={tech}
-                className="px-3 py-1.5 rounded-full text-xs font-medium"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(245,245,244,0.6)",
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Tagline — no italic, use weight + muted color */}
       <section className="px-6 py-24 border-t border-[rgba(255,255,255,0.04)]">
         <div className="max-w-3xl mx-auto text-center reveal">
