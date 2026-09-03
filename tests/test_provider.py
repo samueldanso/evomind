@@ -54,8 +54,17 @@ def test_bedrock_provider_custom_region(monkeypatch):
 # --- Factory ---
 
 
-def test_get_provider_default_is_bedrock(monkeypatch):
+def test_get_provider_default_is_openrouter(monkeypatch):
     monkeypatch.delenv("EVO_LLM_PROVIDER", raising=False)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    provider = get_provider()
+    from core.llm.openrouter import OpenRouterProvider
+
+    assert isinstance(provider, OpenRouterProvider)
+
+
+def test_get_provider_bedrock_explicit(monkeypatch):
+    monkeypatch.setenv("EVO_LLM_PROVIDER", "bedrock")
     with patch("boto3.client"):
         provider = get_provider()
     assert isinstance(provider, BedrockProvider)

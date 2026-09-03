@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from core.llm.bedrock import BedrockProvider, ChatMessage
+from core.llm.bedrock import ChatMessage
 from core.memory.retrieval import hybrid_search
 
 router = APIRouter()
@@ -51,7 +51,7 @@ async def chat(request: Request, body: ChatRequest):
         )
 
     db: sqlite3.Connection = request.app.state.db
-    provider: BedrockProvider = request.app.state.provider
+    provider = request.app.state.provider
 
     try:
         query_embedding = provider.embed([body.query], input_type="search_query")[0]

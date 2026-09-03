@@ -1,20 +1,8 @@
-import os from "node:os";
 import path from "node:path";
 
 export function resolveVaultRoot(): string {
   return path.resolve(
-    process.env.EVO_STORE ??
-      path.join(
-        os.homedir(),
-        "Library",
-        "Mobile Documents",
-        "iCloud~md~obsidian",
-        "Documents",
-        "Samuel's Vault",
-        "SamuelOS",
-        "Knowledge",
-        "KB"
-      )
+    process.env.EVO_STORE ?? path.join(process.cwd(), "..", "data")
   );
 }
 

@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.llm.bedrock import BedrockProvider
+from core.llm.bedrock import get_provider
 from core.memory.db import default_db_path, load_sqlite_vec, open_db
 from server.routes.agent import router as agent_router
 from server.routes.chat import router as chat_router
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
         raise RuntimeError(f"Failed to open database: {exc}") from exc
 
     try:
-        provider = BedrockProvider()
+        provider = get_provider()
     except ValueError as exc:
         app.state.startup_error = f"Provider init failed: {exc}"
         app.state.db = None
@@ -44,7 +44,11 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        os.environ.get("ALLOWED_ORIGIN", ""),
+    ],
     allow_methods=["POST", "GET", "DELETE", "OPTIONS"],
     allow_headers=["content-type"],
 )

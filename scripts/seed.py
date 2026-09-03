@@ -1,11 +1,14 @@
-"""Seed manifest.db with demo research artifacts for portfolio presentation."""
+"""Seed manifest.db with demo artifacts, chunks, and embeddings."""
 
 import sqlite3
+import struct
 import sys
 from pathlib import Path
 
 DB_DIR = Path(__file__).resolve().parent.parent / "data"
 DB_PATH = DB_DIR / "manifest.db"
+
+EMBEDDING_DIM = 384  # BAAI/bge-small-en-v1.5
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS artifacts (
@@ -23,8 +26,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
 
 CREATE VIRTUAL TABLE IF NOT EXISTS artifacts_fts USING fts5(
     title, summary, tags, topics,
-    content='artifacts',
-    content_rowid='id'
+    content='artifacts', content_rowid='id'
 );
 
 CREATE TRIGGER IF NOT EXISTS artifacts_ai AFTER INSERT ON artifacts BEGIN
@@ -43,7 +45,29 @@ CREATE TRIGGER IF NOT EXISTS artifacts_au AFTER UPDATE ON artifacts BEGIN
     INSERT INTO artifacts_fts(rowid, title, summary, tags, topics)
     VALUES (new.id, new.title, new.summary, new.tags, new.topics);
 END;
+
+CREATE TABLE IF NOT EXISTS chunks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artifact_id INTEGER NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,
+    text TEXT NOT NULL,
+    char_start INTEGER NOT NULL DEFAULT 0,
+    char_end INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
+    text, content='chunks', content_rowid='id'
+);
+
+CREATE TRIGGER IF NOT EXISTS chunks_ai AFTER INSERT ON chunks BEGIN
+    INSERT INTO chunks_fts(rowid, text) VALUES (new.id, new.text);
+END;
+
+CREATE TRIGGER IF NOT EXISTS chunks_ad AFTER DELETE ON chunks BEGIN
+    INSERT INTO chunks_fts(chunks_fts, rowid, text) VALUES ('delete', old.id, old.text);
+END;
 """
+
+# NOTE: embeddings table created separately after sqlite-vec is loaded
 
 ARTIFACTS = [
     {
@@ -133,19 +157,39 @@ def seed():
     DB_DIR.mkdir(parents=True, exist_ok=True)
 
     if DB_PATH.exists():
-        print(f"DB already exists at {DB_PATH}")
-        print("Delete it first if you want to re-seed: rm data/manifest.db")
-        sys.exit(1)
+        print(f"DB exists at {DB_PATH} — removing for fresh seed.")
+        DB_PATH.unlink()
 
     conn = sqlite3.connect(str(DB_PATH))
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
 
+    # Load sqlite-vec for embeddings table
+    try:
+        import sqlite_vec
+
+        conn.enable_load_extension(True)
+        sqlite_vec.load(conn)
+        conn.enable_load_extension(False)
+    except Exception as exc:
+        print(f"WARNING: sqlite-vec not available ({exc}). Skipping embeddings.")
+        _seed_artifacts_and_chunks(conn, embed=False)
+        conn.close()
+        return
+
+    conn.execute(
+        f"CREATE VIRTUAL TABLE IF NOT EXISTS embeddings USING vec0(chunk_id INTEGER PRIMARY KEY, embedding float[{EMBEDDING_DIM}])"
+    )
+
+    _seed_artifacts_and_chunks(conn, embed=True)
+    conn.close()
+
+
+def _seed_artifacts_and_chunks(conn: sqlite3.Connection, embed: bool) -> None:
+    # Insert artifacts
     for art in ARTIFACTS:
         conn.execute(
-            """
-            INSERT INTO artifacts (slug, title, summary, tags, topics, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
+            "INSERT INTO artifacts (slug, title, summary, tags, topics, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
                 art["slug"],
                 art["title"],
@@ -158,10 +202,48 @@ def seed():
         )
 
     conn.commit()
-    count = conn.execute("SELECT COUNT(*) FROM artifacts").fetchone()[0]
-    conn.close()
 
-    print(f"Seeded {count} artifacts into {DB_PATH}")
+    # Create chunks from summaries
+    artifacts = conn.execute("SELECT id, summary FROM artifacts").fetchall()
+    chunk_ids_texts: list[tuple[int, str]] = []
+
+    for art_id, summary in artifacts:
+        if not summary:
+            continue
+        cursor = conn.execute(
+            "INSERT INTO chunks (artifact_id, text, char_start, char_end) VALUES (?, ?, 0, ?)",
+            (art_id, summary, len(summary)),
+        )
+        chunk_ids_texts.append((cursor.lastrowid, summary))
+
+    conn.commit()
+    print(f"Seeded {len(ARTIFACTS)} artifacts and {len(chunk_ids_texts)} chunks.")
+
+    if not embed or not chunk_ids_texts:
+        return
+
+    # Embed chunks
+    print("Computing embeddings with fastembed...")
+    try:
+        from fastembed import TextEmbedding
+
+        embedder = TextEmbedding("BAAI/bge-small-en-v1.5")
+    except ImportError:
+        print("WARNING: fastembed not installed. Skipping embeddings.")
+        return
+
+    texts = [text for _, text in chunk_ids_texts]
+    embeddings = list(embedder.embed(texts))
+
+    for (chunk_id, _), embedding in zip(chunk_ids_texts, embeddings):
+        blob = struct.pack(f"{len(embedding)}f", *embedding.tolist())
+        conn.execute(
+            "INSERT INTO embeddings (chunk_id, embedding) VALUES (?, ?)",
+            (chunk_id, blob),
+        )
+
+    conn.commit()
+    print(f"Embedded {len(embeddings)} chunks ({EMBEDDING_DIM} dims).")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.llm.bedrock import BedrockProvider
+from core.llm.bedrock import get_provider
 from core.memory.db import default_db_path, load_sqlite_vec, open_db
 
 BATCH_SIZE = 64
@@ -42,7 +42,7 @@ def get_all_chunks(conn: sqlite3.Connection) -> list[tuple[int, str]]:
 def embed_chunks(
     conn: sqlite3.Connection,
     chunks: list[tuple[int, str]],
-    provider: BedrockProvider,
+    provider,
 ) -> int:
     """Embed chunks in batches, write to embeddings table. Returns count embedded."""
     total = len(chunks)
@@ -71,7 +71,7 @@ def embed_chunks(
     return embedded
 
 
-def _embed_with_retry(provider: BedrockProvider, texts: list[str]) -> list[list[float]]:
+def _embed_with_retry(provider, texts: list[str]) -> list[list[float]]:
     """Call provider.embed with exponential backoff on transient errors."""
     for attempt in range(MAX_RETRIES):
         try:
@@ -92,7 +92,7 @@ def _serialize_vector(vector: list[float]) -> bytes:
     return struct.pack(f"{len(vector)}f", *vector)
 
 
-def run_incremental(conn: sqlite3.Connection, provider: BedrockProvider) -> int:
+def run_incremental(conn: sqlite3.Connection, provider) -> int:
     chunks = get_unembedded_chunks(conn)
     if not chunks:
         print("All chunks already embedded. Nothing to do.")
@@ -101,7 +101,7 @@ def run_incremental(conn: sqlite3.Connection, provider: BedrockProvider) -> int:
     return embed_chunks(conn, chunks, provider)
 
 
-def run_rebuild(conn: sqlite3.Connection, provider: BedrockProvider) -> int:
+def run_rebuild(conn: sqlite3.Connection, provider) -> int:
     chunks = get_all_chunks(conn)
     total = len(chunks)
     confirm = input(f"Re-embedding all {total} chunks. Confirm? [y/N] ")
@@ -142,7 +142,7 @@ def main(argv: list[str] | None = None) -> None:
     load_sqlite_vec(conn)
 
     try:
-        provider = BedrockProvider()
+        provider = get_provider()
     except ValueError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
