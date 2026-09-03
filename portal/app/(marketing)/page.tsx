@@ -61,7 +61,7 @@ export default function Home() {
           <div className="reveal mb-6">
             <span className="kicker inline-flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#d4a574]" />
-              Personal knowledge base
+              Personal AI knowledge base
             </span>
           </div>
 
