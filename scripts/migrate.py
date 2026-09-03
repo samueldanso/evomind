@@ -1,4 +1,4 @@
-"""scripts/migrate.py — forward-only DB migration runner for Evo.
+"""scripts/migrate.py — forward-only DB migration runner for EvoMind.
 
 Usage:
     uv run scripts/migrate.py [--db PATH] [--skip-backup-check]
@@ -112,7 +112,7 @@ def apply_migrations(
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Evo DB migration runner")
+    parser = argparse.ArgumentParser(description="EvoMind DB migration runner")
     parser.add_argument("--db", type=Path, default=None, help="Path to manifest.db")
     parser.add_argument(
         "--skip-backup-check",

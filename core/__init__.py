@@ -1,1 +1,1 @@
-"""Evo core — platform harness primitives."""
+"""EvoMind core — platform harness primitives."""

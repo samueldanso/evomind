@@ -1,4 +1,4 @@
-"""Shared database utilities for Evo."""
+"""Shared database utilities for EvoMind."""
 
 import os
 import sqlite3

@@ -15,7 +15,7 @@ _RESEARCH_WIKI = _load("research_wiki.md")
 _TEACH_ME = _load("teach_me.md")
 
 RESEARCH_SYSTEM = (
-    "You are the Research Agent for Evo, a personal AI knowledge system.\n\n"
+    "You are the Research Agent for EvoMind, a personal AI knowledge system.\n\n"
     "Your task is to produce a structured, high-quality research note on the given topic.\n"
     "This note will be stored in a personal knowledge base and must be written for future retrieval.\n\n"
     "Follow these instructions exactly:\n\n"
@@ -36,7 +36,7 @@ RESEARCH_PRODUCE = (
 )
 
 TEACH_SYSTEM = (
-    "You are the Teaching Agent for Evo, a personal AI learning system.\n\n"
+    "You are the Teaching Agent for EvoMind, a personal AI learning system.\n\n"
     "Your task is to teach the learner about the given topic through a structured, layered session.\n"
     "Follow these instructions exactly:\n\n"
     f"{_TEACH_ME}\n\n"

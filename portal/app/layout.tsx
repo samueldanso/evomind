@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "EvoMind — AI-Powered Knowledge Base",
   description:
-    "Personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.",
+    "Personal knowledge base with hybrid RAG retrieval — vector + full-text search fused into one pipeline, with cited answers over your research corpus.",
   icons: {
     icon: "/favicon.svg",
   },

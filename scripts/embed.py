@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evo embed pipeline — compute and store chunk embeddings.
+"""EvoMind embed pipeline — compute and store chunk embeddings.
 
 Usage:
     uv run scripts/embed.py [--incremental | --rebuild] [--db PATH]
@@ -116,7 +116,7 @@ def run_rebuild(conn: sqlite3.Connection, provider) -> int:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Evo embedding pipeline")
+    parser = argparse.ArgumentParser(description="EvoMind embedding pipeline")
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--incremental",

@@ -81,7 +81,7 @@ def format_report(
 ) -> str:
     """Format the eval report as a string."""
     lines = [
-        "Evo Phase C — Retrieval Smoke Test",
+        "EvoMind Phase C — Retrieval Smoke Test",
         f"Corpus: {corpus[0]} artifacts, {corpus[1]} chunks, {corpus[2]} embeddings",
         "",
     ]
@@ -108,7 +108,7 @@ def format_report(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Evo retrieval smoke test")
+    parser = argparse.ArgumentParser(description="EvoMind retrieval smoke test")
     parser.add_argument("--db", type=Path, default=None, help="Path to manifest.db")
     args = parser.parse_args(argv)
 

@@ -50,7 +50,7 @@
 
 ## Tech Stack
 
-**Backend:** Python 3.12+ · FastAPI · SQLite (FTS5 + sqlite-vec) · OpenRouter (LLaMA 3.3 70B) · fastembed (BAAI/bge-small-en-v1.5) · pytest (153 tests)
+**Backend:** Python 3.12+ · FastAPI · SQLite (FTS5 + sqlite-vec) · OpenRouter (LLaMA 3.3 70B) · fastembed (BAAI/bge-small-en-v1.5) · pytest (150+ tests)
 
 **Frontend:** Next.js 16 · React 19 · Tailwind v4 · shadcn/ui · better-sqlite3
 

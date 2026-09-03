@@ -40,7 +40,7 @@ export default function SearchPage() {
           >
             <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
               <Sparkle size={14} weight="fill" />
-              Ask Evo AI
+              Ask AI
             </TabButton>
             <TabButton active={activeTab === "search"} onClick={() => setActiveTab("search")}>
               <MagnifyingGlass size={14} weight="bold" />
