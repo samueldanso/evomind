@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: evomind-api
+    runtime: docker
+    healthCheckPath: /health
+    plan: starter
+    disk:
+      name: evomind-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: EVO_STORE
+        value: /data
+      - key: PORT
+        value: 8765
+      - key: EVO_LLM_PROVIDER
+        value: openrouter
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: https://evomind.vercel.app
