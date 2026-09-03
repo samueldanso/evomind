@@ -8,9 +8,11 @@ from core.llm.bedrock import (
     Provider,
     get_provider,
 )
+from core.llm.openrouter import OpenRouterProvider
 
 __all__ = [
     "BedrockProvider",
+    "OpenRouterProvider",
     "ChatMessage",
     "ChatResponse",
     "Citation",

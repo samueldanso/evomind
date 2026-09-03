@@ -106,7 +106,11 @@ class BedrockProvider:
 
 
 def get_provider(provider_name: str | None = None) -> Provider:
-    name = provider_name or os.environ.get("EVO_LLM_PROVIDER", "bedrock")
+    name = provider_name or os.environ.get("EVO_LLM_PROVIDER", "openrouter")
+    if name == "openrouter":
+        from core.llm.openrouter import OpenRouterProvider
+
+        return OpenRouterProvider()
     if name == "bedrock":
         return BedrockProvider()
-    raise ValueError(f"Unknown provider: {name!r}. Expected 'bedrock'.")
+    raise ValueError(f"Unknown provider: {name!r}. Expected 'openrouter' or 'bedrock'.")
