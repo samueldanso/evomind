@@ -54,6 +54,7 @@ export default function RootLayout({
 
             <NavLink href="/wiki">Wiki</NavLink>
             <NavLink href="/search">Search</NavLink>
+            <NavLink href="/ingest">Add Source</NavLink>
 
             <div className="w-px h-4 bg-[rgba(255,255,255,0.08)]" />
 
@@ -98,6 +99,7 @@ export default function RootLayout({
                 <nav className="flex flex-col gap-2.5">
                   <FooterLink href="/wiki">Wiki</FooterLink>
                   <FooterLink href="/search">Search</FooterLink>
+                  <FooterLink href="/ingest">Add Source</FooterLink>
                 </nav>
               </div>
 
@@ -107,9 +109,7 @@ export default function RootLayout({
                   Resources
                 </h4>
                 <nav className="flex flex-col gap-2.5">
-                  <FooterLink href="https://github.com/samueldanso/evomind#readme" external>
-                    Documentation
-                  </FooterLink>
+                  <FooterLink href="/docs">Documentation</FooterLink>
                   <FooterLink href="https://github.com/samueldanso/evomind" external>
                     GitHub
                   </FooterLink>
