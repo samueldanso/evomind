@@ -41,11 +41,11 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-[var(--background)]">
       {/* Hero */}
       <section className="relative min-h-[100dvh] flex items-center justify-center px-6 overflow-hidden">
-        {/* Subtle warm ambient glow */}
+        {/* Smooth warm ambient background */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at center, rgba(212,165,116,0.06) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(212,165,116,0.08) 0%, rgba(212,165,116,0.03) 40%, transparent 70%)",
           }}
         />
 
