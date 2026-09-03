@@ -72,6 +72,73 @@ export default function RootLayout({
         </header>
 
         <main>{children}</main>
+
+        {/* Footer */}
+        <footer className="border-t border-[rgba(255,255,255,0.04)]">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-12 sm:gap-8">
+              {/* Brand */}
+              <div className="sm:col-span-5">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <Image src="/logo.svg" alt="EvoMind" width={20} height={20} className="rounded-md" />
+                  <span className="text-xs font-medium tracking-[0.15em] uppercase text-[rgba(245,245,244,0.7)]">
+                    EvoMind
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed max-w-xs" style={{ color: "rgba(245,245,244,0.4)" }}>
+                  Your personal research agent. Ingest, embed, and retrieve your knowledge with hybrid RAG.
+                </p>
+              </div>
+
+              {/* Product links */}
+              <div className="sm:col-span-3">
+                <h4 className="text-xs font-medium uppercase tracking-wider mb-4" style={{ color: "rgba(245,245,244,0.35)" }}>
+                  Product
+                </h4>
+                <nav className="flex flex-col gap-2.5">
+                  <FooterLink href="/wiki">Wiki</FooterLink>
+                  <FooterLink href="/search">Search</FooterLink>
+                </nav>
+              </div>
+
+              {/* Resources */}
+              <div className="sm:col-span-4">
+                <h4 className="text-xs font-medium uppercase tracking-wider mb-4" style={{ color: "rgba(245,245,244,0.35)" }}>
+                  Resources
+                </h4>
+                <nav className="flex flex-col gap-2.5">
+                  <FooterLink href="https://github.com/samueldanso/evomind#readme" external>
+                    Documentation
+                  </FooterLink>
+                  <FooterLink href="https://github.com/samueldanso/evomind" external>
+                    GitHub
+                  </FooterLink>
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-[rgba(255,255,255,0.04)]">
+            <div className="mx-auto max-w-6xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-xs" style={{ color: "rgba(245,245,244,0.25)" }}>
+                Built with SQLite + hybrid RAG
+              </span>
+              <span className="text-xs" style={{ color: "rgba(245,245,244,0.25)" }}>
+                &copy; {new Date().getFullYear()} EvoMind. Your knowledge. Your control.
+              </span>
+              <a
+                href="https://github.com/samueldanso/evomind/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[rgba(245,245,244,0.5)]"
+                style={{ color: "rgba(245,245,244,0.25)" }}
+              >
+                MIT License
+              </a>
+            </div>
+          </div>
+        </footer>
       </body>
     </html>
   );
@@ -82,6 +149,39 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       className="px-3 py-1.5 rounded-full text-sm font-medium text-[rgba(245,245,244,0.45)] hover:text-[#f5f5f4] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function FooterLink({
+  href,
+  external,
+  children,
+}: { href: string; external?: boolean; children: React.ReactNode }) {
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[#f5f5f4] inline-flex items-center gap-1"
+        style={{ color: "rgba(245,245,244,0.5)" }}
+      >
+        {children}
+        <svg width={11} height={11} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5} className="opacity-50">
+          <path d="M3.5 1.5h7v7M10.5 1.5L1.5 10.5" />
+        </svg>
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[#f5f5f4]"
+      style={{ color: "rgba(245,245,244,0.5)" }}
     >
       {children}
     </Link>
