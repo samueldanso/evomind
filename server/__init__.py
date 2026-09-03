@@ -13,6 +13,7 @@ from core.memory.db import default_db_path, load_sqlite_vec, open_db
 from server.routes.agent import router as agent_router
 from server.routes.chat import router as chat_router
 from server.routes.ingest import router as ingest_router
+from server.routes.upload import router as upload_router
 
 
 @asynccontextmanager
@@ -57,6 +58,7 @@ app.add_middleware(
 app.include_router(chat_router)
 app.include_router(agent_router)
 app.include_router(ingest_router)
+app.include_router(upload_router)
 
 
 if __name__ == "__main__":
