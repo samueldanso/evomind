@@ -2,23 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Search, Sparkles, Loader2, Send, MessageSquare } from "lucide-react";
 import { type ChatResponse, type ChatSource, chat } from "@/lib/chat";
 import type { Artifact } from "@/lib/types";
 
 type Tab = "ask" | "search";
+
+const SUGGESTED_QUESTIONS = [
+  "How does hybrid search work?",
+  "What is retrieval-augmented generation?",
+  "How do embedding models compare?",
+  "What chunking strategies exist for retrieval?",
+];
 
 export default function SearchPage() {
   const [activeTab, setActiveTab] = useState<Tab>("ask");
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <header className="mb-8">
-          <span className="kicker">Intelligence layer</span>
-          <h1 className="section-title mt-2">Search your knowledge</h1>
-        </header>
-
+      <div className="mx-auto max-w-4xl px-6 py-12">
         {/* Tab switcher */}
         <div className="flex gap-1 mb-8 p-1 rounded-xl w-fit" style={{ background: "rgba(255,255,255,0.04)" }}>
           <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
@@ -59,24 +63,38 @@ function TabButton({
 
 /* ── Ask AI Tab ─────────────────────────────────── */
 
+interface QAPair {
+  question: string;
+  answer: string;
+  sources: ChatSource[];
+}
+
 function AskAITab() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ChatResponse | null>(null);
+  const [history, setHistory] = useState<QAPair[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history, loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = query.trim();
-    if (!trimmed) return;
+    if (!trimmed || loading) return;
 
     setLoading(true);
     setError(null);
-    setResult(null);
+    setQuery("");
 
     try {
       const response = await chat(trimmed);
-      setResult(response);
+      setHistory((prev) => [
+        ...prev,
+        { question: trimmed, answer: response.answer, sources: response.sources },
+      ]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to get answer");
     } finally {
@@ -84,91 +102,159 @@ function AskAITab() {
     }
   }
 
+  function handleSuggestion(q: string) {
+    setQuery(q);
+  }
+
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="flex gap-3">
-        <div className="relative flex-1">
-          <Sparkles
-            size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2"
-            style={{ color: "#d4a574" }}
-          />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask anything about your research…"
-            disabled={loading}
-            className="input-field pl-11"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading || !query.trim()}
-          className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : "Ask"}
-        </button>
-      </form>
-
-      {error && (
-        <div
-          className="mt-6 p-4 rounded-xl text-sm"
-          style={{
-            background: "rgba(239,68,68,0.08)",
-            border: "1px solid rgba(239,68,68,0.2)",
-            color: "#fca5a5",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {loading && (
-        <div className="mt-8 flex items-center gap-2" style={{ color: "rgba(245,245,244,0.45)" }}>
-          <Loader2 size={14} className="animate-spin" />
-          <span className="text-sm">Searching corpus and generating answer…</span>
-        </div>
-      )}
-
-      {result && (
-        <div className="mt-8 space-y-6 animate-fade-in">
-          {/* Answer */}
-          <div className="surface-card p-6">
-            <h3
-              className="text-[11px] font-medium uppercase tracking-wider mb-3"
-              style={{ color: "rgba(245,245,244,0.35)" }}
+    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 220px)" }}>
+      {/* Chat area */}
+      <div className="flex-1 space-y-6 pb-6">
+        {/* Empty state */}
+        {history.length === 0 && !loading && !error && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+              style={{ background: "rgba(212,165,116,0.1)" }}
             >
-              Answer
-            </h3>
-            <div className="wiki-prose text-sm leading-relaxed">{result.answer}</div>
+              <MessageSquare size={24} style={{ color: "#d4a574" }} />
+            </div>
+            <h2 className="text-lg font-medium mb-2" style={{ color: "#f5f5f4" }}>
+              Ask your knowledge base
+            </h2>
+            <p className="text-sm mb-8 text-center max-w-md" style={{ color: "rgba(245,245,244,0.4)" }}>
+              Get cited answers grounded in your research corpus using hybrid RAG retrieval.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {SUGGESTED_QUESTIONS.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => handleSuggestion(q)}
+                  className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(245,245,244,0.5)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(212,165,116,0.3)";
+                    e.currentTarget.style.color = "#d4a574";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                    e.currentTarget.style.color = "rgba(245,245,244,0.5)";
+                  }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
+        )}
 
-          {/* Sources */}
-          {result.sources.length > 0 && (
-            <div>
-              <h3
-                className="text-[11px] font-medium uppercase tracking-wider mb-3"
-                style={{ color: "rgba(245,245,244,0.35)" }}
+        {/* Q&A pairs */}
+        {history.map((pair, i) => (
+          <div key={`qa-${pair.question.slice(0, 20)}-${i}`} className="space-y-4">
+            {/* Question */}
+            <div className="flex justify-end">
+              <div
+                className="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-md text-sm"
+                style={{
+                  background: "rgba(212,165,116,0.12)",
+                  color: "#f5f5f4",
+                }}
               >
-                Sources ({result.sources.length})
-              </h3>
-              <div className="space-y-2">
-                {result.sources.map((source) => (
-                  <SourceCard key={`${source.slug}-${source.excerpt.slice(0, 20)}`} source={source} />
-                ))}
+                {pair.question}
               </div>
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Answer */}
+            <div className="flex justify-start">
+              <div className="max-w-full space-y-4">
+                <div className="surface-card p-5">
+                  <div className="wiki-prose text-sm leading-relaxed">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{pair.answer}</ReactMarkdown>
+                  </div>
+                </div>
+
+                {/* Sources */}
+                {pair.sources.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {pair.sources.map((source) => (
+                      <SourceChip key={`${source.slug}-${i}`} source={source} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex justify-start">
+            <div
+              className="surface-card px-5 py-4 flex items-center gap-3"
+            >
+              <Loader2 size={14} className="animate-spin" style={{ color: "#d4a574" }} />
+              <span className="text-sm" style={{ color: "rgba(245,245,244,0.5)" }}>
+                Searching corpus and generating answer…
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div
+            className="p-4 rounded-xl text-sm"
+            style={{
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.2)",
+              color: "#fca5a5",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input — sticky at bottom */}
+      <div
+        className="sticky bottom-0 pt-4 pb-2"
+        style={{ background: "linear-gradient(transparent, #09090b 20%)" }}
+      >
+        <form onSubmit={handleSubmit} className="flex gap-3">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask anything about your research…"
+              disabled={loading}
+              className="input-field pr-4"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed px-4"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
-function SourceCard({ source }: { source: ChatSource }) {
+function SourceChip({ source }: { source: ChatSource }) {
   const matchColors: Record<string, string> = {
     vector: "#C7B8FF",
+    vec: "#C7B8FF",
     fts: "#7BD0E8",
     hybrid: "#d4a574",
   };
@@ -176,36 +262,17 @@ function SourceCard({ source }: { source: ChatSource }) {
 
   return (
     <Link href={`/wiki/${source.slug}`}>
-      <div className="surface-card p-4 flex items-start gap-4 group">
-        <div className="flex-1 min-w-0">
-          <h4
-            className="text-sm font-medium truncate group-hover:text-[#f5f5f4] transition-colors"
-            style={{ color: "rgba(245,245,244,0.8)" }}
-          >
-            {source.title}
-          </h4>
-          <p
-            className="text-xs mt-1 line-clamp-2"
-            style={{ color: "rgba(245,245,244,0.4)" }}
-          >
-            {source.excerpt}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full uppercase"
-            style={{ background: `${color}15`, color }}
-          >
-            {source.match_type}
-          </span>
-          <span
-            className="text-[11px] font-mono tabular-nums"
-            style={{ color: "rgba(245,245,244,0.3)" }}
-          >
-            {source.score.toFixed(2)}
-          </span>
-        </div>
-      </div>
+      <span
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all hover:opacity-80"
+        style={{
+          background: `${color}10`,
+          border: `1px solid ${color}25`,
+          color,
+        }}
+      >
+        <span className="truncate max-w-[180px]">{source.title}</span>
+        <span className="font-mono opacity-60">{source.score.toFixed(2)}</span>
+      </span>
     </Link>
   );
 }
