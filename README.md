@@ -1,114 +1,111 @@
 # EvoMind
 
-> Personal knowledge base with hybrid RAG retrieval — vector + full-text search fused into one pipeline, with cited answers over your research corpus.
+Personal knowledge base with hybrid RAG retrieval. Ingest articles, PDFs, or URLs — ask questions and get cited answers grounded in your own research.
 
-**"The goal isn't to remember everything. It's to never lose what matters."**
+**[Live Demo](https://evomind-ai.vercel.app)** · **[GitHub](https://github.com/samueldanso/evomind)**
 
-## What This Demonstrates
+## Features
 
-| Capability | Implementation |
-|---|---|
-| **Hybrid RAG Retrieval** | Vector search (sqlite-vec) + FTS5 full-text search, fused via score-based merge — neither alone covers the question space |
-| **Cited Q&A** | Ask a question in natural language, get an answer grounded in the corpus with source citations and relevance scores |
-| **Embedding Pipeline** | Sentence-boundary chunking, local ONNX embeddings (fastembed), incremental + full rebuild with batched processing |
-| **Eval-Gated Quality** | Retrieval quality harness gates every change — no migration, no model swap ships without passing the eval |
-| **Provider Abstraction** | Swappable LLM backend: OpenRouter (LLaMA 3.3 70B) or AWS Bedrock (Claude Sonnet). One env var to switch. |
-| **Local-First Storage** | Single SQLite file (FTS5 + sqlite-vec) — no Postgres, no managed vector DB, no infra overhead |
+- **Hybrid Search** — every query runs vector similarity + full-text keyword search in parallel, then fuses the results for comprehensive recall
+- **Cited Q&A** — ask a question in natural language, get a grounded answer with source citations and relevance scores
+- **Multi-Source Ingest** — paste text, drop a URL, or upload a PDF/DOCX — content is extracted, chunked, embedded, and indexed automatically
+- **Wiki Browser** — browse, search, and filter your knowledge base with instant FTS5-powered keyword search
+- **Eval-Gated Quality** — a retrieval quality harness gates every change to the system; if search quality drops, the change doesn't ship
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Python 3.12 · FastAPI · SQLite (FTS5 + sqlite-vec) |
+| **LLM** | OpenRouter (Gemma 4 26B, free) · fastembed (local ONNX embeddings) |
+| **Frontend** | Next.js 16 · React 19 · Tailwind v4 · shadcn/ui |
+| **Database** | Single-file SQLite with FTS5 full-text search + sqlite-vec vector search |
+| **Deployment** | Render (Docker + persistent disk) · Vercel (Next.js) |
+| **Testing** | pytest (150+ tests) · Vitest · Biome |
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  Portal (Next.js 16, React 19, Tailwind v4)         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │ Landing   │  │ Wiki     │  │ Search   │          │
-│  │ Page      │  │ Browser  │  │ Ask AI   │          │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘          │
-│       │              │              │                │
-│  SQLite (readonly)   │         POST /chat            │
-│  better-sqlite3      │              │                │
-└──────────────────────┼──────────────┼────────────────┘
-                       │              │
-┌──────────────────────┼──────────────┼────────────────┐
-│  Server (FastAPI)    │              │                │
-│  ┌───────────────────▼──────────────▼───────────┐    │
-│  │  Hybrid Retrieval: vec_search + fts_search   │    │
-│  │  → score-based merge → dedup by chunk_id     │    │
-│  └──────────────────────────────────────────────┘    │
-│  ┌──────────────┐  ┌───────────┐                     │
-│  │ Provider     │  │ Embedding │                     │
-│  │ (OpenRouter) │  │ (fastembed)│                     │
-│  └──────────────┘  └───────────┘                     │
-└──────────────────────────────────────────────────────┘
-                       │
-              ┌────────▼────────┐
-              │  manifest.db    │
-              │  SQLite + FTS5  │
-              │  + sqlite-vec   │
-              └─────────────────┘
+Portal (Next.js)                     Server (FastAPI)
+┌──────────────────────┐             ┌──────────────────────────┐
+│  Wiki Browser        │──SQLite──→  │                          │
+│  Keyword Search      │  (readonly) │  Hybrid Retrieval        │
+│  Landing Page        │             │  vec_search + fts_search │
+│                      │             │  → score-based merge     │
+│  Ask AI  ────────────│──POST /chat─│                          │
+│  Add Source ─────────│──POST /api──│  Provider (OpenRouter)   │
+│  File Upload ────────│──POST /api──│  Embeddings (fastembed)  │
+└──────────────────────┘             └────────────┬─────────────┘
+                                                  │
+                                          manifest.db
+                                     SQLite + FTS5 + sqlite-vec
 ```
 
-## Tech Stack
-
-**Backend:** Python 3.12+ · FastAPI · SQLite (FTS5 + sqlite-vec) · OpenRouter (LLaMA 3.3 70B) · fastembed (BAAI/bge-small-en-v1.5) · pytest (150+ tests)
-
-**Frontend:** Next.js 16 · React 19 · Tailwind v4 · shadcn/ui · better-sqlite3
-
-## Run Locally
+## Getting Started
 
 ### Prerequisites
+
 - Python 3.12+, [uv](https://docs.astral.sh/uv/)
 - Node.js 20+, [bun](https://bun.sh)
 - [OpenRouter API key](https://openrouter.ai/keys) (free)
 
-### Backend
+### Run locally
+
 ```bash
-# Seed the database (creates demo data + embeddings)
+# Clone and setup
+git clone https://github.com/samueldanso/evomind.git
+cd evomind
+
+# Seed the database with demo content + embeddings
 uv run scripts/seed.py
 
-# Start server
-OPENROUTER_API_KEY=your-key-here uvicorn server:app --port 8765
+# Start the backend
+OPENROUTER_API_KEY=your-key uvicorn server:app --port 8765
+
+# In another terminal — start the portal
+cd portal && bun install && bun dev
 ```
 
-### Portal
-```bash
-cd portal
-bun install
-bun dev
-```
+Open [http://localhost:3000](http://localhost:3000)
 
-Open `http://localhost:3000`
+### Add your own content
 
-### Ingest research
+**From the UI:** Go to Add Source → paste text, drop a URL, or upload a PDF.
+
+**From the CLI:**
 ```bash
-uv run scripts/ingest.py --title "..." --slug "..." --tags "..." --topics "..." --summary "..." --html /path/to/file.html
+uv run scripts/ingest.py --title "..." --slug "..." --tags "..." --summary "..." --html /path/to/file.html
+uv run scripts/embed.py --incremental
 ```
 
 ### Run tests
+
 ```bash
-uv run pytest                    # 153 Python tests
+uv run pytest                    # Python (150+ tests)
 cd portal && bun test            # Portal tests
 cd portal && bun run build       # Build check
-uv run scripts/eval.py           # Retrieval quality gate (10/10)
 ```
 
 ## Deployment
 
-**Backend** → [Render](https://render.com) (Docker + persistent disk)
-**Frontend** → [Vercel](https://vercel.com) (Next.js)
+| Service | Platform | Config |
+|---------|----------|--------|
+| Backend (FastAPI) | [Render](https://render.com) | `render.yaml` — Docker + persistent disk |
+| Frontend (Next.js) | [Vercel](https://vercel.com) | `portal/vercel.json` — root dir `portal` |
 
-### Deploy Backend
-1. Create a new Web Service on Render
-2. Connect your GitHub repo
-3. Render auto-detects the `render.yaml` — confirm settings
-4. Set `OPENROUTER_API_KEY` in the Render dashboard (Secrets)
-5. Deploy — the entrypoint seeds the DB on first run
+### Environment Variables
 
-### Deploy Frontend
-1. Import the repo on Vercel
-2. Set root directory to `portal`
-3. Set `EVO_SERVER_URL` to your Render backend URL (e.g., `https://evomind-api.onrender.com`)
-4. Deploy
+**Render (backend):**
+| Variable | Value |
+|----------|-------|
+| `OPENROUTER_API_KEY` | Your key (set as secret) |
+| `EVO_STORE` | `/data` |
+| `ALLOWED_ORIGIN` | Your Vercel URL |
+
+**Vercel (frontend):**
+| Variable | Value |
+|----------|-------|
+| `EVO_SERVER_URL` | Your Render URL |
 
 ## License
 
