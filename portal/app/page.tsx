@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Search, Sparkles, Brain, Database, Shield } from "lucide-react";
+import { ArrowRight, Search, Database, Shield, Layers, MessageSquare } from "lucide-react";
 
 export default function Home() {
   return (
@@ -19,7 +19,7 @@ export default function Home() {
           <div className="mb-6">
             <span className="kicker inline-flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#d4a574]" />
-              AI-Powered Knowledge Base
+              Hybrid RAG Knowledge Base
             </span>
           </div>
 
@@ -70,22 +70,22 @@ export default function Home() {
             {[
               {
                 title: "Hybrid RAG Retrieval",
-                desc: "Vector search (sqlite-vec, Cohere Embed v4) fused with FTS5 full-text search via score-based merge. Neither alone covers the question space — both together hit 10/10 on the eval harness.",
-                Icon: Search,
+                desc: "Vector search (sqlite-vec) fused with FTS5 full-text search via score-based merge. Neither alone covers the question space — hybrid retrieval combines semantic similarity with exact keyword matching for comprehensive recall.",
+                Icon: Layers,
               },
               {
-                title: "Research Agents",
-                desc: "Autonomous agents that retrieve existing context, generate structured notes via LLM, and ingest results back into the knowledge base. Tool-calling loop with allowlist enforcement and full audit log.",
-                Icon: Brain,
+                title: "Cited Answers",
+                desc: "Ask a question in natural language, get an answer grounded in your knowledge base with source citations. Every answer traces back to the chunks that informed it — no hallucination without attribution.",
+                Icon: MessageSquare,
               },
               {
                 title: "Embedding Pipeline",
-                desc: "Sentence-boundary chunking, Cohere Embed v4 at 1024 dimensions, batched processing with exponential backoff. Incremental and full rebuild modes.",
+                desc: "Sentence-boundary chunking with configurable overlap. Local ONNX embeddings via fastembed — no external API dependency for vector generation. Incremental and full rebuild modes with batched processing.",
                 Icon: Database,
               },
               {
                 title: "Eval-Gated Quality",
-                desc: "10-question retrieval quality harness gates every release. Currently 10/10. No agent change ships if retrieval regresses. The eval is the contract.",
+                desc: "Retrieval quality harness with curated test questions gates every change. No schema migration, no embedding model swap, no chunking adjustment ships without passing the eval. The eval is the contract.",
                 Icon: Shield,
               },
             ].map(({ title, desc, Icon }) => (
@@ -115,7 +115,7 @@ export default function Home() {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             {[
               "Python", "FastAPI", "SQLite", "sqlite-vec", "FTS5",
-              "AWS Bedrock", "Claude Sonnet", "Cohere Embed v4",
+              "OpenRouter", "LLaMA 3.3", "fastembed",
               "Next.js 16", "React 19", "Tailwind v4",
             ].map((tech) => (
               <span

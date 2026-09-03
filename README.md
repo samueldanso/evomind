@@ -1,6 +1,6 @@
 # EvoMind
 
-> AI-powered personal knowledge base with hybrid RAG retrieval, autonomous research agents, and a compounding knowledge graph.
+> Personal knowledge base with hybrid RAG retrieval — vector + full-text search fused into one pipeline, with cited answers over your research corpus.
 
 **"The goal isn't to remember everything. It's to never lose what matters."**
 
@@ -8,12 +8,12 @@
 
 | Capability | Implementation |
 |---|---|
-| **Hybrid RAG Retrieval** | Vector search (sqlite-vec, fastembed 384 dims) + FTS5 full-text search, fused via score-based merge |
-| **Research Agents** | Autonomous tool-calling loop: retrieve → generate → ingest. Allowlist-enforced, fully audited. |
-| **Embedding Pipeline** | Sentence-boundary chunking, batched embedding with exponential backoff, incremental + full rebuild |
-| **Eval Harness** | 10-question retrieval quality gate — currently 10/10. No change ships if retrieval regresses. |
-| **Provider Abstraction** | OpenRouterProvider (LLaMA 3.3 70B + fastembed) or BedrockProvider (Claude Sonnet 4.6 + Cohere Embed v4). Swappable via `EVO_LLM_PROVIDER`. |
-| **Migration-Versioned Schema** | Forward-only SQL migrations. SQLite + sqlite-vec + FTS5 in a single local file. |
+| **Hybrid RAG Retrieval** | Vector search (sqlite-vec) + FTS5 full-text search, fused via score-based merge — neither alone covers the question space |
+| **Cited Q&A** | Ask a question in natural language, get an answer grounded in the corpus with source citations and relevance scores |
+| **Embedding Pipeline** | Sentence-boundary chunking, local ONNX embeddings (fastembed), incremental + full rebuild with batched processing |
+| **Eval-Gated Quality** | Retrieval quality harness gates every change — no migration, no model swap ships without passing the eval |
+| **Provider Abstraction** | Swappable LLM backend: OpenRouter (LLaMA 3.3 70B) or AWS Bedrock (Claude Sonnet). One env var to switch. |
+| **Local-First Storage** | Single SQLite file (FTS5 + sqlite-vec) — no Postgres, no managed vector DB, no infra overhead |
 
 ## Architecture
 
@@ -35,14 +35,10 @@
 │  │  Hybrid Retrieval: vec_search + fts_search   │    │
 │  │  → score-based merge → dedup by chunk_id     │    │
 │  └──────────────────────────────────────────────┘    │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────┐   │
-│  │ Research    │  │ Provider     │  │ Embedding │    │
-│  │ Agent       │  │ (OpenRouter) │  │ Pipeline  │    │
-│  └─────────────┘  └──────────────┘  └───────────┘   │
-│  ┌─────────────┐  ┌──────────────┐                   │
-│  │ Tool Router │  │ Governance   │                   │
-│  │ + Allowlist │  │ + Audit Log  │                   │
-│  └─────────────┘  └──────────────┘                   │
+│  ┌──────────────┐  ┌───────────┐                     │
+│  │ Provider     │  │ Embedding │                     │
+│  │ (OpenRouter) │  │ (fastembed)│                     │
+│  └──────────────┘  └───────────┘                     │
 └──────────────────────────────────────────────────────┘
                        │
               ┌────────▼────────┐
