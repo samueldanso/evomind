@@ -21,7 +21,7 @@ const STEPS = [
     number: "03",
     title: "Ask questions",
     description:
-      "Use the Ask AI feature to get cited answers grounded in your knowledge base. Hybrid retrieval combines vector similarity with full-text search for accurate results.",
+      "Use the Ask Evo AI feature to get cited answers grounded in your knowledge base. Hybrid retrieval combines vector similarity with full-text search for accurate results.",
     href: "/wiki",
     linkLabel: "Try it",
   },
