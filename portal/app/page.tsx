@@ -41,6 +41,14 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-black">
       {/* Hero */}
       <section className="relative min-h-[100dvh] flex items-center justify-center px-6 overflow-hidden">
+        {/* Subtle warm ambient glow */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, rgba(212,165,116,0.06) 0%, transparent 70%)",
+          }}
+        />
+
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <div className="reveal mb-6">
             <span className="kicker inline-flex items-center gap-2">
