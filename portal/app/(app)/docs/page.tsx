@@ -37,7 +37,7 @@ const STEPS = [
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen pt-28 pb-20 px-6">
+    <div className="min-h-screen py-8 pb-20 px-6">
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <div className="mb-14 animate-fade-in">

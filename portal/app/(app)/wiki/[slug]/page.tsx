@@ -46,7 +46,7 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
   const readTime = estimateReadingTime(artifact.summary ?? "");
 
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8">
@@ -94,7 +94,7 @@ export default async function WikiDetailPage({ params }: { params: Promise<{ slu
 
           {/* Sidebar */}
           <aside className="w-full lg:w-[280px] flex-shrink-0">
-            <div className="lg:sticky lg:top-[80px] space-y-6">
+            <div className="lg:sticky lg:top-8 space-y-6">
               {/* Metadata card */}
               <div className="surface-card p-5 space-y-4">
                 <h4

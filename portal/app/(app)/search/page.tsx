@@ -21,8 +21,8 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState<Tab>("ask");
 
   return (
-    <div className="min-h-screen pt-20">
-      <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Tab switcher */}
         <div className="flex gap-1 mb-8 p-1 rounded-full w-fit" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <TabButton active={activeTab === "ask"} onClick={() => setActiveTab("ask")}>
@@ -215,7 +215,7 @@ function AskAITab() {
       {/* Input — sticky at bottom */}
       <div
         className="sticky bottom-0 pt-4 pb-2"
-        style={{ background: "linear-gradient(transparent, #000000 20%)" }}
+        style={{ background: "linear-gradient(transparent, black 20%)" }}
       >
         <form onSubmit={handleSubmit} className="flex gap-3">
           <div className="relative flex-1">
